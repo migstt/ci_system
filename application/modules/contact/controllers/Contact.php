@@ -20,30 +20,54 @@ class Contact extends MY_Controller
         $this->contacts();
     }
 
-    function contacts()
-    {
+    public function contacts() {
         if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             
-            $data['user_id']       = $_SESSION['user_id'];
-            $data['user_email']    = $_SESSION['user_email'];
-            $data['contacts']      = $this->contact->get_user_specific_contacts($_SESSION['user_id']);
-            $data['current_user']  = $this->user->get_user_row($this->db->escape($_SESSION['user_email']));
+            $data['user_id']        = $_SESSION['user_id'];
+            $data['user_email']     = $_SESSION['user_email'];
+            $data['current_user']   = $this->user->get_user_row($this->db->escape($_SESSION['user_email']));
+            $data['user_options']   = array('Default' => 'Select user');
+            $users_except_current   = $this->get_other_users_except_current($_SESSION['user_id']);
+            $total_contact_rows     = $this->contact->count_user_specific_contacts($_SESSION['user_id']);
+            // pagination config
+            $config["base_url"]         = base_url() . "index.php/contact/contacts";
+            $config["total_rows"]       = $total_contact_rows;
+            $config["per_page"]         = 5;
+            $config["uri_segment"]      = 3;
+            $config['full_tag_open']    = '<ul class="pagination">';
+            $config['full_tag_close']   = '</ul>';
+            $config['attributes']       = ['class' => 'page-link'];
+            $config['first_link']       = false;
+            $config['last_link']        = false;
+            $config['first_tag_open']   = '<li class="page-item">';
+            $config['first_tag_close']  = '</li>';
+            $config['prev_link']        = '&laquo';
+            $config['prev_tag_open']    = '<li class="page-item">';
+            $config['prev_tag_close']   = '</li>';
+            $config['next_link']        = '&raquo';
+            $config['next_tag_open']    = '<li class="page-item">';
+            $config['next_tag_close']   = '</li>';
+            $config['last_tag_open']    = '<li class="page-item">';
+            $config['last_tag_close']   = '</li>';
+            $config['cur_tag_open']     = '<li class="page-item active"><a href="#" class="page-link">';
+            $config['cur_tag_close']    = '<span class="sr-only"></span></a></li>';
+            $config['num_tag_open']     = '<li class="page-item">';
+            $config['num_tag_close']    = '</li>';
 
-            $data['user_options'] = array(
-                'Default' => 'Select user'
-            );
+            $this->pagination->initialize($config);
 
-            $users_except_current = $this->get_other_users_except_current($_SESSION['user_id']);
+            $page               = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
+            $data["links"]      = $this->pagination->create_links();    
+            $data['contacts']   = $this->contact->get_user_specific_contacts($_SESSION['user_id'], $config["per_page"], $page);
 
             foreach ($users_except_current as $user) {
-                $data['user_share_options'][$user['user_id']] = $user['user_first_name'] . ' ' . $user['user_last_name'];
+                $data['user_options'][$user['user_id']] = $user['user_first_name'] . ' ' . $user['user_last_name'];
             }
             if (!is_array($data['contacts'])) {
                 $data['contacts'] = array();
             }
 
             $this->load->view('contact/contacts', $data);
-
         } else {
             redirect('user/login');
         }
@@ -139,6 +163,7 @@ class Contact extends MY_Controller
     {
         $contact_id     = $this->input->post('contact_id');
         $selected_user  = $this->input->post('user_selected');
+
         $user_contacts_data = array(
             'user_id'       => $selected_user,
             'contact_id'    => $contact_id,

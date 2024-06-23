@@ -123,7 +123,8 @@ class User extends MY_Controller
         );
         $this->session->sess_destroy();
         if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
-            $this->load->view('user/login');
+            // $this->load->view('user/login');
+            redirect('user/login');
         }
     }
 }

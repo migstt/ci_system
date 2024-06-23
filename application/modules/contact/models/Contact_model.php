@@ -26,7 +26,7 @@ class Contact_model extends MY_Model
         return false;
     }
 
-    public function get_user_specific_contacts($user_id)
+    public function get_user_specific_contacts($user_id, $limit = 0, $offset = 0)
     {
         $this->db->select('*');
         $this->db->from('user_contacts');
@@ -34,7 +34,19 @@ class Contact_model extends MY_Model
         $this->db->join('contacts', 'user_contacts.contact_id = contacts.contact_id');
         $this->db->where('contacts.contact_is_deleted', 0);
         $this->db->order_by('contacts.contact_first_name', 'ASC');
+        if ($limit > 0) {
+            $this->db->limit($limit, $offset);
+        }
         return $this->db->get()->result();
+    }
+
+    public function count_user_specific_contacts($user_id)
+    {
+        $this->db->from('user_contacts');
+        $this->db->where('user_contacts.user_id', $user_id);
+        $this->db->join('contacts', 'user_contacts.contact_id = contacts.contact_id');
+        $this->db->where('contacts.contact_is_deleted', 0);
+        return $this->db->count_all_results();
     }
 
     public function update_contact($contact_id, $updated_contact_formdata)
@@ -56,4 +68,5 @@ class Contact_model extends MY_Model
         }
         return false;
     }
+
 }

@@ -56,3 +56,6 @@ $route['translate_uri_dashes'] = FALSE;
 
 $route['user/thankyou'] = 'user/thankyou';
 
+	
+$route['contacts/(:num)'] = 'contacts';
+
