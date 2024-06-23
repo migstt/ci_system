@@ -68,6 +68,7 @@ class Contact extends MY_Controller
             }
 
             $this->load->view('contact/contacts', $data);
+            
         } else {
             redirect('user/login');
         }
