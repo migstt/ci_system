@@ -9,16 +9,16 @@ class Contact_model extends MY_Model
         parent::__construct();
     }
 
-    public function insert_contact($contact_data)
+    public function insert_contact($shared_contact_formdata, $selected_user)
     {
-        $inserted_contact_id = $this->insert('contacts', $contact_data, true);
+        $inserted_contact_id = $this->insert('contacts', $shared_contact_formdata, true);
 
         if (isset($inserted_contact_id)) {
             $user_contacts_data = array(
-                'user_id' => $_SESSION['user_id'],
+                'user_id' => $selected_user,
                 'contact_id' => $inserted_contact_id
             );
-            if ($this->insert('user_contacts', $user_contacts_data)) {
+            if ($this->share_contact($user_contacts_data)) {
                 return true;
             }
             return false;
@@ -49,9 +49,10 @@ class Contact_model extends MY_Model
         return $this->db->count_all_results();
     }
 
-    public function update_contact($contact_id, $updated_contact_formdata)
+    public function update_contact($user_id, $contact_id, $updated_contact_formdata)
     {
         $this->db->where('contact_id', $contact_id);
+        $this->db->where('user_id', $user_id);
         $result = $this->db->update('contacts', $updated_contact_formdata);
 
         if ($result) {
@@ -67,6 +68,11 @@ class Contact_model extends MY_Model
             return true;
         }
         return false;
+    }
+
+    public function get_contact_row($field, $table, $contact_id)
+    {
+        $this->getRow($field, $table, 'contact_id=' . $contact_id);
     }
 
 }

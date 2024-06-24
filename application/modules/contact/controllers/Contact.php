@@ -20,15 +20,17 @@ class Contact extends MY_Controller
         $this->contacts();
     }
 
-    public function contacts() {
+    public function contacts()
+    {
         if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
-            
+
             $data['user_id']        = $_SESSION['user_id'];
             $data['user_email']     = $_SESSION['user_email'];
             $data['current_user']   = $this->user->get_user_row($this->db->escape($_SESSION['user_email']));
             $data['user_options']   = array('Default' => 'Select user');
             $users_except_current   = $this->get_other_users_except_current($_SESSION['user_id']);
             $total_contact_rows     = $this->contact->count_user_specific_contacts($_SESSION['user_id']);
+
             // pagination config
             $config["base_url"]         = base_url() . "index.php/contact/contacts";
             $config["total_rows"]       = $total_contact_rows;
@@ -57,7 +59,7 @@ class Contact extends MY_Controller
             $this->pagination->initialize($config);
 
             $page               = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
-            $data["links"]      = $this->pagination->create_links();    
+            $data["links"]      = $this->pagination->create_links();
             $data['contacts']   = $this->contact->get_user_specific_contacts($_SESSION['user_id'], $config["per_page"], $page);
 
             foreach ($users_except_current as $user) {
@@ -68,7 +70,6 @@ class Contact extends MY_Controller
             }
 
             $this->load->view('contact/contacts', $data);
-            
         } else {
             redirect('user/login');
         }
@@ -91,6 +92,7 @@ class Contact extends MY_Controller
             $companyname    = $this->input->post('companyname');
 
             $contact_formdata = array(
+                'user_id'               => $_SESSION['user_id'],
                 'contact_first_name'    => $firstname,
                 'contact_last_name'     => $lastname,
                 'contact_email'         => $email,
@@ -100,7 +102,7 @@ class Contact extends MY_Controller
                 'contact_created_at'    => date('Y-m-d H:i:s'),
             );
 
-            if ($this->contact->insert_contact($contact_formdata)) {
+            if ($this->contact->insert_contact($contact_formdata, $_SESSION['user_id'])) {
                 $this->session->set_flashdata('success', 'Contact added successfully!');
                 redirect('contact/contacts');
             } else {
@@ -113,6 +115,7 @@ class Contact extends MY_Controller
     function update_contact()
     {
         $contact_id = $this->input->post('contact_id');
+        $user_id    = $_SESSION['user_id'];
         $this->form_validation->set_rules('firstname', 'First name', 'required');
         $this->form_validation->set_rules('lastname', 'Last name', 'required');
         $this->form_validation->set_rules('email', 'Email', 'required');
@@ -136,11 +139,11 @@ class Contact extends MY_Controller
                 'contact_updated_at'    => date('Y-m-d H:i:s')
             );
 
-            if ($this->contact->update_contact($contact_id, $updated_contact_formdata)) {
-                $this->session->set_flashdata('success', 'Contact added successfully!');
+            if ($this->contact->update_contact($user_id, $contact_id, $updated_contact_formdata)) {
+                $this->session->set_flashdata('success', 'Contact updated successfully!');
                 redirect('contact/contacts');
             } else {
-                $this->session->set_flashdata('error', 'Contact not added!');
+                $this->session->set_flashdata('error', 'Failed to update contact!');
                 redirect('contact/contacts');
             }
         }
@@ -149,11 +152,12 @@ class Contact extends MY_Controller
     function delete_contact()
     {
         $contact_id = $this->input->post('contact_id');
+        $user_id    = $_SESSION['user_id'];
         $updated_contact_formdata = array(
             'contact_is_deleted' => 1,
             'contact_deleted_at' => date('Y-m-d H:i:s')
         );
-        if ($this->contact->update_contact($contact_id, $updated_contact_formdata)) {
+        if ($this->contact->update_contact($user_id, $contact_id, $updated_contact_formdata)) {
             redirect('contact/contacts');
         } else {
             redirect('contact/error_page');
@@ -162,15 +166,20 @@ class Contact extends MY_Controller
 
     public function share_contact()
     {
-        $contact_id     = $this->input->post('contact_id');
-        $selected_user  = $this->input->post('user_selected');
-
-        $user_contacts_data = array(
-            'user_id'       => $selected_user,
-            'contact_id'    => $contact_id,
+        $selected_user      = $this->input->post('user_selected');
+        $shared_contact_formdata = array(
+            'user_id'               => $selected_user,
+            'contact_first_name'    => $this->input->post('firstname'),
+            'contact_last_name'     => $this->input->post('lastname'),
+            'contact_email'         => $this->input->post('email'),
+            'contact_phone'         => $this->input->post('phone'),
+            'contact_company_name'  => $this->input->post('companyname'),
+            'contact_is_deleted'    => 0,
+            'contact_created_at'    => date('Y-m-d H:i:s'),
+            'contact_shared_at'     => date('Y-m-d H:i:s')
         );
 
-        if ($this->contact->share_contact($user_contacts_data)) {
+        if ($this->contact->insert_contact($shared_contact_formdata, $selected_user)) {
             redirect('contact/contacts');
         }
     }
