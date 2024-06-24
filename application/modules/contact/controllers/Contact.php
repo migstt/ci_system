@@ -60,7 +60,11 @@ class Contact extends MY_Controller
 
             $page               = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
             $data["links"]      = $this->pagination->create_links();
-            $data['contacts']   = $this->contact->get_user_specific_contacts($_SESSION['user_id'], $config["per_page"], $page);
+
+            // paginated
+            // $data['contacts']   = $this->contact->get_user_specific_contacts($_SESSION['user_id'], $config["per_page"], $page);
+            // not paginated
+            $data['contacts']   = $this->contact->get_user_specific_contacts_all($_SESSION['user_id']);
 
             foreach ($users_except_current as $user) {
                 $data['user_options'][$user['user_id']] = $user['user_first_name'] . ' ' . $user['user_last_name'];
@@ -70,6 +74,7 @@ class Contact extends MY_Controller
             }
 
             $this->load->view('contact/contacts', $data);
+            
         } else {
             redirect('user/login');
         }
@@ -116,6 +121,7 @@ class Contact extends MY_Controller
     {
         $contact_id = $this->input->post('contact_id');
         $user_id    = $_SESSION['user_id'];
+
         $this->form_validation->set_rules('firstname', 'First name', 'required');
         $this->form_validation->set_rules('lastname', 'Last name', 'required');
         $this->form_validation->set_rules('email', 'Email', 'required');
@@ -153,10 +159,12 @@ class Contact extends MY_Controller
     {
         $contact_id = $this->input->post('contact_id');
         $user_id    = $_SESSION['user_id'];
+
         $updated_contact_formdata = array(
             'contact_is_deleted' => 1,
             'contact_deleted_at' => date('Y-m-d H:i:s')
         );
+
         if ($this->contact->update_contact($user_id, $contact_id, $updated_contact_formdata)) {
             redirect('contact/contacts');
         } else {
@@ -167,6 +175,7 @@ class Contact extends MY_Controller
     public function share_contact()
     {
         $selected_user      = $this->input->post('user_selected');
+        
         $shared_contact_formdata = array(
             'user_id'               => $selected_user,
             'contact_first_name'    => $this->input->post('firstname'),

@@ -40,6 +40,17 @@ class Contact_model extends MY_Model
         return $this->db->get()->result();
     }
 
+    public function get_user_specific_contacts_all($user_id)
+    {
+        $this->db->select('*');
+        $this->db->from('user_contacts');
+        $this->db->where('user_contacts.user_id', $user_id);
+        $this->db->join('contacts', 'user_contacts.contact_id = contacts.contact_id');
+        $this->db->where('contacts.contact_is_deleted', 0);
+        $this->db->order_by('contacts.contact_first_name', 'ASC');
+        return $this->db->get()->result();
+    }
+
     public function count_user_specific_contacts($user_id)
     {
         $this->db->from('user_contacts');
