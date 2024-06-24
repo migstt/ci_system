@@ -8,15 +8,16 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <!-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script> -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css">
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
 
     <!-- DATATABLES TABLE -->
     <script>
         $(document).ready(function() {
-            $('#contactstable').DataTable();
+            $('#contactstable').DataTable({
+                "searching": true,
+                "processing": true,
+            });
         });
     </script>
 
@@ -49,8 +50,6 @@
         </div> -->
 
         <!-- Contacts Table -->
-
-        <!-- <table class="table table-sm mt-3" class="display" id="contactstable" style="display: none;"> -->
         <table class="table table-sm table-striped" class="display" id="contactstable">
             <thead>
                 <tr>
@@ -77,131 +76,130 @@
                             <td>
                                 <div class="d-flex justify-content-end">
                                     <div class="btn-group btn-group-sm" role="group" aria-label="Basic mixed styles example">
+
+                                        <!-- Update/Edit Contact Modal -->
                                         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editContactModal<?php echo $contacts_item->contact_id; ?>">Edit</button>
+                                        <?php echo validation_errors(); ?>
+                                        <?php echo form_open('contact/update_contact', array('id' => 'updateContactForm' . $contacts_item->contact_id)); ?>
+                                        <div class="modal fade" id="editContactModal<?php echo $contacts_item->contact_id; ?>" tabindex="-1" aria-labelledby="editContactModal" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Contact</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col">
+                                                                <input name="firstname" value="<?php echo $contacts_item->contact_first_name; ?>" type="text" class="form-control" placeholder="First name" aria-label="First name" required />
+                                                            </div>
+                                                            <div class="col">
+                                                                <input name="lastname" value="<?php echo $contacts_item->contact_last_name; ?>" type="text" class="form-control" placeholder="Last name" aria-label="Last name" required />
+                                                            </div>
+                                                        </div>
+                                                        <div class="row g-3 mb-3">
+                                                            <div class="col">
+                                                                <input name="email" value="<?php echo $contacts_item->contact_email; ?>" type="email" class="form-control" placeholder="Email address" aria-label="Email address" required />
+                                                            </div>
+                                                            <div class="col">
+                                                                <input name="phone" value="<?php echo $contacts_item->contact_phone; ?>" type="text" class="form-control" placeholder="Phone number" aria-label="Phone number" required />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col">
+                                                            <input name="companyname" value="<?php echo $contacts_item->contact_company_name; ?>" type="text" class="form-control" placeholder="Company name" aria-label="Company name" required />
+                                                        </div>
+                                                        <div class="col">
+                                                            <input type="hidden" name="contact_id" value="<?php echo $contacts_item->contact_id; ?>" type="text" class="form-control" placeholder="contact_id" aria-label="contact_id" required />
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </form>
+
+                                        <!-- Share Modal -->
+                                        <?php echo form_open('contact/share_contact'); ?>
+                                        <div class="modal fade" id="shareContactModal<?php echo $contacts_item->contact_id; ?>" tabindex="-1" aria-labelledby="shareContactModal" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Share contact</h1>
+                                                        <div class="col">
+                                                            <input type="hidden" name="contact_id" value=<?php echo $contacts_item->contact_id; ?> type="text" class="form-control" placeholder="contact_id" aria-label="contact_id" required />
+
+                                                            <div class="row g-3 mb-3">
+                                                                <div class="col">
+                                                                    <input type="hidden" name="firstname" value=<?php echo $contacts_item->contact_first_name; ?> type="text" class="form-control" placeholder="First name" aria-label="First name" required />
+                                                                </div>
+                                                                <div class="col">
+                                                                    <input type="hidden" name="lastname" value=<?php echo $contacts_item->contact_last_name; ?> type="text" class="form-control" placeholder="Last name" aria-label="Last name" required />
+                                                                </div>
+                                                            </div>
+                                                            <div class="row g-3 mb-3">
+                                                                <div class="col">
+                                                                    <input type="hidden" name="email" value=<?php echo $contacts_item->contact_email; ?> type="email" class="form-control" placeholder="Email address" aria-label="Email address" required />
+                                                                </div>
+                                                                <div class="col">
+                                                                    <input type="hidden" name="phone" value=<?php echo $contacts_item->contact_phone; ?> type="text" class="form-control" placeholder="Phone number" aria-label="Phone number" required />
+                                                                </div>
+                                                            </div>
+                                                            <div class="col">
+                                                                <input type="hidden" name="companyname" value=<?php echo $contacts_item->contact_company_name; ?> type="text" class="form-control" placeholder="Company name" aria-label="Company name" required />
+                                                            </div>
+
+                                                        </div>
+                                                        <div>
+                                                            <?php echo validation_errors(); ?>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="modal-body">
+                                                            <?php if (!empty($user_options)) : ?>
+                                                                <?php echo form_dropdown('user_selected', $user_options, 'Default'); ?>
+                                                            <?php else : ?>
+                                                                <p>No users to share with found.</p>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Share</button>
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </form>
                                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareContactModal<?php echo $contacts_item->contact_id; ?>">Share</button>
+
+                                        <!-- Delete Confirmation Modal -->
+                                        <?php echo validation_errors(); ?>
+                                        <?php echo form_open('contact/delete_contact'); ?>
+                                        <div class="modal fade" id="confirmDeleteModal<?php echo $contacts_item->contact_id; ?>" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmation</h1>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <input type="hidden" name="contact_id" value="<?php echo $contacts_item->contact_id; ?>" />
+                                                        <p>Are you sure you want to delete this contact?</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-danger">Yes</button>
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nope</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </form>
                                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal<?php echo $contacts_item->contact_id; ?>">Delete</button>
                                     </div>
                                 </div>
                             </td>
-
-                            <!-- Update/Edit Contact Modal -->
-                            <?php echo validation_errors(); ?>
-                            <?php echo form_open('contact/update_contact', array('id' => 'updateContactForm' . $contacts_item->contact_id)); ?>
-                            <div class="modal fade" id="editContactModal<?php echo $contacts_item->contact_id; ?>" tabindex="-1" aria-labelledby="editContactModal" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Contact</h1>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="row g-3 mb-3">
-                                                <div class="col">
-                                                    <input name="firstname" value="<?php echo $contacts_item->contact_first_name; ?>" type="text" class="form-control" placeholder="First name" aria-label="First name" required />
-                                                </div>
-                                                <div class="col">
-                                                    <input name="lastname" value="<?php echo $contacts_item->contact_last_name; ?>" type="text" class="form-control" placeholder="Last name" aria-label="Last name" required />
-                                                </div>
-                                            </div>
-                                            <div class="row g-3 mb-3">
-                                                <div class="col">
-                                                    <input name="email" value="<?php echo $contacts_item->contact_email; ?>" type="email" class="form-control" placeholder="Email address" aria-label="Email address" required />
-                                                </div>
-                                                <div class="col">
-                                                    <input name="phone" value="<?php echo $contacts_item->contact_phone; ?>" type="text" class="form-control" placeholder="Phone number" aria-label="Phone number" required />
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <input name="companyname" value="<?php echo $contacts_item->contact_company_name; ?>" type="text" class="form-control" placeholder="Company name" aria-label="Company name" required />
-                                            </div>
-                                            <div class="col">
-                                                <input type="hidden" name="contact_id" value="<?php echo $contacts_item->contact_id; ?>" type="text" class="form-control" placeholder="contact_id" aria-label="contact_id" required />
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                <button type="submit" class="btn btn-primary">Submit</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            </form>
-
-                            <!-- Delete Confirmation Modal -->
-                            <?php echo validation_errors(); ?>
-                            <?php echo form_open('contact/delete_contact'); ?>
-                            <div class="modal fade" id="confirmDeleteModal<?php echo $contacts_item->contact_id; ?>" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmation</h1>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="contact_id" value="<?php echo $contacts_item->contact_id; ?>" />
-                                            <p>Are you sure you want to delete this contact?</p>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-danger">Yes</button>
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nope</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            </form>
-
-                            <!-- Share Modal -->
-                            <?php echo form_open('contact/share_contact'); ?>
-                            <div class="modal fade" id="shareContactModal<?php echo $contacts_item->contact_id; ?>" tabindex="-1" aria-labelledby="shareContactModal" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Share contact</h1>
-                                            <div class="col">
-                                                <input type="hidden" name="contact_id" value=<?php echo $contacts_item->contact_id; ?> type="text" class="form-control" placeholder="contact_id" aria-label="contact_id" required />
-
-                                                <div class="row g-3 mb-3">
-                                                    <div class="col">
-                                                        <input type="hidden" name="firstname" value=<?php echo $contacts_item->contact_first_name; ?> type="text" class="form-control" placeholder="First name" aria-label="First name" required />
-                                                    </div>
-                                                    <div class="col">
-                                                        <input type="hidden" name="lastname" value=<?php echo $contacts_item->contact_last_name; ?> type="text" class="form-control" placeholder="Last name" aria-label="Last name" required />
-                                                    </div>
-                                                </div>
-                                                <div class="row g-3 mb-3">
-                                                    <div class="col">
-                                                        <input type="hidden" name="email" value=<?php echo $contacts_item->contact_email; ?> type="email" class="form-control" placeholder="Email address" aria-label="Email address" required />
-                                                    </div>
-                                                    <div class="col">
-                                                        <input type="hidden" name="phone" value=<?php echo $contacts_item->contact_phone; ?> type="text" class="form-control" placeholder="Phone number" aria-label="Phone number" required />
-                                                    </div>
-                                                </div>
-                                                <div class="col">
-                                                    <input type="hidden" name="companyname" value=<?php echo $contacts_item->contact_company_name; ?> type="text" class="form-control" placeholder="Company name" aria-label="Company name" required />
-                                                </div>
-
-                                            </div>
-                                            <div>
-                                                <?php echo validation_errors(); ?>
-                                            </div>
-                                        </div>
-                                        <div class="col">
-                                            <div class="modal-body">
-                                                <?php if (!empty($user_options)) : ?>
-                                                    <?php echo form_dropdown('user_selected', $user_options, 'Default'); ?>
-                                                <?php else : ?>
-                                                    <p>No users to share with found.</p>
-                                                <?php endif; ?>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Share</button>
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            </form>
-
                         </tr>
                         <?php $counter++; ?>
                     <?php endforeach; ?>
