@@ -85,5 +85,4 @@ class Contact_model extends MY_Model
     {
         $this->getRow($field, $table, 'contact_id=' . $contact_id);
     }
-
 }

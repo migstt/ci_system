@@ -58,7 +58,7 @@ class Contact extends MY_Controller
 
             $this->pagination->initialize($config);
 
-            $page               = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
+            $page = $this->uri->segment(3);
             $data["links"]      = $this->pagination->create_links();
 
             // paginated
@@ -74,9 +74,46 @@ class Contact extends MY_Controller
             }
 
             $this->load->view('contact/contacts', $data);
-            
         } else {
             redirect('user/login');
+        }
+    }
+
+    public function get_contacts()
+    {
+        if (!$this->input->is_ajax_request()) {
+            exit('No direct script access allowed');
+        }
+
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode(array('error' => 'User ID not set in session'));
+            return;
+        }
+
+        $contacts = $this->contact->get_user_specific_contacts($_SESSION['user_id'], 0, 0);
+
+        if ($contacts === false) {
+            echo json_encode(array('error' => 'Error retrieving contacts'));
+        } else {
+            $data = array();
+            foreach ($contacts as $contact) {
+                $data[] = array(
+                    'contact_id'    => $contact->contact_id,
+                    'full_name'     => $contact->contact_first_name . ' ' . $contact->contact_last_name,
+                    'company'       => $contact->contact_company_name,
+                    'phone'         => $contact->contact_phone,
+                    'email'         => $contact->contact_email,
+                );
+            }
+            // Return data in DataTables format
+            $output = array(
+                "draw" => intval($this->input->get("draw")),
+                "recordsTotal" => count($data),
+                "recordsFiltered" => count($data),
+                "data" => $data
+            );
+            // return $data;
+            echo json_encode($output);
         }
     }
 
@@ -109,10 +146,8 @@ class Contact extends MY_Controller
 
             if ($this->contact->insert_contact($contact_formdata, $_SESSION['user_id'])) {
                 $this->session->set_flashdata('success', 'Contact added successfully!');
-                redirect('contact/contacts');
             } else {
                 $this->session->set_flashdata('error', 'Contact not added!');
-                redirect('contact/contacts');
             }
         }
     }
@@ -147,10 +182,10 @@ class Contact extends MY_Controller
 
             if ($this->contact->update_contact($user_id, $contact_id, $updated_contact_formdata)) {
                 $this->session->set_flashdata('success', 'Contact updated successfully!');
-                redirect('contact/contacts');
+                // redirect('contact/contacts');
             } else {
                 $this->session->set_flashdata('error', 'Failed to update contact!');
-                redirect('contact/contacts');
+                // redirect('contact/contacts');
             }
         }
     }
@@ -175,7 +210,7 @@ class Contact extends MY_Controller
     public function share_contact()
     {
         $selected_user      = $this->input->post('user_selected');
-        
+
         $shared_contact_formdata = array(
             'user_id'               => $selected_user,
             'contact_first_name'    => $this->input->post('firstname'),
@@ -189,7 +224,11 @@ class Contact extends MY_Controller
         );
 
         if ($this->contact->insert_contact($shared_contact_formdata, $selected_user)) {
+            $this->session->set_flashdata('success', 'Contact shared successfully!');
             redirect('contact/contacts');
+        } else {
+            $this->session->set_flashdata('error', 'Failed to share contact!');
+            // redirect('contact/contacts');
         }
     }
 
