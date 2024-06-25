@@ -64,7 +64,7 @@ class Contact extends MY_Controller
             // paginated
             // $data['contacts']   = $this->contact->get_user_specific_contacts($_SESSION['user_id'], $config["per_page"], $page);
             // not paginated
-            $data['contacts']   = $this->contact->get_user_specific_contacts_all($_SESSION['user_id']);
+            $data['contacts']   = $this->contact->get_user_specific_contacts($_SESSION['user_id'], 0, 0);
 
             foreach ($users_except_current as $user) {
                 $data['user_options'][$user['user_id']] = $user['user_first_name'] . ' ' . $user['user_last_name'];
@@ -86,14 +86,14 @@ class Contact extends MY_Controller
         }
 
         if (!isset($_SESSION['user_id'])) {
-            echo json_encode(array('error' => 'User ID not set in session'));
+            echo json_encode(array('error' => 'User ID not set in session.'));
             return;
         }
 
         $contacts = $this->contact->get_user_specific_contacts($_SESSION['user_id'], 0, 0);
 
         if ($contacts === false) {
-            echo json_encode(array('error' => 'Error retrieving contacts'));
+            echo json_encode(array('error' => 'Error retrieving contacts.'));
         } else {
             $data = array();
             foreach ($contacts as $contact) {
@@ -105,14 +105,14 @@ class Contact extends MY_Controller
                     'email'         => $contact->contact_email,
                 );
             }
-            // Return data in DataTables format
+
             $output = array(
-                "draw" => intval($this->input->get("draw")),
-                "recordsTotal" => count($data),
-                "recordsFiltered" => count($data),
-                "data" => $data
+                "draw"              => intval($this->input->get("draw")),
+                "recordsTotal"      => count($data),
+                "recordsFiltered"   => count($data),
+                "data"              => $data
             );
-            // return $data;
+
             echo json_encode($output);
         }
     }
@@ -182,10 +182,8 @@ class Contact extends MY_Controller
 
             if ($this->contact->update_contact($user_id, $contact_id, $updated_contact_formdata)) {
                 $this->session->set_flashdata('success', 'Contact updated successfully!');
-                // redirect('contact/contacts');
             } else {
                 $this->session->set_flashdata('error', 'Failed to update contact!');
-                // redirect('contact/contacts');
             }
         }
     }
@@ -224,11 +222,10 @@ class Contact extends MY_Controller
         );
 
         if ($this->contact->insert_contact($shared_contact_formdata, $selected_user)) {
-            $this->session->set_flashdata('success', 'Contact shared successfully!');
+            $this->session->set_flashdata('success', 'sContact shared successfully!');
             redirect('contact/contacts');
         } else {
             $this->session->set_flashdata('error', 'Failed to share contact!');
-            // redirect('contact/contacts');
         }
     }
 

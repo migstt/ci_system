@@ -32,7 +32,10 @@
                 dataSrc: 'data'
             },
             "columns": [{
-                    "data": 'contact_id',
+                    "data": null,
+                    "render": function(data, type, row, meta) {
+                        return meta.row + 1;
+                    }
                 },
                 {
                     "data": 'full_name',
@@ -46,7 +49,7 @@
                 {
                     "data": "email"
                 },
-                // For the actions row
+                // For the actions (edit, share, delete) row
                 {
                     "data": null,
                     "render": function(data, type, row) {
@@ -133,11 +136,17 @@
                                                 </div>
                                                 <div class="col">
                                                     <div class="modal-body">
-                                                        <?php if (!empty($user_options)) : ?>
-                                                            <?php echo form_dropdown('user_selected', $user_options, 'Default'); ?>
-                                                        <?php else : ?>
-                                                            <p>No users to share with found.</p>
-                                                        <?php endif; ?>
+                                                        <div class="col">
+                                                            <?php if (!empty($user_options)) : ?>
+                                                                <select name="user_selected" class="form-select" aria-label="User selected">
+                                                                    <?php foreach ($user_options as $option_value => $option_label) : ?>
+                                                                        <option value="<?php echo $option_value; ?>"><?php echo $option_label; ?></option>
+                                                                    <?php endforeach; ?>
+                                                                </select>
+                                                            <?php else : ?>
+                                                                <p>No users to share with found.</p>
+                                                            <?php endif; ?>
+                                                        </div>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Share</button>
@@ -180,7 +189,7 @@
         });
     });
 
-    // for adding contact
+    // ajax for adding contact
     $(document).on('submit', 'form[id^="addNewContactForm"]', function(e) {
         e.preventDefault();
         var form = $(this);
@@ -298,7 +307,6 @@
             }
         });
     });
-
 </script>
 
 </head>
@@ -333,7 +341,6 @@
 
             </tbody>
         </table>
-
         <!-- Pagination Link -->
         <!-- <p><?php echo $links; ?></p> -->
 
@@ -376,7 +383,6 @@
                 </div>
             </div>
         </div>
-    </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
