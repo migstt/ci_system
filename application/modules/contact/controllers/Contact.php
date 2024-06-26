@@ -92,6 +92,10 @@ class Contact extends MY_Controller
 
         $contacts = $this->contact->get_user_specific_contacts($_SESSION['user_id'], 0, 0);
 
+        // paginated contacts
+        // $page = $this->uri->segment(3);
+        // $contacts = $this->contact->get_user_specific_contacts($_SESSION['user_id'], 10, $page);
+
         if ($contacts === false) {
             echo json_encode(array('error' => 'Error retrieving contacts.'));
         } else {
@@ -99,22 +103,73 @@ class Contact extends MY_Controller
             foreach ($contacts as $contact) {
                 $data[] = array(
                     'contact_id'    => $contact->contact_id,
+                    'firstname'     => $contact->contact_first_name,
+                    'lastname'      => $contact->contact_last_name,
                     'full_name'     => $contact->contact_first_name . ' ' . $contact->contact_last_name,
                     'company'       => $contact->contact_company_name,
                     'phone'         => $contact->contact_phone,
                     'email'         => $contact->contact_email,
                 );
             }
-
             $output = array(
                 "draw"              => intval($this->input->get("draw")),
                 "recordsTotal"      => count($data),
                 "recordsFiltered"   => count($data),
                 "data"              => $data
             );
-
             echo json_encode($output);
         }
+    }
+
+    public function get_contacts_ssp()
+    {
+        $table = 'contacts';
+
+        $primary_key = 'contact_id';
+
+        $columns = array(
+            array('db' => 'contact_first_name', 'dt' => 'full_name'),
+            array('db' => 'contact_company_name', 'dt' => 'company'),
+            array('db' => 'contact_phone',  'dt' => 'phone'),
+            array('db' => 'contact_email',   'dt' => 'email'),
+            array(
+                'db' => 'contact_id',
+                'dt' => 'actions',
+                'formatter' => function ($data, $row) {
+                    return '
+                        <div class="d-flex justify-content-end">
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Basic mixed styles example">
+
+                                <!-- Update/Edit Contact Modal -->
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editContactModal' . $data . '">Edit</button>
+
+                                <!-- Share Modal -->
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareContactModal' . $data . '">Share</button>
+
+                                <!-- Delete Confirmation Modal -->
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal' . $data . '">Delete</button>
+
+                            </div>
+                        </div>
+                    ';
+                }
+            )
+        );
+
+        $sql_details = array(
+            'user' => $this->db->username,
+            'pass' => $this->db->password,
+            'db'   => $this->db->database,
+            'host' => $this->db->hostname
+        );
+
+        $where = "user_id = " . $_SESSION['user_id'] . " AND contact_is_deleted = 0";
+
+        require('ssp.class.php');
+
+        echo json_encode(
+            SSP::complex($_GET, $sql_details, $table, $primary_key, $columns, null, $where)
+        );
     }
 
     function insert_contact()
@@ -181,9 +236,11 @@ class Contact extends MY_Controller
             );
 
             if ($this->contact->update_contact($user_id, $contact_id, $updated_contact_formdata)) {
-                $this->session->set_flashdata('success', 'Contact updated successfully!');
+                $response = array('status' => 'success', 'message' => 'Contact updated.');
+                echo json_encode($response);
             } else {
-                $this->session->set_flashdata('error', 'Failed to update contact!');
+                $response = array('status' => 'error', 'message' => 'Failed to update contact.');
+                echo json_encode($response);
             }
         }
     }
@@ -199,15 +256,52 @@ class Contact extends MY_Controller
         );
 
         if ($this->contact->update_contact($user_id, $contact_id, $updated_contact_formdata)) {
-            redirect('contact/contacts');
+            $response = array('status' => 'success', 'message' => 'Contact deleted.');
+            echo json_encode($response);
         } else {
-            redirect('contact/error_page');
+            $response = array('status' => 'error', 'message' => 'Failed to delete contact.');
+            echo json_encode($response);
         }
     }
 
     public function share_contact()
     {
         $selected_user      = $this->input->post('user_selected');
+        $contact_email      = $this->db->escape($this->input->post('email'));
+        $selected_user_row  = $this->user->get_user_row_by_id($selected_user);
+
+        $shared_contact_formdata = array(
+            'user_id'               => $selected_user,
+            'contact_first_name'    => $this->input->post('firstname'),
+            'contact_last_name'     => $this->input->post('lastname'),
+            'contact_email'         => $this->input->post('email'),
+            'contact_phone'         => $this->input->post('phone'),
+            'contact_company_name'  => $this->input->post('companyname'),
+            'contact_is_deleted'    => 0,
+            'contact_created_at'    => date('Y-m-d H:i:s'),
+            'contact_shared_at'     => date('Y-m-d H:i:s')
+        );
+
+        if ($this->check_contact_exist($selected_user, $contact_email)) {
+            $response = array('status' => 'error', 'message' => $selected_user_row['user_first_name'] . ' ' . $selected_user_row['user_last_name'] . ' already has this contact.');
+            echo json_encode($response);
+            return;
+        }
+
+        if ($this->contact->insert_contact($shared_contact_formdata, $selected_user)) {
+            $response = array('status' => 'success', 'message' => 'Contact successfully shared with ' . $selected_user_row['user_first_name'] . ' ' . $selected_user_row['user_last_name'] . '.');
+            echo json_encode($response);
+        } else {
+            $response = array('status' => 'error', 'message' => 'MySQL Database Error! Failed to share contact.');
+            echo json_encode($response);
+            return;
+        }
+    }
+
+    public function force_share_contact()
+    {
+        $selected_user = $this->input->post('user_selected');
+        $selected_user_row  = $this->user->get_user_row_by_id($selected_user);
 
         $shared_contact_formdata = array(
             'user_id'               => $selected_user,
@@ -222,11 +316,19 @@ class Contact extends MY_Controller
         );
 
         if ($this->contact->insert_contact($shared_contact_formdata, $selected_user)) {
-            $this->session->set_flashdata('success', 'sContact shared successfully!');
-            redirect('contact/contacts');
+            $response = array('status' => 'success', 'message' => 'Contact successfully shared with ' . $selected_user_row['user_first_name'] . ' ' . $selected_user_row['user_last_name'] . '.');
+            echo json_encode($response);
         } else {
-            $this->session->set_flashdata('error', 'Failed to share contact!');
+            $response = array('status' => 'error', 'message' => 'MySQL Database Error! Failed to share contact.');
+            echo json_encode($response);
+            return;
         }
+    }
+
+    public function check_contact_exist($selected_user, $contact_email)
+    {
+        $contact_exists = $this->contact->check_contact_exist($selected_user, $contact_email);
+        return $contact_exists;
     }
 
     function get_other_users_except_current($current_user_id)

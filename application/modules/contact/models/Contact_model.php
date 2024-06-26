@@ -71,6 +71,15 @@ class Contact_model extends MY_Model
         return false;
     }
 
+    public function check_contact_exist($selected_user, $contact_email)
+    {
+        $result = $this->getRow('*', 'contacts', 'user_id=' . $selected_user . ' AND contact_email=' . $contact_email . ' AND contact_is_deleted=0');
+        if ($result) {
+            return true;
+        }
+        return false;
+    }
+
     public function get_contact_row($field, $table, $contact_id)
     {
         $this->getRow($field, $table, 'contact_id=' . $contact_id);

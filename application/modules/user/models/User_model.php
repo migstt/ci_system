@@ -22,9 +22,14 @@ class User_model extends MY_Model
         return $this->getRow('*', 'users', 'user_email='. $email);
     }
 
+    public function get_user_row_by_id($user_id)
+    {
+        return $this->getRow('*', 'users', 'user_id='. $user_id);
+    }
+
     function get_users_except_current($current_user_id)
     {
-        $users_except_current = $this->getRows('*', 'users', 'user_id!='. $current_user_id, '');
+        $users_except_current = $this->getRows('*', 'users', 'user_id!='. $current_user_id, 'user_first_name ASC');
 
         if (!is_array($users_except_current)) {
             $users_except_current = array();

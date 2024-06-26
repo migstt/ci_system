@@ -6,6 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System</title>
+
+    <!-- Bootstrap 5.3.3 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -20,18 +22,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.js"></script>
 
+    <!-- Sweetalert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 
 <script>
-    var table = $(document).ready(function() {
+    $(document).ready(function() {
+
+        // client side contacts datatable
         $('#my_contacts_table').DataTable({
-            "searching": true,
-            "processing": true,
+            searching: true,
+            processing: true,
             ajax: {
                 url: '<?php echo site_url(); ?>/contact/get_contacts',
-                dataSrc: 'data'
+                dataSrc: 'data',
+                type: 'GET',
             },
-            "columns": [{
+            columns: [{
                     "data": null,
                     "render": function(data, type, row, meta) {
                         return meta.row + 1;
@@ -49,13 +57,14 @@
                 {
                     "data": "email"
                 },
-                // For the actions (edit, share, delete) row
+                // for the contact actions (edit, share, delete) row
                 {
                     "data": null,
                     "render": function(data, type, row) {
                         return `
                             <div class="d-flex justify-content-end">
                                 <div class="btn-group btn-group-sm" role="group" aria-label="Basic mixed styles example">
+                                
                                     <!-- Update/Edit Contact Modal -->
                                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editContactModal${data.contact_id}">Edit</button>
                                     <?php echo validation_errors(); ?>
@@ -70,10 +79,10 @@
                                                 <div class="modal-body">
                                                     <div class="row g-3 mb-3">
                                                         <div class="col">
-                                                            <input name="firstname" value="${data.full_name.split(' ')[0]}" type="text" class="form-control" placeholder="First name" aria-label="First name" required />
+                                                            <input name="firstname" value="${data.firstname}" type="text" class="form-control" placeholder="First name" aria-label="First name" required />
                                                         </div>
                                                         <div class="col">
-                                                            <input name="lastname" value="${data.full_name.split(' ')[1]}" type="text" class="form-control" placeholder="Last name" aria-label="Last name" required />
+                                                            <input name="lastname" value="${data.lastname}" type="text" class="form-control" placeholder="Last name" aria-label="Last name" required />
                                                         </div>
                                                     </div>
                                                     <div class="row g-3 mb-3">
@@ -99,7 +108,10 @@
                                         </div>
                                     </div>
                                     </form>
+
+
                                     <!-- Share Modal -->
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareContactModal${data.contact_id}">Share</button>
                                     <?php echo form_open('contact/share_contact', array('id' => 'shareContactForm${data.contact_id}')); ?>
                                     <div class="modal fade" id="shareContactModal${data.contact_id}" tabindex="-1" aria-labelledby="shareContactModal" aria-hidden="true">
                                         <div class="modal-dialog">
@@ -111,10 +123,10 @@
 
                                                         <div class="row g-3 mb-3">
                                                             <div class="col">
-                                                                <input type="hidden" name="firstname" value="${data.full_name.split(' ')[0]}" type="text" class="form-control" placeholder="First name" aria-label="First name" required />
+                                                                <input type="hidden" name="firstname" value="${data.firstname}" type="text" class="form-control" placeholder="First name" aria-label="First name" required />
                                                             </div>
                                                             <div class="col">
-                                                                <input type="hidden" name="lastname" value="${data.full_name.split(' ')[1]}" type="text" class="form-control" placeholder="Last name" aria-label="Last name" required />
+                                                                <input type="hidden" name="lastname" value="${data.lastname}" type="text" class="form-control" placeholder="Last name" aria-label="Last name" required />
                                                             </div>
                                                         </div>
                                                         <div class="row g-3 mb-3">
@@ -157,9 +169,10 @@
                                         </div>
                                     </div>
                                     </form>
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareContactModal${data.contact_id}">Share</button>
+                                    
+                                    
                                     <!-- Delete Confirmation Modal -->
-                                    <?php echo validation_errors(); ?>
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal${data.contact_id}">Delete</button>
                                     <?php echo form_open('contact/delete_contact', array('id' => 'deleteContactForm${data.contact_id}')); ?>
                                     <div class="modal fade" id="confirmDeleteModal${data.contact_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
                                         <div class="modal-dialog">
@@ -179,14 +192,49 @@
                                         </div>
                                     </div>
                                     </form>
-                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal${data.contact_id}">Delete</button>
+                                
                                 </div>
                             </div>
                         `;
                     }
                 }
-            ]
+            ],
         });
+
+        // server side contacts datatable
+        $('#ssp_contacts_table').DataTable({
+            searching: true,
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '<?php echo site_url(); ?>/contact/get_contacts_ssp',
+                type: 'GET',
+            },
+            columns: [{
+                    "data": null,
+                    "render": function(data, type, row, meta) {
+                        return meta.row + 1;
+                    }
+                },
+                {
+                    data: 'full_name'
+                },
+                {
+                    data: 'company'
+                },
+                {
+                    data: 'phone'
+                },
+                {
+                    data: 'email'
+                },
+                // for the contact actions (edit, share, delete) row
+                {
+                    data: 'actions',
+                },
+            ],
+        });
+
     });
 
     // ajax for adding contact
@@ -202,15 +250,29 @@
                 form.closest('.modal').modal('hide');
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
-                $.alert({
-                    title: 'Success!',
-                    content: 'Contact added successfully.',
+                $('#my_contacts_table').DataTable().ajax.reload(null, false);
+                form.closest('.modal').modal('hide');
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+                Swal.fire({
+                    position: "top-end",
+                    icon: "success",
+                    title: "Contact added",
+                    showConfirmButton: false,
+                    timer: 1200
                 });
             },
-            error: function(xhr, status, error) {
-                $.alert({
-                    title: 'Error!',
-                    content: 'Failed to add contact.',
+            error: function(xhr, status, error, response) {
+                $('#my_contacts_table').DataTable().ajax.reload(null, false);
+                form.closest('.modal').modal('hide');
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: "Failed to add contact.",
+                    showConfirmButton: false,
+                    timer: 1200
                 });
                 console.error('AJAX ERROR: ' + xhr.responseText);
                 console.error('ADD CONTACT ERROR: ' + error);
@@ -228,19 +290,28 @@
             url: "<?php echo site_url(); ?>/contact/update_contact/" + id,
             data: form.serialize(),
             success: function(response) {
+                response = JSON.parse(response);
                 $('#my_contacts_table').DataTable().ajax.reload(null, false);
+                $('#ssp_contacts_table').DataTable().ajax.reload(null, false);
                 form.closest('.modal').modal('hide');
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
-                $.alert({
-                    title: 'Success!',
-                    content: 'Contact updated successfully.',
+                Swal.fire({
+                    position: "top-end",
+                    icon: "success",
+                    title: response.message,
+                    showConfirmButton: false,
+                    timer: 1200
                 });
             },
-            error: function(xhr, status, error) {
-                $.alert({
-                    title: 'Error!',
-                    content: 'Failed to update contact.',
+            error: function(xhr, status, error, response) {
+                response = JSON.parse(response);
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: response.message,
+                    showConfirmButton: false,
+                    timer: 1200
                 });
                 console.error('AJAX ERROR: ' + xhr.responseText);
                 console.error('EDIT CONTACT ERROR: ' + error);
@@ -258,19 +329,28 @@
             url: "<?php echo site_url(); ?>/contact/delete_contact/" + id,
             data: form.serialize(),
             success: function(response) {
+                response = JSON.parse(response);
                 $('#my_contacts_table').DataTable().ajax.reload(null, false);
+                $('#ssp_contacts_table').DataTable().ajax.reload(null, false);
                 form.closest('.modal').modal('hide');
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
-                $.alert({
-                    title: 'Success!',
-                    content: 'Contact deleted successfully.',
+                Swal.fire({
+                    position: "top-end",
+                    icon: "success",
+                    title: response.message,
+                    showConfirmButton: false,
+                    timer: 1200
                 });
             },
-            error: function(xhr, status, error) {
-                $.alert({
-                    title: 'Error!',
-                    content: 'Failed to delete contact.',
+            error: function(xhr, status, error, response) {
+                response = JSON.parse(response);
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: response.message,
+                    showConfirmButton: false,
+                    timer: 1200
                 });
                 console.error('AJAX ERROR: ' + xhr.responseText);
                 console.error('DELETE CONTACT ERROR: ' + error);
@@ -288,19 +368,63 @@
             url: "<?php echo site_url(); ?>/contact/share_contact/" + id,
             data: form.serialize(),
             success: function(response) {
-                $('#my_contacts_table').DataTable().ajax.reload(null, false);
-                form.closest('.modal').modal('hide');
-                $('body').removeClass('modal-open');
-                $('.modal-backdrop').remove();
-                $.alert({
-                    title: 'Success!',
-                    content: 'Contact shared successfully.',
-                });
+                response = JSON.parse(response);
+                if (response.status === 'error') {
+                    Swal.fire({
+                        text: response.message,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Share anyway?"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                type: 'POST',
+                                url: "<?php echo site_url(); ?>/contact/force_share_contact/" + id,
+                                data: form.serialize(),
+                                success: function(response) {
+                                    response = JSON.parse(response);
+                                    Swal.fire({
+                                        position: "top-end",
+                                        icon: "success",
+                                        title: response.message,
+                                        showConfirmButton: false,
+                                        timer: 1200
+                                    });
+                                },
+                                error: function(xhr, status, error, response) {
+                                    response = JSON.parse(response);
+                                    Swal.fire({
+                                        position: "top-end",
+                                        icon: "error",
+                                        title: response.message,
+                                        showConfirmButton: false,
+                                        timer: 1200
+                                    });
+                                    console.error('AJAX ERROR: ' + xhr.responseText);
+                                    console.error('EDIT CONTACT ERROR: ' + error);
+                                }
+                            });
+                        }
+                    });
+                } else if (response.status === 'success') {
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "success",
+                        title: response.message,
+                        showConfirmButton: false,
+                        timer: 1200
+                    });
+                }
             },
             error: function(xhr, status, error) {
-                $.alert({
-                    title: 'Error!',
-                    content: 'Failed to share contact.',
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: "Failed to share contact.",
+                    showConfirmButton: false,
+                    timer: 1200
                 });
                 console.error('AJAX ERROR: ' + xhr.responseText);
                 console.error('SHARE CONTACT ERROR: ' + error);
@@ -311,7 +435,7 @@
 
 </head>
 
-<body>
+<body style="overflow-y: scroll;">
     <div class="container-sm">
         <div class="d-flex justify-content-between align-items-center">
             <h4 class="mt-1"><?php echo $current_user['user_first_name'] . ' ' . $current_user['user_last_name'] . "'s "; ?> contacts</h4>
@@ -329,18 +453,30 @@
         <table class="table table-sm table-striped" class="display" id="my_contacts_table">
             <thead>
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Company</th>
-                    <th scope="col" class="text-start">Phone Number</th>
-                    <th scope="col">Email Address</th>
-                    <th scope="col" class="text-end">Actions</th>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Company</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th class="text-end">Actions</th>
                 </tr>
             </thead>
-            <tbody>
-
-            </tbody>
         </table>
+
+        <!-- SSP Contacts Table -->
+        <table class="table table-sm table-striped mt-5" class="display" id="ssp_contacts_table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Fullname</th>
+                    <th>Company</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+        </table>
+
         <!-- Pagination Link -->
         <!-- <p><?php echo $links; ?></p> -->
 
@@ -383,6 +519,7 @@
                 </div>
             </div>
         </div>
+
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>

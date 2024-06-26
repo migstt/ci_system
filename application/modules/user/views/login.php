@@ -7,6 +7,8 @@
     <title>Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
+    <!-- Sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -16,7 +18,7 @@
             <h5>
                 Login
             </h5>
-            <?php echo form_open('user/login'); ?>
+            <?php echo form_open('user/login', array('id' => 'signInForm')); ?>
             <?php echo validation_errors(); ?>
             <div class="mb-3">
                 <label class="form-label">Email address</label>
