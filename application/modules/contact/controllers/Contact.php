@@ -337,4 +337,9 @@ class Contact extends MY_Controller
         $other_users = $this->user->get_users_except_current($current_user_id);
         return $other_users;
     }
+
+    function contactsv2()
+    {
+        $this->load->view('contact/contactsv2');
+    }
 }
