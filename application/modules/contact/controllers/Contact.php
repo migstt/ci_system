@@ -86,7 +86,7 @@ class Contact extends MY_Controller
         }
 
         if (!isset($_SESSION['user_id'])) {
-            echo json_encode(array('error' => 'User ID not set in session.'));
+            echo json_encode(array('error' => 'Login required.'));
             return;
         }
 

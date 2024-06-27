@@ -38,9 +38,10 @@
             ajax: {
                 url: '<?php echo site_url(); ?>/contact/get_contacts',
                 dataSrc: 'data',
-                type: 'GET',
+                type: 'POST',
             },
             columns: [{
+                    "sortable": false,
                     "data": null,
                     "render": function(data, type, row, meta) {
                         return meta.row + 1;
@@ -53,6 +54,7 @@
                     "data": "company"
                 },
                 {
+                    "sortable": false,
                     "data": "phone"
                 },
                 {
@@ -61,13 +63,14 @@
                 // for the contact actions (edit, share, delete) row
                 {
                     "data": null,
+                    "sortable": false,
                     "render": function(data, type, row) {
                         return `
                             <div class="d-flex justify-content-end">
                                 <div class="btn-group btn-group-sm" role="group" aria-label="Basic mixed styles example">
                                 
                                     <!-- Update/Edit Contact Modal -->
-                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editContactModal${data.contact_id}">Edit</button>
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editContactModal${data.contact_id}">Edit</button>              
                                     <?php echo validation_errors(); ?>
                                     <?php echo form_open('contact/update_contact', array('id' => 'updateContactForm${data.contact_id}')); ?>
                                     <div class="modal fade" id="editContactModal${data.contact_id}" tabindex="-1" aria-labelledby="editContactModal" aria-hidden="true">
@@ -202,7 +205,7 @@
             ],
         });
 
-        // server side contacts datatable
+        // server side contacts datatable, currently hidden
         $('#ssp_contacts_table').DataTable({
             searching: true,
             processing: true,
@@ -232,6 +235,7 @@
                 // for the contact actions (edit, share, delete) row
                 {
                     data: 'actions',
+                    sortable: false,
                 },
             ],
         });
@@ -293,6 +297,7 @@
             success: function(response) {
                 response = JSON.parse(response);
                 $('#my_contacts_table').DataTable().ajax.reload(null, false);
+                $('#ssp_contacts_table').DataTable().ajax.reload(null, false);
                 form.closest('.modal').modal('hide');
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
@@ -456,7 +461,7 @@
         <table class="table table-sm table-striped" class="display" id="my_contacts_table">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th></th>
                     <th>Name</th>
                     <th>Company</th>
                     <th>Phone</th>
@@ -467,18 +472,19 @@
         </table>
 
         <!-- SSP Contacts Table -->
-        <table class="table table-sm table-striped mt-5" class="display" id="ssp_contacts_table">
+        <!-- Currently hidden -->
+        <!-- <table class="table table-sm table-striped mt-5" class="display" id="ssp_contacts_table">
             <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Fullname</th>
-                    <th>Company</th>
-                    <th>Phone</th>
-                    <th>Email</th>
-                    <th class="text-end">Actions</th>
-                </tr>
+            <tr>
+                <th>#</th>
+                <th>Fullname</th>
+                <th>Company</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th class="text-end">Actions</th>
+            </tr>
             </thead>
-        </table>
+        </table> -->
 
         <!-- Pagination Link -->
         <!-- <p><?php echo $links; ?></p> -->
@@ -522,6 +528,51 @@
                 </div>
             </div>
         </div>
+
+
+        <!-- Edit Contact Form -->
+        <?php echo validation_errors(); ?>
+        <?php echo form_open('contact/update_contact', array('id' => 'updateContactForm${data.contact_id}')); ?>
+        <div class="modal fade" id="editContactModal${data.contact_id}" tabindex="-1" aria-labelledby="editContactModal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Contact</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3 mb-3">
+                            <div class="col">
+                                <input name="firstname" value="${data.firstname}" type="text" class="form-control" placeholder="First name" aria-label="First name" required />
+                            </div>
+                            <div class="col">
+                                <input name="lastname" value="${data.lastname}" type="text" class="form-control" placeholder="Last name" aria-label="Last name" required />
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col">
+                                <input name="email" value="${data.email}" type="email" class="form-control" placeholder="Email address" aria-label="Email address" required />
+                            </div>
+                            <div class="col">
+                                <input name="phone" value="${data.phone}" type="text" class="form-control" placeholder="Phone number" aria-label="Phone number" required />
+                            </div>
+                        </div>
+                        <div class="col">
+                            <input name="companyname" value="${data.company}" type="text" class="form-control" placeholder="Company name" aria-label="Company name" required />
+                        </div>
+                        <div class="col">
+                            <input type="hidden" name="contact_id" value="${data.contact_id}" type="text" class="form-control" placeholder="contact_id" aria-label="contact_id" required />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </form>
+
 
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
