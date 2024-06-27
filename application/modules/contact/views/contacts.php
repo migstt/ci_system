@@ -27,6 +27,7 @@
 
 </head>
 
+<!-- Custom scripts -->
 <script>
     $(document).ready(function() {
 
@@ -246,31 +247,31 @@
             url: "<?php echo site_url(); ?>/contact/insert_contact/",
             data: form.serialize(),
             success: function(response) {
+                response = JSON.parse(response);
                 $('#my_contacts_table').DataTable().ajax.reload(null, false);
-                form.closest('.modal').modal('hide');
-                $('body').removeClass('modal-open');
-                $('.modal-backdrop').remove();
-                $('#my_contacts_table').DataTable().ajax.reload(null, false);
+                $('#ssp_contacts_table').DataTable().ajax.reload(null, false);
                 form.closest('.modal').modal('hide');
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
                 Swal.fire({
                     position: "top-end",
                     icon: "success",
-                    title: "Contact added",
+                    title: response.message,
                     showConfirmButton: false,
                     timer: 1200
                 });
             },
             error: function(xhr, status, error, response) {
+                response = JSON.parse(response);
                 $('#my_contacts_table').DataTable().ajax.reload(null, false);
+                $('#ssp_contacts_table').DataTable().ajax.reload(null, false);
                 form.closest('.modal').modal('hide');
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
                 Swal.fire({
                     position: "top-end",
                     icon: "error",
-                    title: "Failed to add contact.",
+                    title: response.message,
                     showConfirmButton: false,
                     timer: 1200
                 });
@@ -292,7 +293,6 @@
             success: function(response) {
                 response = JSON.parse(response);
                 $('#my_contacts_table').DataTable().ajax.reload(null, false);
-                $('#ssp_contacts_table').DataTable().ajax.reload(null, false);
                 form.closest('.modal').modal('hide');
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
@@ -436,6 +436,9 @@
 </head>
 
 <body style="overflow-y: scroll;">
+    <div class="sidenav">
+
+    </div>
     <div class="container-sm">
         <div class="d-flex justify-content-between align-items-center">
             <h4 class="mt-1"><?php echo $current_user['user_first_name'] . ' ' . $current_user['user_last_name'] . "'s "; ?> contacts</h4>

@@ -123,9 +123,16 @@ class Contact extends MY_Controller
 
     public function get_contacts_ssp()
     {
-        $table = 'contacts';
+        $table          = 'contacts';
+        $primary_key    = 'contact_id';
+        $where          = "user_id = " . $_SESSION['user_id'] . " AND contact_is_deleted = 0";
 
-        $primary_key = 'contact_id';
+        $sql_creds = array(
+            'user' => $this->db->username,
+            'pass' => $this->db->password,
+            'db'   => $this->db->database,
+            'host' => $this->db->hostname
+        );
 
         $columns = array(
             array('db' => 'contact_first_name', 'dt' => 'full_name'),
@@ -143,10 +150,10 @@ class Contact extends MY_Controller
                                 <!-- Update/Edit Contact Modal -->
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editContactModal' . $data . '">Edit</button>
 
-                                <!-- Share Modal -->
+                                <!-- Share Contact Modal -->
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareContactModal' . $data . '">Share</button>
 
-                                <!-- Delete Confirmation Modal -->
+                                <!-- Delete Contact Confirmation Modal -->
                                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal' . $data . '">Delete</button>
 
                             </div>
@@ -156,19 +163,10 @@ class Contact extends MY_Controller
             )
         );
 
-        $sql_details = array(
-            'user' => $this->db->username,
-            'pass' => $this->db->password,
-            'db'   => $this->db->database,
-            'host' => $this->db->hostname
-        );
-
-        $where = "user_id = " . $_SESSION['user_id'] . " AND contact_is_deleted = 0";
-
         require('ssp.class.php');
 
         echo json_encode(
-            SSP::complex($_GET, $sql_details, $table, $primary_key, $columns, null, $where)
+            SSP::complex($_GET, $sql_creds, $table, $primary_key, $columns, null, $where)
         );
     }
 
@@ -200,9 +198,12 @@ class Contact extends MY_Controller
             );
 
             if ($this->contact->insert_contact($contact_formdata, $_SESSION['user_id'])) {
-                $this->session->set_flashdata('success', 'Contact added successfully!');
+                $response = array('status' => 'success', 'message' => 'Contact added successfully!');
+                echo json_encode($response);
             } else {
                 $this->session->set_flashdata('error', 'Contact not added!');
+                $response = array('status' => 'success', 'message' => 'Failed to add contact.');
+                echo json_encode($response);
             }
         }
     }

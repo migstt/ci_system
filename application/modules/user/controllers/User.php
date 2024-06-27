@@ -23,13 +23,15 @@ class User extends MY_Controller
         $this->form_validation->set_rules('email', 'Email', 'required');
         $this->form_validation->set_rules('password', 'Password', 'required');
 
-        if (isset($_SESSION['user_id'])) {
+        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             redirect('contact/contacts');
         } else {
             if ($this->form_validation->run() == TRUE) {
+
                 $email              = $this->db->escape($this->input->post('email'));
                 $password           = $this->input->post('password');
                 $existing_user_row  = $this->user->get_user_row($email);
+
                 if ($existing_user_row) {
                     if (password_verify($password, $existing_user_row['user_password'])) {
                         $user_session_data = array(
@@ -38,16 +40,19 @@ class User extends MY_Controller
                         );
                         $this->session->set_userdata($user_session_data);
                         if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
-                            redirect('contact/contacts');
+                            $response = array('status' => 'success', 'message' => 'Sign in successful. Redirecting.');
+                            echo json_encode($response);
                         } else {
-                            $this->load->view('user/login');
+                            $response = array('status' => 'error', 'message' => 'Unable to sign in. Please try again.');
+                            echo json_encode($response);
                         }
                     } else {
-                        $this->load->view('user/login');
-                        echo 'Incorrect password.';
+                        $response = array('status' => 'error', 'message' => 'Incorrect password. Please try again.');
+                        echo json_encode($response);
                     }
                 } else {
-                    $this->load->view('user/login');
+                    $response = array('status' => 'error', 'message' => $email . ' is not registered.');
+                    echo json_encode($response);
                 }
             } else {
                 $this->load->view('user/login');
@@ -71,8 +76,8 @@ class User extends MY_Controller
             $password   = $this->input->post('password');
 
             if ($this->verify_user_email($this->db->escape($email))) {
-                $this->load->view('user/register');
-                echo 'Email already exists.';
+                $response = array('status' => 'error', 'message' => 'Email already registered.');
+                echo json_encode($response);
                 return;
             }
 
@@ -86,15 +91,20 @@ class User extends MY_Controller
 
             if ($this->user->insert_user($registration_formdata)) {
                 $this->session->set_userdata('user_email', $email);
+
                 if (isset($_SESSION['user_email'])) {
                     $new_registered_user = $this->user->get_user_row($this->db->escape($_SESSION['user_email']));
                     $this->session->set_userdata('user_id', $new_registered_user['user_id']);
                     if (isset($_SESSION['user_id'])) {
-                        $this->load->view('user/thankyou');
+                        $response = array('status' => 'success', 'message' => 'Registration successful.');
+                        echo json_encode($response);
                     } else {
                         $this->load->view('user/register');
                     }
                 }
+            } else {
+                $response = array('status' => 'error', 'message' => 'Unable to register you at this time. Please try again later.');
+                echo json_encode($response);
             }
         } else {
             $this->load->view('user/register');
@@ -123,8 +133,12 @@ class User extends MY_Controller
         );
         $this->session->sess_destroy();
         if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
-            // $this->load->view('user/login');
             redirect('user/login');
         }
+    }
+
+    function thankyou()
+    {
+        $this->load->view('user/thankyou');
     }
 }
