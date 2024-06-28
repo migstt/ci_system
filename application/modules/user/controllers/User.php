@@ -28,22 +28,22 @@ class User extends MY_Controller
         } else {
             if ($this->form_validation->run() == TRUE) {
 
-                $email              = $this->db->escape($this->input->post('email'));
-                $password           = $this->input->post('password');
-                $existing_user_row  = $this->user->get_user_row($email);
+                $email          = $this->db->escape($this->input->post('email'));
+                $password       = $this->input->post('password');
+                $existing_user  = $this->user->get_user_row($email);
 
-                if ($existing_user_row) {
-                    if (password_verify($password, $existing_user_row['user_password'])) {
+                if ($existing_user) {
+                    if (password_verify($password, $existing_user['user_password'])) {
                         $user_session_data = array(
-                            'user_id'       => $existing_user_row['user_id'],
-                            'user_email'    => $existing_user_row['user_email']
+                            'user_id'       => $existing_user['user_id'],
+                            'user_email'    => $existing_user['user_email']
                         );
                         $this->session->set_userdata($user_session_data);
                         if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
                             $response = array('status' => 'success', 'message' => 'Sign in successful. Redirecting.');
                             echo json_encode($response);
                         } else {
-                            $response = array('status' => 'error', 'message' => 'Unable to sign in. Please try again.');
+                            $response = array('status' => 'error', 'message' => 'Unable to sign you in this time. Please try again later.');
                             echo json_encode($response);
                         }
                     } else {
@@ -134,6 +134,9 @@ class User extends MY_Controller
         $this->session->sess_destroy();
         if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
             redirect('login');
+        } else {
+            $response = array('status' => 'error', 'message' => 'Unable to log you out. Please try again.');
+            echo json_encode($response);
         }
     }
 

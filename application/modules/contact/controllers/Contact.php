@@ -73,10 +73,7 @@ class Contact extends MY_Controller
                 $data['contacts'] = array();
             }
 
-            // without sidebar
             // $this->load->view('contact/contacts', $data);
-
-            // with nice sidebar
             $this->load->view('contact/contactsv2', $data);
 
         } else {
@@ -90,7 +87,7 @@ class Contact extends MY_Controller
             exit('No direct script access allowed');
         }
 
-        if (!isset($_SESSION['user_id'])) {
+        if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
             echo json_encode(array('error' => 'Login required.'));
             return;
         }
@@ -273,6 +270,7 @@ class Contact extends MY_Controller
     {
         $selected_user      = $this->input->post('user_selected');
         $contact_email      = $this->db->escape($this->input->post('email'));
+
         $selected_user_row  = $this->user->get_user_row_by_id($selected_user);
 
         $shared_contact_formdata = array(

@@ -202,7 +202,7 @@ class Task extends MY_Controller
         }
     }
 
-    public function assign_contact()
+    public function assign_task()
     {
         $selected_user      = $this->input->post('user_selected');
 

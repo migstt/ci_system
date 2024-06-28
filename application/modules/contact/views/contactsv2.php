@@ -603,11 +603,30 @@
         });
     });
 
-    // for editing  contact
     $(document).on('submit', 'form[id^="updateContactForm"]', function(e) {
         e.preventDefault();
         var form = $(this);
         var id = form.find('input[name="contact_id"]').val();
+
+        var has_changes = false;
+        form.find('input').each(function() {
+            if ($(this).val() !== $(this).attr('value')) {
+                has_changes = true;
+                return false;
+            }
+        });
+
+        if (!has_changes) {
+            Swal.fire({
+                position: "top-end",
+                icon: "warning",
+                title: 'No changes made.',
+                showConfirmButton: false,
+                timer: 1200
+            });
+            return;
+        }
+
         $.ajax({
             type: 'POST',
             url: "<?php echo site_url(); ?>/contact/update_contact/" + id,
@@ -843,6 +862,8 @@
                     </thead>
                 </table>
             </div>
+            <!-- Pagination Link -->
+            <!-- <p><?php echo $links; ?></p> -->
 
             <!-- SSP Contacts Table -->
             <!-- Currently hidden -->
@@ -859,8 +880,7 @@
                     </thead>
                 </table> -->
 
-            <!-- Pagination Link -->
-            <!-- <p><?php echo $links; ?></p> -->
+
 
             <!-- Add New Contact Modal -->
             <div class="modal fade" id="addNewContactModal" tabindex="-1" aria-labelledby="addNewContactModal" aria-hidden="true">
@@ -902,58 +922,14 @@
                 </div>
             </div>
 
-
-            <!-- Edit Contact Form -->
-            <?php echo validation_errors(); ?>
-            <?php echo form_open('contact/update_contact', array('id' => 'updateContactForm${data.contact_id}')); ?>
-            <div class="modal fade" id="editContactModal${data.contact_id}" tabindex="-1" aria-labelledby="editContactModal" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Contact</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row g-3 mb-3">
-                                <div class="col">
-                                    <input name="firstname" value="${data.firstname}" type="text" class="form-control" placeholder="First name" aria-label="First name" required />
-                                </div>
-                                <div class="col">
-                                    <input name="lastname" value="${data.lastname}" type="text" class="form-control" placeholder="Last name" aria-label="Last name" required />
-                                </div>
-                            </div>
-                            <div class="row g-3 mb-3">
-                                <div class="col">
-                                    <input name="email" value="${data.email}" type="email" class="form-control" placeholder="Email address" aria-label="Email address" required />
-                                </div>
-                                <div class="col">
-                                    <input name="phone" value="${data.phone}" type="text" class="form-control" placeholder="Phone number" aria-label="Phone number" required />
-                                </div>
-                            </div>
-                            <div class="col">
-                                <input name="companyname" value="${data.company}" type="text" class="form-control" placeholder="Company name" aria-label="Company name" required />
-                            </div>
-                            <div class="col">
-                                <input type="hidden" name="contact_id" value="${data.contact_id}" type="text" class="form-control" placeholder="contact_id" aria-label="contact_id" required />
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            </form>
-
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     </section>
 
 
-
     <script>
+        // Sidebar
         let arrow = document.querySelectorAll(".arrow");
         for (var i = 0; i < arrow.length; i++) {
             arrow[i].addEventListener("click", (e) => {
@@ -966,6 +942,7 @@
         sidebarBtn.addEventListener("click", () => {
             sidebar.classList.toggle("close");
         });
+        // Sidebar
     </script>
 </body>
 

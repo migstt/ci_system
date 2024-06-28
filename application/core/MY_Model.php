@@ -72,8 +72,6 @@ class MY_Model extends CI_Model
     }
 
 
-
-
     public function delete($table, $where)
     {
 

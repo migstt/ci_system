@@ -27,7 +27,6 @@
 
 </head>
 
-<!-- Custom scripts -->
 <script>
     $(document).ready(function() {
 
@@ -395,7 +394,7 @@
                                         icon: "success",
                                         title: response.message,
                                         showConfirmButton: false,
-                                        timer: 1200
+                                        timer: 2000
                                     });
                                 },
                                 error: function(xhr, status, error, response) {
@@ -405,7 +404,7 @@
                                         icon: "error",
                                         title: response.message,
                                         showConfirmButton: false,
-                                        timer: 1200
+                                        timer: 2000
                                     });
                                     console.error('AJAX ERROR: ' + xhr.responseText);
                                     console.error('EDIT CONTACT ERROR: ' + error);
@@ -438,13 +437,9 @@
     });
 </script>
 
-<!-- Custom styles -->
-
-
 </head>
 
 <body style="overflow-y: scroll;">
-
     <div class="container-sm">
         <div class="d-flex justify-content-between align-items-center">
             <h4 class="mt-1"><?php echo $current_user['user_first_name'] . ' ' . $current_user['user_last_name'] . "'s "; ?> contacts</h4>
@@ -573,9 +568,8 @@
             </div>
         </div>
         </form>
-
-
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 

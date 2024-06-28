@@ -61,3 +61,6 @@ $route['translate_uri_dashes'] = FALSE;
 $route['contacts'] = 'contact/contacts';
 $route['login'] = 'user/login';
 $route['register'] = 'user/register';
+// --------------------------------------------
+// my URIs
+// --------------------------------------------
