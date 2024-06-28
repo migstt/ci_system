@@ -58,7 +58,7 @@
                             timer: 2000
                         });
                         setTimeout(function() {
-                            window.location.href = "<?php echo site_url('contact/contacts'); ?>";
+                            window.location.href = "<?php echo site_url('contacts'); ?>";
                         }, 1500);
                     }
                 },
@@ -137,7 +137,7 @@
         </form>
         <h5 class="mt-10">
             <p>Don't have an account? </p>
-            <a href="<?php echo site_url('user/register'); ?>" class="btn btn-success">Register</a>
+            <a href="<?php echo site_url('register'); ?>" class="btn btn-success">Register</a>
         </h5>
     </div>
 

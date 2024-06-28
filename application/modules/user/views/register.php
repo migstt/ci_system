@@ -162,7 +162,7 @@
         <button type="submit" class="btn btn-primary">Register</button>
         <div class="mt-3">
             <p>Already have an account?</p>
-            <a href="<?php echo site_url('user/login'); ?>" class="btn btn-success">Sign in</a>
+            <a href="<?php echo site_url('login'); ?>" class="btn btn-success">Sign in</a>
         </div>
         <?php echo form_close(); ?>
     </div>

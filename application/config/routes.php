@@ -54,8 +54,10 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
 
-$route['user/thankyou'] = 'user/thankyou';
 
-
-$route['contacts/(:num)'] = 'contacts';
-$route['contact/contacts'] = 'contact/contacts';
+// --------------------------------------------
+// my URIs
+// --------------------------------------------
+$route['contacts'] = 'contact/contacts';
+$route['login'] = 'user/login';
+$route['register'] = 'user/register';

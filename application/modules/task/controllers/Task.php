@@ -74,7 +74,7 @@ class Task extends MY_Controller
 
             $this->load->view('task/tasks', $data);
         } else {
-            redirect('user/login');
+            redirect('login');
         }
     }
 

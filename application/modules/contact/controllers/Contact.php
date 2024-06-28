@@ -73,9 +73,14 @@ class Contact extends MY_Controller
                 $data['contacts'] = array();
             }
 
-            $this->load->view('contact/contacts', $data);
+            // without sidebar
+            // $this->load->view('contact/contacts', $data);
+
+            // with nice sidebar
+            $this->load->view('contact/contactsv2', $data);
+
         } else {
-            redirect('user/login');
+            redirect('login');
         }
     }
 
@@ -201,8 +206,7 @@ class Contact extends MY_Controller
                 $response = array('status' => 'success', 'message' => 'Contact added successfully!');
                 echo json_encode($response);
             } else {
-                $this->session->set_flashdata('error', 'Contact not added!');
-                $response = array('status' => 'success', 'message' => 'Failed to add contact.');
+                $response = array('status' => 'error', 'message' => 'Failed to add contact.');
                 echo json_encode($response);
             }
         }
@@ -301,7 +305,7 @@ class Contact extends MY_Controller
 
     public function force_share_contact()
     {
-        $selected_user = $this->input->post('user_selected');
+        $selected_user      = $this->input->post('user_selected');
         $selected_user_row  = $this->user->get_user_row_by_id($selected_user);
 
         $shared_contact_formdata = array(

@@ -38,7 +38,7 @@
 
     <div class="container-sm">
         <h1>Thank you!</h1>
-        <a href="<?php echo site_url('contact/contacts'); ?>" class="btn btn-success">Continue</a>
+        <a href="<?php echo site_url('contacts'); ?>" class="btn btn-success">Continue</a>
     </div>
 
 </body>

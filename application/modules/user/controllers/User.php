@@ -24,7 +24,7 @@ class User extends MY_Controller
         $this->form_validation->set_rules('password', 'Password', 'required');
 
         if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
-            redirect('contact/contacts');
+            redirect('contacts');
         } else {
             if ($this->form_validation->run() == TRUE) {
 
@@ -51,7 +51,7 @@ class User extends MY_Controller
                         echo json_encode($response);
                     }
                 } else {
-                    $response = array('status' => 'error', 'message' => $email . ' is not registered.');
+                    $response = array('status' => 'error', 'message' => $email . ' is not a registered email.');
                     echo json_encode($response);
                 }
             } else {
@@ -133,7 +133,7 @@ class User extends MY_Controller
         );
         $this->session->sess_destroy();
         if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
-            redirect('user/login');
+            redirect('login');
         }
     }
 

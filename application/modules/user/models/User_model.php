@@ -11,7 +11,7 @@ class User_model extends MY_Model
 
     public function insert_user($registration_formdata)
     {
-        if($this->insert('users', $registration_formdata)){
+        if ($this->insert('users', $registration_formdata)) {
             return true;
         }
         return false;
@@ -19,22 +19,29 @@ class User_model extends MY_Model
 
     public function get_user_row($email)
     {
-        return $this->getRow('*', 'users', 'user_email='. $email);
+        $where = 'user_email=' . $email;
+        return $this->getRow('*', 'users', $where);
     }
 
     public function get_user_row_by_id($user_id)
     {
-        return $this->getRow('*', 'users', 'user_id='. $user_id);
+        $where = 'user_id=' . $user_id;
+        return $this->getRow('*', 'users', $where);
     }
 
     function get_users_except_current($current_user_id)
     {
-        $users_except_current = $this->getRows('*', 'users', 'user_id!='. $current_user_id, 'user_first_name ASC');
+
+        $where      = 'user_id!=' . $current_user_id;
+        $order_by   = 'user_first_name ASC';
+
+        $users_except_current = $this->getRows('*', 'users', $where, $order_by);
 
         if (!is_array($users_except_current)) {
             $users_except_current = array();
             return $users_except_current;
         }
+        
         return $users_except_current;
     }
 }

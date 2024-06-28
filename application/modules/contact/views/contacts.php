@@ -439,46 +439,11 @@
 </script>
 
 <!-- Custom styles -->
-<style>
-    .sidenav {
-        height: 100vh;
-        width: 200px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        background-color: #f8f9fa;
-        padding-top: 20px;
-    }
 
-    .sidenav a {
-        padding: 8px 16px;
-        text-decoration: none;
-        font-size: 18px;
-        color: #343a40;
-        display: block;
-    }
-
-    .sidenav a:hover {
-        background-color: #ddd;
-        color: #000;
-    }
-
-    .container-sm {
-        margin-left: 220px;
-        /* Same as the width of the sidenav */
-        padding: 20px;
-    }
-</style>
 
 </head>
 
 <body style="overflow-y: scroll;">
-
-    <div class="sidenav">
-        <a href="#section1">Contacts</a>
-        <a href="#section2">Tasks</a>
-        <a href="#section3">Inventory</a>
-    </div>
 
     <div class="container-sm">
         <div class="d-flex justify-content-between align-items-center">
