@@ -27,7 +27,7 @@ class Contact extends MY_Controller
             $data['user_id']        = $_SESSION['user_id'];
             $data['user_email']     = $_SESSION['user_email'];
             $data['current_user']   = $this->user->get_user_row($this->db->escape($_SESSION['user_email']));
-            $data['user_options']   = array('Default' => 'Select user');
+            $data['user_options']   = array('Default' => 'Select user to share it with');
             $users_except_current   = $this->get_other_users_except_current($_SESSION['user_id']);
             $total_contact_rows     = $this->contact->count_user_specific_contacts($_SESSION['user_id']);
 
@@ -294,7 +294,7 @@ class Contact extends MY_Controller
         }
 
         if ($this->contact->insert_contact($shared_contact_formdata, $selected_user)) {
-            $response = array('status' => 'success', 'message' => 'Contact successfully shared with ' . $selected_user_row['user_first_name'] . ' ' . $selected_user_row['user_last_name'] . '.');
+            $response = array('status' => 'success', 'message' => 'Contact successfully shared to ' . $selected_user_row['user_first_name'] . ' ' . $selected_user_row['user_last_name'] . '.');
             echo json_encode($response);
         } else {
             $response = array('status' => 'error', 'message' => 'MySQL Database Error! Failed to share contact.');
@@ -321,7 +321,7 @@ class Contact extends MY_Controller
         );
 
         if ($this->contact->insert_contact($shared_contact_formdata, $selected_user)) {
-            $response = array('status' => 'success', 'message' => 'Contact successfully shared with ' . $selected_user_row['user_first_name'] . ' ' . $selected_user_row['user_last_name'] . '.');
+            $response = array('status' => 'success', 'message' => 'Contact successfully shared to ' . $selected_user_row['user_first_name'] . ' ' . $selected_user_row['user_last_name'] . '.');
             echo json_encode($response);
         } else {
             $response = array('status' => 'error', 'message' => 'MySQL Database Error! Failed to share contact.');
