@@ -10,9 +10,9 @@ class Task_model extends MY_Model
     }
 
 
-    public function insert_task($assign_task_formdata, $selected_user)
+    public function insert_task($task_formdata, $selected_user)
     {
-        $inserted_task_id = $this->insert('tasks', $assign_task_formdata, true);
+        $inserted_task_id = $this->insert('tasks', $task_formdata, true);
 
         if (isset($inserted_task_id)) {
             $user_tasks_data = array(
@@ -20,7 +20,7 @@ class Task_model extends MY_Model
                 'task_assigned_to' => $selected_user,
                 'task_assigned_by' => $_SESSION['user_id'],
             );
-            if ($this->assign_task($user_tasks_data)) {
+            if ($this->insert_to_user_tasks($user_tasks_data)) {
                 return true;
             }
             return false;
@@ -28,12 +28,26 @@ class Task_model extends MY_Model
         return false;
     }
 
-    public function get_user_specific_tasks($task_assigned_to, $limit = 0, $offset = 0)
+    public function get_user_specific_tasks($user_id, $limit = 0, $offset = 0)
     {
         $this->db->select('*');
         $this->db->from('user_tasks');
-        $this->db->where('user_tasks.task_assigned_to', $task_assigned_to);
+        $this->db->where('user_tasks.task_assigned_to', $user_id);
         $this->db->join('tasks', 'user_tasks.task_assigned_to = tasks.task_assigned_to');
+        $this->db->where('tasks.task_is_deleted', 0);
+        $this->db->order_by('tasks.task_title', 'ASC');
+        if ($limit > 0) {
+            $this->db->limit($limit, $offset);
+        }
+        return $this->db->get()->result();
+    }
+
+    public function get_tasks_assigned_to_others($task_assigned_by, $limit = 0, $offset = 0)
+    {
+        $this->db->select('*');
+        $this->db->from('user_tasks');
+        $this->db->where('user_tasks.task_assigned_by', $task_assigned_by);
+        $this->db->join('tasks', 'user_tasks.task_assigned_by = tasks.task_assigned_by');
         $this->db->where('tasks.task_is_deleted', 0);
         $this->db->order_by('tasks.task_title', 'ASC');
         if ($limit > 0) {
@@ -51,11 +65,10 @@ class Task_model extends MY_Model
         return $this->db->count_all_results();
     }
 
-    public function update_task($user_id, $task_assigned_to, $updated_contact_formdata)
+    public function update_task($task_id, $updated_task_formdata)
     {
-        $this->db->where('task_assigned_to', $task_assigned_to);
-        $this->db->where('task_assigned_to', $user_id);
-        $result = $this->db->update('tasks', $updated_contact_formdata);
+        $this->db->where('task_id', $task_id);
+        $result = $this->db->update('tasks', $updated_task_formdata);
 
         if ($result) {
             return true;
@@ -64,7 +77,7 @@ class Task_model extends MY_Model
         }
     }
 
-    public function assign_task($user_task_data)
+    public function insert_to_user_tasks($user_task_data)
     {
         if ($this->insert('user_tasks', $user_task_data)) {
             return true;

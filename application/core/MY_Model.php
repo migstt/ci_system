@@ -58,7 +58,7 @@ class MY_Model extends CI_Model
         return false;
     }
 
-    public function update($table, $form_data,  $id = '')
+    public function update($table, $form_data,  $id)
     {
 
         if (!empty($id)) {

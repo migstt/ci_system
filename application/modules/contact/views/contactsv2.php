@@ -808,14 +808,14 @@
             </li>
             <li>
                 <div class="iocn-link">
-                    <a href="<?php echo site_url('task/task'); ?>">
+                    <a href="<?php echo site_url('tasks'); ?>">
                         <i class='bx bx-task'></i>
                         <span class="link_name">Tasks</span>
                     </a>
                     <i class='bx bxs-chevron-down arrow'></i>
                 </div>
                 <ul class="sub-menu">
-                    <li><a class="link_name" href="<?php echo site_url('task/task'); ?>">Tasks</a></li>
+                    <li><a class="link_name" href="<?php echo site_url('tasks'); ?>">Tasks</a></li>
                     <li><a href="#">Pending</a></li>
                     <li><a href="#">In Progess</a></li>
                     <li><a href="#">Completed</a></li>

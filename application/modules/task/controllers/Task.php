@@ -26,50 +26,11 @@ class Task extends MY_Controller
             $data['user_id']        = $_SESSION['user_id'];
             $data['user_email']     = $_SESSION['user_email'];
             $data['current_user']   = $this->user->get_user_row($this->db->escape($_SESSION['user_email']));
-            $data['user_options']   = array('Default' => 'Select user to assign');
+            $data['user_options']   = array('Default' => 'Select user to assign this task to');
             $users_except_current   = $this->get_other_users_except_current($_SESSION['user_id']);
-            $total_task_rows     = $this->task->count_user_specific_tasks($_SESSION['user_id']);
-
-            // pagination config
-            $config["base_url"]         = base_url() . "index.php/task/tasks";
-            $config["total_rows"]       = $total_task_rows;
-            $config["per_page"]         = 5;
-            $config["uri_segment"]      = 3;
-            $config['full_tag_open']    = '<ul class="pagination">';
-            $config['full_tag_close']   = '</ul>';
-            $config['attributes']       = ['class' => 'page-link'];
-            $config['first_link']       = false;
-            $config['last_link']        = false;
-            $config['first_tag_open']   = '<li class="page-item">';
-            $config['first_tag_close']  = '</li>';
-            $config['prev_link']        = '&laquo';
-            $config['prev_tag_open']    = '<li class="page-item">';
-            $config['prev_tag_close']   = '</li>';
-            $config['next_link']        = '&raquo';
-            $config['next_tag_open']    = '<li class="page-item">';
-            $config['next_tag_close']   = '</li>';
-            $config['last_tag_open']    = '<li class="page-item">';
-            $config['last_tag_close']   = '</li>';
-            $config['cur_tag_open']     = '<li class="page-item active"><a href="#" class="page-link">';
-            $config['cur_tag_close']    = '<span class="sr-only"></span></a></li>';
-            $config['num_tag_open']     = '<li class="page-item">';
-            $config['num_tag_close']    = '</li>';
-
-            $this->pagination->initialize($config);
-
-            $page = $this->uri->segment(3);
-            $data["links"]      = $this->pagination->create_links();
-
-            // paginated
-            // $data['contacts']   = $this->task->get_user_specific_contacts($_SESSION['user_id'], $config["per_page"], $page);
-            // not paginated
-            $data['tasks']   = $this->task->get_user_specific_tasks($_SESSION['user_id'], 0, 0);
 
             foreach ($users_except_current as $user) {
                 $data['user_options'][$user['user_id']] = $user['user_first_name'] . ' ' . $user['user_last_name'];
-            }
-            if (!is_array($data['tasks'])) {
-                $data['tasks'] = array();
             }
 
             $this->load->view('task/tasks', $data);
@@ -78,7 +39,7 @@ class Task extends MY_Controller
         }
     }
 
-    public function get_task()
+    public function get_others_tasks()
     {
         if (!$this->input->is_ajax_request()) {
             exit('No direct script access allowed');
@@ -89,45 +50,125 @@ class Task extends MY_Controller
             return;
         }
 
-        $tasks = $this->task->get_user_specific_tasks($_SESSION['user_id'], 0, 0);
+        $others_tasks = $this->task->get_tasks_assigned_to_others($_SESSION['user_id'], 0, 0);
 
-        if ($tasks === false) {
+        if (!$others_tasks) {
             echo json_encode(array('error' => 'Error retrieving tasks.'));
-        } else {
-            $data = array();
-            foreach ($tasks as $task) {
-                $data[] = array(
-                    'task_id'       => $task->task_id,
-                    'title'         => $task->task_title,
-                    'description'   => $task->description,
-                    'assigned_to'   => $task->task_assigned_to,
-                    'assigned_by'   => $task->task_assigned_by,
-                );
-            }
-
-            $output = array(
-                "draw"              => intval($this->input->get("draw")),
-                "recordsTotal"      => count($data),
-                "recordsFiltered"   => count($data),
-                "data"              => $data
-            );
-
-            echo json_encode($output);
+            return;
         }
+
+        $data = array();
+        $task_ids = array();
+
+        foreach ($others_tasks as $task) {
+            if (!in_array($task->task_id, $task_ids)) {
+                $assigned_to    = $this->user->get_user_row_by_id($task->task_assigned_to);
+                if ($assigned_to) {
+                    $assigned_name  = $assigned_to['user_first_name'] . ' ' . $assigned_to['user_last_name'];
+
+                    $data[] = array(
+                        'task_id'       => $task->task_id,
+                        'title'         => $task->task_title,
+                        'description'   => $task->task_description,
+                        'assigned_to'   => $assigned_name,
+                        'due_date'      => $task->task_due_date,
+                        'status'        => $task->task_status,
+                    );
+
+                    $task_ids[] = $task->task_id;
+                }
+            }
+        }
+
+        $users_except_current = $this->get_other_users_except_current($_SESSION['user_id']);
+        $edit_user_options = array();
+
+        foreach ($users_except_current as $user) {
+            $edit_user_options[$user['user_id']] = $user['user_first_name'] . ' ' . $user['user_last_name'];
+        }
+
+        $output = array(
+            "draw" => intval($this->input->get("draw")),
+            "recordsTotal" => count($data),
+            "recordsFiltered" => count($data),
+            "data" => $data,
+            "edit_user_options" => $edit_user_options
+        );
+
+        echo json_encode($output);
+    }
+
+    public function get_my_tasks()
+    {
+        if (!$this->input->is_ajax_request()) {
+            exit('No direct script access allowed');
+        }
+
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode(array('error' => 'User ID not set in session.'));
+            return;
+        }
+
+        $my_tasks = $this->task->get_user_specific_tasks($_SESSION['user_id'], 0, 0);
+
+        if (!$my_tasks) {
+            echo json_encode(array('error' => 'Error retrieving tasks.'));
+            return;
+        }
+
+        $data = array();
+        $task_ids = array();
+
+        foreach ($my_tasks as $task) {
+            if (!in_array($task->task_id, $task_ids)) {
+
+                $assigned_by    = $this->user->get_user_row_by_id($task->task_assigned_by);
+
+                if ($assigned_by) {
+
+                    $assigned_by_name  = $assigned_by['user_first_name'] . ' ' . $assigned_by['user_last_name'];
+
+                    $data[] = array(
+                        'task_id'       => $task->task_id,
+                        'title'         => $task->task_title,
+                        'description'   => $task->task_description,
+                        'assigned_by'   => $assigned_by_name,
+                        'due_date'      => $task->task_due_date,
+                        'status'        => $task->task_status,
+                    );
+
+                    $task_ids[] = $task->task_id;
+                }
+            }
+        }
+
+        $output = array(
+            "draw"              => intval($this->input->get("draw")),
+            "recordsTotal"      => count($data),
+            "recordsFiltered"   => count($data),
+            "data"              => $data
+        );
+
+        echo json_encode($output);
     }
 
     function insert_task()
     {
         $this->form_validation->set_rules('title', 'Task title', 'required');
         $this->form_validation->set_rules('description', 'Task description', 'required');
-        $this->form_validation->set_rules('assigned_to', 'Assigned to', 'required');
+        $this->form_validation->set_rules('user_selected', 'Assigned to', 'required');
+        $this->form_validation->set_rules('due_date', 'Due date', 'required');
 
 
         if ($this->form_validation->run() == TRUE) {
 
             $firstname      = $this->input->post('title');
             $lastname       = $this->input->post('description');
-            $assigned_to    = $this->input->post('assigned_to');
+            $assigned_to    = $this->input->post('user_selected');
+            $due_date       = $this->input->post('due_date');
+
+            $assigned_to_row        = $this->user->get_user_row_by_id($assigned_to);
+            $assigned_to_full_name  = $assigned_to_row['user_first_name'] . ' ' . $assigned_to_row['user_last_name'];
 
             $task_formdata = array(
                 'task_assigned_by' => $_SESSION['user_id'],
@@ -137,92 +178,97 @@ class Task extends MY_Controller
                 'task_status'      => 'pending',
                 'task_created_at'  => date('Y-m-d H:i:s'),
                 'task_updated_at'  => null,
-                'task_completed_at'=> null,
+                'task_completed_at' => null,
+                'task_due_date'    => $due_date,
                 'task_is_deleted'  => 0,
-            );  
+            );
 
-            if ($this->task->insert_task($task_formdata, $_SESSION['user_id'])) {
-                $this->session->set_flashdata('success', 'Contact added successfully!');
+            if ($this->task->insert_task($task_formdata, $assigned_to)) {
+                $response = array('status' => 'success', 'message' => 'Task created and assigned to ' . $assigned_to_full_name . '.');
+                echo json_encode($response);
             } else {
-                $this->session->set_flashdata('error', 'Contact not added!');
+                $response = array('status' => 'error', 'message' => 'Failed to create task. Please try again.');
+                echo json_encode($response);
             }
         }
     }
 
-    function update_task()
+    function update_others_task()
     {
-        $tasks_id = $this->input->post('tasks_id');
-        $user_id    = $_SESSION['user_id'];
 
-        $this->form_validation->set_rules('firstname', 'First name', 'required');
-        $this->form_validation->set_rules('lastname', 'Last name', 'required');
-        $this->form_validation->set_rules('email', 'Email', 'required');
-        $this->form_validation->set_rules('phone', 'Phone number', 'required');
-        $this->form_validation->set_rules('companyname', 'Company name', 'required');
+        $this->form_validation->set_rules('title', 'Task title', 'required');
+        $this->form_validation->set_rules('description', 'Task description', 'required');
+        $this->form_validation->set_rules('user_selected', 'Assigned to', 'required');
+        $this->form_validation->set_rules('due_date', 'Due date', 'required');
+
 
         if ($this->form_validation->run() == TRUE) {
 
-            $firstname      = $this->input->post('firstname');
-            $lastname       = $this->input->post('lastname');
-            $email          = $this->input->post('email');
-            $phone          = $this->input->post('phone');
-            $companyname    = $this->input->post('companyname');
+            $title          = $this->input->post('title');
+            $description    = $this->input->post('description');
+            $assigned_to    = $this->input->post('user_selected');
+            $due_date       = $this->input->post('due_date');
+            $task_id        = $this->input->post('task_id');
 
-            $updated_tasks_formdata = array(
-                'tasks_first_name'    => $firstname,
-                'tasks_last_name'     => $lastname,
-                'tasks_email'         => $email,
-                'tasks_phone'         => $phone,
-                'tasks_company_name'  => $companyname,
-                'tasks_updated_at'    => date('Y-m-d H:i:s')
+            $updated_task_formdata = array(
+                'task_title'       => $title,
+                'task_description' => $description,
+                'task_assigned_to' => $assigned_to,
+                'task_due_date'    => $due_date,
             );
 
-            if ($this->task->update_contact($user_id, $tasks_id, $updated_tasks_formdata)) {
-                $this->session->set_flashdata('success', 'Contact updated successfully!');
+            if ($this->task->update_task($task_id, $updated_task_formdata)) {
+                $response = array('status' => 'success', 'message' => 'Task updated.');
+                echo json_encode($response);
             } else {
-                $this->session->set_flashdata('error', 'Failed to update contact!');
+                $response = array('status' => 'error', 'message' => 'Failed to update task. Please try again.');
+                echo json_encode($response);
             }
+        }
+    }
+
+    function update_task_status()
+    {
+        $task_id    = $this->input->post('task_id');
+        $status     = $this->input->post('status');
+
+        if ($status == 'completed') {
+            $updated_task_status_formdata = array(
+                'task_status' => $status,
+                'task_updated_at' => date('Y-m-d H:i:s'),
+                'task_completed_at' => date('Y-m-d H:i:s')
+            );
+        } else {
+            $updated_task_status_formdata = array(
+                'task_status' => $status,
+                'task_updated_at' => date('Y-m-d H:i:s')
+            );
+        }
+
+        if ($this->task->update_task($task_id, $updated_task_status_formdata)) {
+            $response = array('status' => 'success', 'message' => 'Task status updated.');
+            echo json_encode($response);
+        } else {
+            $response = array('status' => 'error', 'message' => 'Failed to update task status. Please try again.');
+            echo json_encode($response);
         }
     }
 
     function delete_task()
     {
-        $tasks_id = $this->input->post('tasks_id');
-        $user_id    = $_SESSION['user_id'];
+        $task_id   = $this->input->post('task_id');
 
         $updated_tasks_formdata = array(
-            'tasks_is_deleted' => 1,
-            'tasks_deleted_at' => date('Y-m-d H:i:s')
+            'task_is_deleted' => 1,
+            'task_deleted_at' => date('Y-m-d H:i:s')
         );
 
-        if ($this->task->update_contact($user_id, $tasks_id, $updated_tasks_formdata)) {
-            redirect('task/tasks";');
+        if ($this->task->update_task($task_id, $updated_tasks_formdata)) {
+            $response = array('status' => 'success', 'message' => 'Task deleted.');
+            echo json_encode($response);
         } else {
-            redirect('contact/error_page');
-        }
-    }
-
-    public function assign_task()
-    {
-        $selected_user      = $this->input->post('user_selected');
-
-        $shared_tasks_formdata = array(
-            'user_id'               => $selected_user,
-            'tasks_first_name'    => $this->input->post('firstname'),
-            'tasks_last_name'     => $this->input->post('lastname'),
-            'tasks_email'         => $this->input->post('email'),
-            'tasks_phone'         => $this->input->post('phone'),
-            'tasks_company_name'  => $this->input->post('companyname'),
-            'tasks_is_deleted'    => 0,
-            'tasks_created_at'    => date('Y-m-d H:i:s'),
-            'tasks_shared_at'     => date('Y-m-d H:i:s')
-        );
-
-        if ($this->task->insert_contact($shared_tasks_formdata, $selected_user)) {
-            $this->session->set_flashdata('success', 'sContact shared successfully!');
-            redirect('task/tasks";');
-        } else {
-            $this->session->set_flashdata('error', 'Failed to share contact!');
+            $response = array('status' => 'error', 'message' => 'Failed to delete task. Please try again.');
+            echo json_encode($response);
         }
     }
 

@@ -30,6 +30,10 @@
     <!-- Sweetalert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- Flatpickr CSS and JS-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <!-- sidebar styles -->
     <style>
         /* Google Fonts Import Link */
@@ -296,6 +300,7 @@
             left: 260px;
             width: calc(100% - 260px);
             transition: all 0.5s ease;
+            overflow-y: scroll;
         }
 
         .sidebar.close~.home-section {
@@ -331,10 +336,23 @@
             }
         }
 
-        .contacts-table-container {
+        .others-tasks-table-container {
             background-color: white;
             padding: 1%;
             border-radius: 5px;
+        }
+
+        .my-tasks-table-container {
+            background-color: white;
+            padding: 1%;
+            border-radius: 5px;
+        }
+
+        .btn-fixed-width {
+            width: 150px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -343,87 +361,125 @@
 <script>
     $(document).ready(function() {
 
-        // client side contacts datatable
-        $('#my_contacts_table').DataTable({
+
+        // initialize flatpickr for task task due date and time,
+        flatpickr("#due_date", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            minDate: "today",
+        });
+
+        // for flatpickr bug on month dropdown
+        $("#addNewTaskModal").modal({
+            show: true,
+            focus: false
+        });
+
+
+        // client side other's tasks datatable
+        $('#others_tasks').DataTable({
             responsive: true,
             searching: true,
             processing: true,
             ajax: {
-                url: '<?php echo site_url(); ?>/contact/get_contacts',
-                dataSrc: 'data',
+                url: '<?php echo site_url(); ?>/task/get_others_tasks',
+                // dataSrc: 'data',
+                dataSrc: function(json) {
+                    window.editUserOptions = json.edit_user_options;
+                    return json.data;
+                },
                 type: 'POST',
             },
             columns: [{
                     "sortable": false,
                     "data": null,
-                    "className": "text-center align-middle", // Add align-middle class for vertical alignment
+                    "className": "text-center align-middle",
                     "render": function(data, type, row, meta) {
                         return meta.row + 1;
                     }
                 },
                 {
-                    "data": "full_name",
+                    "data": "title",
                     "className": "text-start align-middle"
                 },
                 {
-                    "data": "company",
+                    "data": "description",
                     "className": "text-start align-middle"
                 },
                 {
-                    "data": "phone",
+                    "data": "assigned_to",
                     "className": "text-start align-middle",
-                    "sortable": false,
                 },
                 {
-                    "data": "email",
-                    "className": "text-start align-middle"
+                    "data": "due_date",
+                    "className": "text-start align-middle",
                 },
-                // for the contact actions (edit, share, delete) row
+                {
+                    "data": "status",
+                    "className": "text-start align-middle",
+                    "render": function(data) {
+                        return data.charAt(0).toUpperCase() + data.slice(1);
+                    }
+                },
+                // for the tasks actions (edit, delete) row
                 {
                     "data": null,
                     "sortable": false,
+                    className: "align-middle",
                     "render": function(data, type, row) {
+                        let options = window.editUserOptions;
+                        let optionsHTML = '';
+                        for (let key in options) {
+                            optionsHTML += `<option value="${key}" ${options[key] == data.assigned_to ? 'selected' : ''}>${options[key]}</option>`;
+                        }
                         return `
                             <div class="d-flex justify-content-end">
-                                <div class="btn-group btn-group-sm" role="group" aria-label="Basic mixed styles example">
-                                
-                                    <!-- Update/Edit Contact Modal -->
-                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editContactModal${data.contact_id}">Edit</button>              
+                                <div class="btn-group btn-group-sm" role="group" aria-label="">
+                            
+                                    <!-- Update/Edit Task Modal -->
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editTaskModal${data.task_id}">Edit</button>
                                     <?php echo validation_errors(); ?>
-                                    <?php echo form_open('contact/update_contact', array('id' => 'updateContactForm${data.contact_id}')); ?>
-                                    <div class="modal fade" id="editContactModal${data.contact_id}" tabindex="-1" aria-labelledby="editContactModal" aria-hidden="true">
+                                    <?php echo form_open('task/update_others_task', array('id' => 'editTaskForm${data.task_id}')); ?>
+                                    <div class="modal fade" id="editTaskModal${data.task_id}" tabindex="-1" aria-labelledby="editTaskModal" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Contact</h1>
+                                                    <h1 class="modal-title fs-5" id="modalLabel">Edit Task</h1>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <div class="row g-3 mb-3">
-                                                        <div class="col">
-                                                            <input name="firstname" value="${data.firstname}" type="text" class="form-control" placeholder="First name" aria-label="First name" required />
-                                                        </div>
-                                                        <div class="col">
-                                                            <input name="lastname" value="${data.lastname}" type="text" class="form-control" placeholder="Last name" aria-label="Last name" required />
-                                                        </div>
-                                                    </div>
-                                                    <div class="row g-3 mb-3">
-                                                        <div class="col">
-                                                            <input name="email" value="${data.email}" type="email" class="form-control" placeholder="Email address" aria-label="Email address" required />
-                                                        </div>
-                                                        <div class="col">
-                                                            <input name="phone" value="${data.phone}" type="text" class="form-control" placeholder="Phone number" aria-label="Phone number" required />
-                                                        </div>
+                                                    <div class="col mb-3">
+                                                        <p class="text-start"><strong>Task title</strong></p>
                                                     </div>
                                                     <div class="col">
-                                                        <input name="companyname" value="${data.company}" type="text" class="form-control" placeholder="Company name" aria-label="Company name" required />
+                                                        <input name="title" value="${data.title}" type="text" class="form-control" placeholder="Task title" aria-label="Task title" required />
+                                                    </div>
+                                                    <div class="col mt-3 mb-3">
+                                                        <p class="text-start"><strong>Task description</strong></p>
+                                                    </div>
+                                                    <div class="col mt-3 mb-3">
+                                                        <textarea name="description" class="form-control" placeholder="Task description" aria-label="Task description" required rows="4">${data.description}</textarea>
+                                                    </div>
+                                                    <div class="col mt-3 mb-3">
+                                                        <p class="text-start"><strong>Task is assigned to: </strong></p>
                                                     </div>
                                                     <div class="col">
-                                                        <input type="hidden" name="contact_id" value="${data.contact_id}" type="text" class="form-control" placeholder="contact_id" aria-label="contact_id" required />
+                                                        <select name="user_selected" class="form-select" aria-label="User selected">
+                                                            ${optionsHTML}
+                                                        </select>
+                                                    </div>  
+                                                    <div class="col mt-3 text-start">
+                                                        <p><strong>Task due date</strong></p>
+                                                    </div>
+                                                    <div class="col">
+                                                        <input name="due_date" id="due_date" type="text" class="form-control" placeholder="Due date" aria-label="Due date" required value="${data.due_date}" />
+                                                    </div>
+                                                    <div class="col">
+                                                        <input type="hidden" name="task_id" value="${data.task_id}" type="text" class="form-control" placeholder="task_id" aria-label="task_id" required />
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                                        <button type="submit" class="btn btn-primary">Update</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -432,79 +488,18 @@
                                     </form>
 
 
-                                    <!-- Share Modal -->
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareContactModal${data.contact_id}">Share</button>
-                                    <?php echo form_open('contact/share_contact', array('id' => 'shareContactForm${data.contact_id}')); ?>
-                                    <div class="modal fade" id="shareContactModal${data.contact_id}" tabindex="-1" aria-labelledby="shareContactModal" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Share contact</h1>
-                                                    <div class="col">
-                                                        <input type="hidden" name="contact_id" value="${data.contact_id}" type="text" class="form-control" placeholder="contact_id" aria-label="contact_id" required />
-
-                                                        <div class="row g-3 mb-3">
-                                                            <div class="col">
-                                                                <input type="hidden" name="firstname" value="${data.firstname}" type="text" class="form-control" placeholder="First name" aria-label="First name" required />
-                                                            </div>
-                                                            <div class="col">
-                                                                <input type="hidden" name="lastname" value="${data.lastname}" type="text" class="form-control" placeholder="Last name" aria-label="Last name" required />
-                                                            </div>
-                                                        </div>
-                                                        <div class="row g-3 mb-3">
-                                                            <div class="col">
-                                                                <input type="hidden" name="email" value="${data.email}" type="email" class="form-control" placeholder="Email address" aria-label="Email address" required />
-                                                            </div>
-                                                            <div class="col">
-                                                                <input type="hidden" name="phone" value="${data.phone}" type="text" class="form-control" placeholder="Phone number" aria-label="Phone number" required />
-                                                            </div>
-                                                        </div>
-                                                        <div class="col">
-                                                            <input type="hidden" name="companyname" value="${data.company}" type="text" class="form-control" placeholder="Company name" aria-label="Company name" required />
-                                                        </div>
-
-                                                    </div>
-                                                    <div>
-                                                        <?php echo validation_errors(); ?>
-                                                    </div>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="modal-body">
-                                                        <div class="col">
-                                                            <?php if (!empty($user_options)) : ?>
-                                                                <select name="user_selected" class="form-select" aria-label="User selected">
-                                                                    <?php foreach ($user_options as $option_value => $option_label) : ?>
-                                                                        <option value="<?php echo $option_value; ?>"><?php echo $option_label; ?></option>
-                                                                    <?php endforeach; ?>
-                                                                </select>
-                                                            <?php else : ?>
-                                                                <p>No users to share with found.</p>
-                                                            <?php endif; ?>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Share</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    </form>
-                                    
-                                    
                                     <!-- Delete Confirmation Modal -->
-                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal${data.contact_id}">Delete</button>
-                                    <?php echo form_open('contact/delete_contact', array('id' => 'deleteContactForm${data.contact_id}')); ?>
-                                    <div class="modal fade" id="confirmDeleteModal${data.contact_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal${data.task_id}">Delete</button>
+                                    <?php echo form_open('task/delete_task', array('id' => 'deleteTaskForm${data.task_id}')); ?>
+                                    <div class="modal fade" id="confirmDeleteModal${data.task_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmation</h1>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <input type="hidden" name="contact_id" value="${data.contact_id}" />
-                                                    <p>Are you sure you want to delete this contact?</p>
+                                                    <input type="hidden" name="task_id" value="${data.task_id}" />
+                                                    <p class="text-start">Are you sure you want to delete this task?</p>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="submit" class="btn btn-danger">Yes</button>
@@ -521,6 +516,109 @@
                     }
                 }
             ],
+        });
+
+        // client side my tasks datatable
+        $('#my_tasks').DataTable({
+            responsive: true,
+            searching: true,
+            processing: true,
+            ajax: {
+                url: '<?php echo site_url(); ?>/task/get_my_tasks',
+                dataSrc: 'data',
+                type: 'POST',
+            },
+            columns: [{
+                    "sortable": false,
+                    "data": null,
+                    "className": "text-center align-middle",
+                    "render": function(data, type, row, meta) {
+                        return meta.row + 1;
+                    }
+                },
+                {
+                    "data": "title",
+                    "className": "text-start align-middle"
+                },
+                {
+                    "data": "description",
+                    "className": "text-start align-middle"
+                },
+                {
+                    "data": "assigned_by",
+                    "className": "text-start align-middle",
+                },
+                {
+                    "data": "due_date",
+                    "className": "text-start align-middle",
+                },
+                {
+                    "data": "status",
+                    "className": "text-start align-middle",
+                    "render": function(data, type, row) {
+                        let dropdownItems = '';
+
+                        if (data === 'in_progress') {
+                            dropdownItems = `
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'done')">Done</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'pending')">Pending</a></li>
+                            `;
+                        } else if (data === 'done') {
+                            dropdownItems = `
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'in_progress')">In Progress</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'pending')">Pending</a></li>
+                            `;
+                        } else if (data === 'pending') {
+                            dropdownItems = `
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'in_progress')">In Progress</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'done')">Done</a></li>
+                            `;
+                        }
+
+                        let buttonClass = 'btn-secondary';
+                        if (data === 'in_progress') {
+                            buttonClass = 'btn-warning';
+                        } else if (data === 'done') {
+                            buttonClass = 'btn-success';
+                        } else if (data === 'pending') {
+                            buttonClass = 'btn-danger';
+                        }
+
+                        return `
+                            <div class="dropdown">
+                                <button class="btn btn-fixed-width ${buttonClass} dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    ${data.charAt(0).toUpperCase() + data.slice(1)}
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+                                    ${dropdownItems}
+                                </ul>
+                            </div>
+                        `;
+                    }
+
+
+                },
+                // for the tasks actions (edit, delete) row
+            ],
+        });
+
+        // for Flatpickr bug on month dropdown
+        $("[id^='editTaskModal']").modal({
+            show: true,
+            focus: false
+        });
+
+        // initialize Flatpickr in the dynamically generated modals
+        $(document).on('shown.bs.modal', function(event) {
+            var modal = $(event.target);
+            var input = modal.find('input[id^="due_date"]');
+            if (input.length) {
+                flatpickr(input, {
+                    enableTime: true,
+                    dateFormat: "Y-m-d H:i",
+                    minDate: "today"
+                });
+            }
         });
 
         // server side contacts datatable, currently hidden
@@ -560,18 +658,39 @@
 
     });
 
-    // ajax for adding contact
-    $(document).on('submit', 'form[id^="addNewContactForm"]', function(e) {
+    // for adding task
+    $(document).on('submit', 'form[id^="addNewTaskForm"]', function(e) {
         e.preventDefault();
         var form = $(this);
+        var userSelected = form.find('select[name="user_selected"]').val();
+        var dueDate = form.find('input[name="due_date"]').val();
+        if (userSelected === "Default") {
+            Swal.fire({
+                position: "top-end",
+                icon: "warning",
+                title: "Please select a user to assign this task to.",
+                showConfirmButton: false,
+                timer: 1500
+            });
+            return;
+        }
+        if (dueDate === "") {
+            Swal.fire({
+                position: "top-end",
+                icon: "warning",
+                title: "Please select a due date for this task.",
+                showConfirmButton: false,
+                timer: 1500
+            });
+            return;
+        }
         $.ajax({
             type: 'POST',
-            url: "<?php echo site_url(); ?>/contact/insert_contact/",
+            url: "<?php echo site_url(); ?>/task/insert_task/",
             data: form.serialize(),
             success: function(response) {
                 response = JSON.parse(response);
-                $('#my_contacts_table').DataTable().ajax.reload(null, false);
-                $('#ssp_contacts_table').DataTable().ajax.reload(null, false);
+                $('#others_tasks').DataTable().ajax.reload(null, false);
                 form.closest('.modal').modal('hide');
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
@@ -580,13 +699,12 @@
                     icon: "success",
                     title: response.message,
                     showConfirmButton: false,
-                    timer: 1200
+                    timer: 2000
                 });
             },
             error: function(xhr, status, error, response) {
                 response = JSON.parse(response);
-                $('#my_contacts_table').DataTable().ajax.reload(null, false);
-                $('#ssp_contacts_table').DataTable().ajax.reload(null, false);
+                $('#others_tasks').DataTable().ajax.reload(null, false);
                 form.closest('.modal').modal('hide');
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
@@ -595,22 +713,23 @@
                     icon: "error",
                     title: response.message,
                     showConfirmButton: false,
-                    timer: 1200
+                    timer: 2000
                 });
                 console.error('AJAX ERROR: ' + xhr.responseText);
-                console.error('ADD CONTACT ERROR: ' + error);
+                console.error('ADD TASK ERROR: ' + error);
             }
         });
     });
 
-    // for updating  contact
-    $(document).on('submit', 'form[id^="updateContactForm"]', function(e) {
+    // for updating  tasks
+    $(document).on('submit', 'form[id^="editTaskForm"]', function(e) {
         e.preventDefault();
         var form = $(this);
-        var id = form.find('input[name="contact_id"]').val();
+        var id = form.find('input[name="task_id"]').val();
 
         var has_changes = false;
-        form.find('input').each(function() {
+
+        form.find('input, textarea').each(function() {
             if ($(this).val() !== $(this).attr('value')) {
                 has_changes = true;
                 return false;
@@ -630,12 +749,11 @@
 
         $.ajax({
             type: 'POST',
-            url: "<?php echo site_url(); ?>/contact/update_contact/" + id,
+            url: "<?php echo site_url(); ?>/task/update_others_task/" + id,
             data: form.serialize(),
             success: function(response) {
                 response = JSON.parse(response);
-                $('#my_contacts_table').DataTable().ajax.reload(null, false);
-                $('#ssp_contacts_table').DataTable().ajax.reload(null, false);
+                $('#others_tasks').DataTable().ajax.reload(null, false);
                 form.closest('.modal').modal('hide');
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
@@ -647,8 +765,8 @@
                     timer: 1200
                 });
             },
-            error: function(xhr, status, error, response) {
-                response = JSON.parse(response);
+            error: function(xhr, status, error) {
+                var response = JSON.parse(xhr.responseText);
                 Swal.fire({
                     position: "top-end",
                     icon: "error",
@@ -657,24 +775,23 @@
                     timer: 1200
                 });
                 console.error('AJAX ERROR: ' + xhr.responseText);
-                console.error('EDIT CONTACT ERROR: ' + error);
+                console.error('EDIT TASK ERROR: ' + error);
             }
         });
     });
 
-    // for deleting  contact
-    $(document).on('submit', 'form[id^="deleteContactForm"]', function(e) {
+    // for deleting  tasks
+    $(document).on('submit', 'form[id^="deleteTaskForm"]', function(e) {
         e.preventDefault();
         var form = $(this);
-        var id = form.find('input[name="contact_id"]').val();
+        var id = form.find('input[name="task_id"]').val();
         $.ajax({
             type: 'POST',
-            url: "<?php echo site_url(); ?>/contact/delete_contact/" + id,
+            url: "<?php echo site_url(); ?>/task/delete_task/" + id,
             data: form.serialize(),
             success: function(response) {
                 response = JSON.parse(response);
-                $('#my_contacts_table').DataTable().ajax.reload(null, false);
-                $('#ssp_contacts_table').DataTable().ajax.reload(null, false);
+                $('#others_tasks').DataTable().ajax.reload(null, false);
                 form.closest('.modal').modal('hide');
                 $('body').removeClass('modal-open');
                 $('.modal-backdrop').remove();
@@ -683,7 +800,7 @@
                     icon: "success",
                     title: response.message,
                     showConfirmButton: false,
-                    timer: 1200
+                    timer: 1500
                 });
             },
             error: function(xhr, status, error, response) {
@@ -693,87 +810,47 @@
                     icon: "error",
                     title: response.message,
                     showConfirmButton: false,
-                    timer: 1200
+                    timer: 1500
                 });
                 console.error('AJAX ERROR: ' + xhr.responseText);
-                console.error('DELETE CONTACT ERROR: ' + error);
+                console.error('DELETE TASK ERROR: ' + error);
             }
         });
     });
 
-    // for sharing  contact
-    $(document).on('submit', 'form[id^="shareContactForm"]', function(e) {
-        e.preventDefault();
-        var form = $(this);
-        var id = form.find('input[name="contact_id"]').val();
+    // for updating status
+    function updateStatus(taskId, newStatus) {
         $.ajax({
             type: 'POST',
-            url: "<?php echo site_url(); ?>/contact/share_contact/" + id,
-            data: form.serialize(),
+            url: "<?php echo site_url(); ?>/task/update_task_status/" + taskId,
+            data: {
+                task_id: taskId,
+                status: newStatus
+            },
             success: function(response) {
                 response = JSON.parse(response);
-                if (response.status === 'error') {
-                    Swal.fire({
-                        text: response.message,
-                        icon: "warning",
-                        showCancelButton: true,
-                        confirmButtonColor: "#3085d6",
-                        cancelButtonColor: "#d33",
-                        confirmButtonText: "Share anyway?"
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            $.ajax({
-                                type: 'POST',
-                                url: "<?php echo site_url(); ?>/contact/force_share_contact/" + id,
-                                data: form.serialize(),
-                                success: function(response) {
-                                    response = JSON.parse(response);
-                                    Swal.fire({
-                                        position: "top-end",
-                                        icon: "success",
-                                        title: response.message,
-                                        showConfirmButton: false,
-                                        timer: 1200
-                                    });
-                                },
-                                error: function(xhr, status, error, response) {
-                                    response = JSON.parse(response);
-                                    Swal.fire({
-                                        position: "top-end",
-                                        icon: "error",
-                                        title: response.message,
-                                        showConfirmButton: false,
-                                        timer: 1200
-                                    });
-                                    console.error('AJAX ERROR: ' + xhr.responseText);
-                                    console.error('EDIT CONTACT ERROR: ' + error);
-                                }
-                            });
-                        }
-                    });
-                } else if (response.status === 'success') {
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "success",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 1200
-                    });
-                }
+                $('#my_tasks').DataTable().ajax.reload(null, false);
+                Swal.fire({
+                    position: "top-end",
+                    icon: "success",
+                    title: response.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
             },
             error: function(xhr, status, error) {
                 Swal.fire({
                     position: "top-end",
                     icon: "error",
-                    title: "Failed to share contact.",
+                    title: 'An error occurred while updating the status',
                     showConfirmButton: false,
-                    timer: 1200
+                    timer: 1500
                 });
                 console.error('AJAX ERROR: ' + xhr.responseText);
-                console.error('SHARE CONTACT ERROR: ' + error);
+                console.error('UPDATE STATUS ERROR: ' + error);
             }
         });
-    });
+    }
 </script>
 
 <body>
@@ -809,14 +886,14 @@
             </li>
             <li>
                 <div class="iocn-link">
-                    <a href="<?php echo site_url('task/task'); ?>">
+                    <a href="<?php echo site_url('tasks'); ?>">
                         <i class='bx bx-task'></i>
                         <span class="link_name">Tasks</span>
                     </a>
                     <i class='bx bxs-chevron-down arrow'></i>
                 </div>
                 <ul class="sub-menu">
-                    <li><a class="link_name" href="<?php echo site_url('task/task'); ?>">Tasks</a></li>
+                    <li><a class="link_name" href="<?php echo site_url('tasks'); ?>">Tasks</a></li>
                     <li><a href="#">Pending</a></li>
                     <li><a href="#">In Progess</a></li>
                     <li><a href="#">Completed</a></li>
@@ -837,86 +914,95 @@
         <i class='bx bx-menu' style='margin-top: .7%;'></i>
         <div class="container-sm">
             <div class="d-flex justify-content-between align-items-center">
-                <h5>Tasks</h5>
+                <h5>Tasks assigned by me</h5>
                 <?php echo form_open('user/logout'); ?>
                 <button type="submit" class="btn btn-secondary mt-3">Logout</button>
                 </form>
             </div>
 
             <!-- Add New Contact Button -->
-            <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewContactModal">
+            <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewTaskModal">
                 Create Task
             </button>
 
-            <!-- Contacts Table -->
-            <div class="contacts-table-container">
-                <table class="table table-sm table-striped" class="display" id="my_contacts_table">
+            <!-- Other's Tasks Table -->
+            <div class="others-tasks-table-container">
+                <table class="table table-sm table-striped" class="display" id="others_tasks">
                     <thead>
                         <tr>
                             <th class="text-center"></th>
-                            <th class="text-start">Name</th>
-                            <th class="text-start">Company</th>
-                            <th class="text-start">Phone</th>
-                            <th class="text-start">Email</th>
+                            <th class="text-start">Title</th>
+                            <th class="text-start">Description</th>
+                            <th class="text-start">Assigned to</th>
+                            <th class="text-start">Due date</th>
+                            <th class="text-start">Status</th>
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                 </table>
             </div>
-            <!-- Pagination Link -->
-            <!-- <p><?php echo $links; ?></p> -->
-
-            <!-- SSP Contacts Table -->
-            <!-- Currently hidden -->
-
-            <!-- <table class="table table-sm table-striped mt-5" class="display" id="ssp_contacts_table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Fullname</th>
-                        <th>Company</th>
-                        <th>Phone</th>
-                        <th>Email</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
-            </table> -->
 
 
+            <h5 class="mb-2 mt-4">
+                Tasks assigned to me
+            </h5>
+            <!-- Task Assigned to me Table -->
+            <div class="my-tasks-table-container">
+                <table class="table table-sm table-striped" class="display" id="my_tasks">
+                    <thead>
+                        <tr>
+                            <th class="text-center"></th>
+                            <th class="text-start">Title</th>
+                            <th class="text-start">Description</th>
+                            <th class="text-start">Assigned by</th>
+                            <th class="text-start">Due date</th>
+                            <th class="text-start">Status</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
 
-            <!-- Add New Contact Modal -->
-            <div class="modal fade" id="addNewContactModal" tabindex="-1" aria-labelledby="addNewContactModal" aria-hidden="true">
+
+            <!-- Add New Task Modal -->
+            <div class="modal fade" id="addNewTaskModal" tabindex="-1" aria-labelledby="addNewTaskModal" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">Create Task</h1>
+                            <h1 class="modal-title fs-5" id="modalLabek">Create Task</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <?php echo validation_errors(); ?>
-                            <?php echo form_open('contact/insert_contact', array('id' => 'addNewContactForm')); ?>
-                            <div class="row g-3 mb-3">
-                                <div class="col">
-                                    <input name="firstname" value="<?php echo set_value('firstname'); ?>" type="text" class="form-control" placeholder="First name" aria-label="First name" required />
-                                </div>
-                                <div class="col">
-                                    <input name="lastname" value="<?php echo set_value('lastname'); ?>" type="text" class="form-control" placeholder="Last name" aria-label="Last name" required />
-                                </div>
+                            <?php echo form_open('task/insert_task', array('id' => 'addNewTaskForm')); ?>
+                            <div class="col">
+                                <input name="title" value="<?php echo set_value('title'); ?>" type="text" class="form-control" placeholder="Task title" aria-label="Task title" required />
                             </div>
-                            <div class="row g-3 mb-3">
-                                <div class="col">
-                                    <input name="email" value="<?php echo set_value('email'); ?>" type="email" class="form-control" placeholder="Email address" aria-label="Email address" required />
-                                </div>
-                                <div class="col">
-                                    <input name="phone" value="<?php echo set_value('phone'); ?>" type="text" class="form-control" placeholder="Phone number" aria-label="Phone number" required />
-                                </div>
+                            <div class="col mt-3 mb-3">
+                                <textarea name="description" class="form-control" placeholder="Task description" aria-label="Task description" required rows="5"><?php echo set_value('description'); ?></textarea>
                             </div>
                             <div class="col">
-                                <input name="companyname" value="<?php echo set_value('companyname'); ?>" type="text" class="form-control" placeholder="Company name" aria-label="Company name" required />
+                                <p>Assign to</p>
+                            </div>
+                            <div class="col">
+                                <?php if (!empty($user_options)) : ?>
+                                    <select name="user_selected" class="form-select" aria-label="User selected">
+                                        <?php foreach ($user_options as $option_value => $option_label) : ?>
+                                            <option value="<?php echo $option_value; ?>"><?php echo $option_label; ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                <?php else : ?>
+                                    <p>No users to assign with found.</p>
+                                <?php endif; ?>
+                            </div>
+                            <div class="col mt-3">
+                                <p>Due date</p>
+                            </div>
+                            <div class="col">
+                                <input name="due_date" id="due_date" type="date" class="form-control" placeholder="Due date" aria-label="Due date" required />
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <button type="submit" class="btn btn-primary">Create</button>
                             </div>
                             </form>
                         </div>
@@ -935,7 +1021,7 @@
         let arrow = document.querySelectorAll(".arrow");
         for (var i = 0; i < arrow.length; i++) {
             arrow[i].addEventListener("click", (e) => {
-                let arrowParent = e.target.parentElement.parentElement; //selecting main parent of arrow
+                let arrowParent = e.target.parentElement.parentElement;
                 arrowParent.classList.toggle("showMenu");
             });
         }
