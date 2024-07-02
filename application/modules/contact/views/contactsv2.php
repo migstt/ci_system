@@ -8,13 +8,12 @@
     <!-- for favicon.ico error -->
     <link rel="shortcut icon" href="#">
 
-    <!-- Boxicons CDN Link -->
-    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <!-- Bootstrap 5.3.3 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
 
     <!-- DataTables -->
     <script type="text/javascript" charset="utf8" src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
@@ -22,6 +21,10 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.0.8/js/dataTables.jqueryui.js"></script>
     <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/dataTables.jqueryui.css">
+
+    <!-- Boxicons CDN Link -->
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Jconfirm -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.css">
@@ -388,7 +391,9 @@
                                 <div class="btn-group btn-group-sm" role="group" aria-label="Basic mixed styles example">
                                 
                                     <!-- Update/Edit Contact Modal -->
-                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editContactModal${data.contact_id}">Edit</button>              
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editContactModal${data.contact_id}">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
                                     <?php echo validation_errors(); ?>
                                     <?php echo form_open('contact/update_contact', array('id' => 'updateContactForm${data.contact_id}')); ?>
                                     <div class="modal fade" id="editContactModal${data.contact_id}" tabindex="-1" aria-labelledby="editContactModal" aria-hidden="true">
@@ -433,7 +438,9 @@
 
 
                                     <!-- Share Modal -->
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareContactModal${data.contact_id}">Share</button>
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareContactModal${data.contact_id}">
+                                        <i class="bi bi-share-fill"></i>
+                                    </button>
                                     <?php echo form_open('contact/share_contact', array('id' => 'shareContactForm${data.contact_id}')); ?>
                                     <div class="modal fade" id="shareContactModal${data.contact_id}" tabindex="-1" aria-labelledby="shareContactModal" aria-hidden="true">
                                         <div class="modal-dialog">
@@ -494,7 +501,9 @@
                                     
                                     
                                     <!-- Delete Confirmation Modal -->
-                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal${data.contact_id}">Delete</button>
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal${data.contact_id}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                     <?php echo form_open('contact/delete_contact', array('id' => 'deleteContactForm${data.contact_id}')); ?>
                                     <div class="modal fade" id="confirmDeleteModal${data.contact_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
                                         <div class="modal-dialog">
