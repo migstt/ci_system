@@ -418,14 +418,16 @@
                     "data": "status",
                     "className": "text-start align-middle",
                     "render": function(data) {
-                        return data.charAt(0).toUpperCase() + data.slice(1);
+                        data = data.replace(/_/g, ' ');
+                        data = data.charAt(0).toUpperCase() + data.slice(1);
+                        return data;
                     }
                 },
                 // for the tasks actions (edit, delete) row
                 {
                     "data": null,
                     "sortable": false,
-                    className: "align-middle",
+                    "className": "align-middle",
                     "render": function(data, type, row) {
                         let options = window.editUserOptions;
                         let optionsHTML = '';
@@ -587,13 +589,14 @@
                         return `
                             <div class="dropdown">
                                 <button class="btn btn-fixed-width ${buttonClass} dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    ${data.charAt(0).toUpperCase() + data.slice(1)}
+                                    ${data.replace(/_/g, ' ').charAt(0).toUpperCase() + data.replace(/_/g, ' ').slice(1)}
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="statusDropdown">
                                     ${dropdownItems}
                                 </ul>
                             </div>
                         `;
+
                     }
 
 

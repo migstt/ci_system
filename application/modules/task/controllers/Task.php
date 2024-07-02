@@ -53,8 +53,7 @@ class Task extends MY_Controller
         $others_tasks = $this->task->get_tasks_assigned_to_others($_SESSION['user_id'], 0, 0);
 
         if (!$others_tasks) {
-            echo json_encode(array('error' => 'Error retrieving tasks.'));
-            return;
+            $others_tasks = array();
         }
 
         $data = array();
@@ -112,8 +111,7 @@ class Task extends MY_Controller
         $my_tasks = $this->task->get_user_specific_tasks($_SESSION['user_id'], 0, 0);
 
         if (!$my_tasks) {
-            echo json_encode(array('error' => 'Error retrieving tasks.'));
-            return;
+            $my_tasks = array();
         }
 
         $data = array();
@@ -232,16 +230,17 @@ class Task extends MY_Controller
         $task_id    = $this->input->post('task_id');
         $status     = $this->input->post('status');
 
-        if ($status == 'completed') {
+        if ($status == 'done') {
             $updated_task_status_formdata = array(
-                'task_status' => $status,
-                'task_updated_at' => date('Y-m-d H:i:s'),
+                'task_status'       => $status,
+                'task_updated_at'   => date('Y-m-d H:i:s'),
                 'task_completed_at' => date('Y-m-d H:i:s')
             );
         } else {
             $updated_task_status_formdata = array(
-                'task_status' => $status,
-                'task_updated_at' => date('Y-m-d H:i:s')
+                'task_status'       => $status,
+                'task_updated_at'   => date('Y-m-d H:i:s'),
+                'task_completed_at' => null
             );
         }
 
