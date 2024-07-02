@@ -387,6 +387,7 @@
                 // dataSrc: 'data',
                 dataSrc: function(json) {
                     window.editUserOptions = json.edit_user_options;
+                    window.editTeamOptions = json.edit_team_options;
                     return json.data;
                 },
                 type: 'POST',
@@ -444,9 +445,9 @@
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
 
-                                    <?php echo validation_errors(); ?>
-                                    <?php echo form_open('task/update_others_task', array('id' => 'editTaskForm${data.task_id}')); ?>
                                     <div class="modal fade" id="editTaskModal${data.task_id}" tabindex="-1" aria-labelledby="editTaskModal" aria-hidden="true">
+                                        <?php echo validation_errors(); ?>
+                                        <?php echo form_open('task/update_others_task', array('id' => 'editTaskForm${data.task_id}')); ?>
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
@@ -473,7 +474,7 @@
                                                         <select name="user_selected" class="form-select" aria-label="User selected">
                                                             ${optionsHTML}
                                                         </select>
-                                                    </div>  
+                                                    </div> 
                                                     <div class="col mt-3 text-start">
                                                         <p><strong>Task due date</strong></p>
                                                     </div>
@@ -490,8 +491,8 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        </form>
                                     </div>
-                                    </form>
 
 
                                     <!-- Delete Confirmation Modal -->
@@ -499,8 +500,8 @@
                                         <i class="bi bi-trash"></i>
                                     </button>
 
-                                    <?php echo form_open('task/delete_task', array('id' => 'deleteTaskForm${data.task_id}')); ?>
                                     <div class="modal fade" id="confirmDeleteModal${data.task_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
+                                    <?php echo form_open('task/delete_task', array('id' => 'deleteTaskForm${data.task_id}')); ?>
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
@@ -516,9 +517,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
                                     </form>
-                                
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -663,44 +663,128 @@
             ],
         });
 
-    });
+        $('#assign_to_team').change(function() {
+            if (this.checked) {
+                $('#team_selected').prop('disabled', false);
+                $('#user_selected').prop('disabled', true);
+                $('#user_selected').val('Default');
+            } else {
+                $('#team_selected').prop('disabled', true);
+                $('#user_selected').prop('disabled', false);
+                $('#team_selected').val('Default');
+            }
+        });
 
-    // for adding task
-    $(document).on('submit', 'form[id^="addNewTaskForm"]', function(e) {
-        e.preventDefault();
-        var form = $(this);
-        var userSelected = form.find('select[name="user_selected"]').val();
-        var dueDate = form.find('input[name="due_date"]').val();
+        // for adding task
+        $(document).on('submit', 'form[id^="addNewTaskForm"]', function(e) {
+            e.preventDefault();
 
-        const assignErrorMessageElement = document.querySelector('.assign-error-message p');
-        const dateErrorMessageElement = document.querySelector('.date-error-message p');
+            var form = $(this);
 
-        let hasError = false;
+            var userSelected = form.find('select[name="user_selected"]').val();
+            var teamSelected = form.find('select[name="team_selected"]').val();
+            var dueDate = form.find('input[name="due_date"]').val();
 
-        if (userSelected === "Default") {
-            assignErrorMessageElement.textContent = "Please select a user to assign this task to.";
-            hasError = true;
-        } else {
-            assignErrorMessageElement.textContent = "";
-        }
+            const assignErrorMessageElement = document.querySelector('.assign-error-message p');
+            const dateErrorMessageElement = document.querySelector('.date-error-message p');
 
-        if (dueDate === "") {
-            dateErrorMessageElement.textContent = "Please select a due date for this task.";
-            hasError = true;
-        } else {
-            dateErrorMessageElement.textContent = "";
-        }
-        
-        if (hasError) {
-            event.preventDefault();
-        } else {
+            let hasError = false;
+
+            if (userSelected === "Default" && teamSelected === "Default") {
+                assignErrorMessageElement.textContent = "Please select a user or team to assign this task to.";
+                hasError = true;
+            } else {
+                assignErrorMessageElement.textContent = "";
+            }
+
+            if (dueDate === "") {
+                dateErrorMessageElement.textContent = "Please select a due date for this task.";
+                hasError = true;
+            } else {
+                dateErrorMessageElement.textContent = "";
+            }
+
+            if (hasError) {
+                event.preventDefault();
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: "<?php echo site_url(); ?>/task/insert_task/",
+                    data: form.serialize({
+                        user_selected: userSelected,
+                        team_selected: teamSelected,
+                        due_date: dueDate
+                    }),
+                    success: function(response) {
+                        response = JSON.parse(response);
+                        $('#others_tasks').DataTable().ajax.reload(null, false);
+                        $('#my_tasks').DataTable().ajax.reload(null, false);
+                        form.closest('.modal').modal('hide');
+                        $('body').removeClass('modal-open');
+                        $('.modal-backdrop').remove();
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "success",
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    },
+                    error: function(xhr, status, error, response) {
+                        response = JSON.parse(response);
+                        $('#others_tasks').DataTable().ajax.reload(null, false);
+                        $('#my_tasks').DataTable().ajax.reload(null, false);
+                        form.closest('.modal').modal('hide');
+                        $('body').removeClass('modal-open');
+                        $('.modal-backdrop').remove();
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "error",
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                        console.error('AJAX ERROR: ' + xhr.responseText);
+                        console.error('ADD TASK ERROR: ' + error);
+                    }
+                });
+            }
+        });
+
+        // for updating  tasks
+        $(document).on('submit', 'form[id^="editTaskForm"]', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var id = form.find('input[name="task_id"]').val();
+
+            var has_changes = false;
+
+            form.find('input, textarea').each(function() {
+                if ($(this).val() !== $(this).attr('value')) {
+                    has_changes = true;
+                    return false;
+                }
+            });
+
+            if (!has_changes) {
+                Swal.fire({
+                    position: "top-end",
+                    icon: "warning",
+                    title: 'No changes made.',
+                    showConfirmButton: false,
+                    timer: 1200
+                });
+                return;
+            }
+
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/task/insert_task/",
+                url: "<?php echo site_url(); ?>/task/update_others_task/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
                     $('#others_tasks').DataTable().ajax.reload(null, false);
+                    $('#my_tasks').DataTable().ajax.reload(null, false);
                     form.closest('.modal').modal('hide');
                     $('body').removeClass('modal-open');
                     $('.modal-backdrop').remove();
@@ -709,124 +793,63 @@
                         icon: "success",
                         title: response.message,
                         showConfirmButton: false,
-                        timer: 2000
+                        timer: 1200
                     });
                 },
-                error: function(xhr, status, error, response) {
-                    response = JSON.parse(response);
-                    $('#others_tasks').DataTable().ajax.reload(null, false);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
+                error: function(xhr, status, error) {
+                    var response = JSON.parse(xhr.responseText);
                     Swal.fire({
                         position: "top-end",
                         icon: "error",
                         title: response.message,
                         showConfirmButton: false,
-                        timer: 2000
+                        timer: 1200
                     });
                     console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('ADD TASK ERROR: ' + error);
+                    console.error('EDIT TASK ERROR: ' + error);
                 }
             });
-        }
-    });
-
-    // for updating  tasks
-    $(document).on('submit', 'form[id^="editTaskForm"]', function(e) {
-        e.preventDefault();
-        var form = $(this);
-        var id = form.find('input[name="task_id"]').val();
-
-        var has_changes = false;
-
-        form.find('input, textarea').each(function() {
-            if ($(this).val() !== $(this).attr('value')) {
-                has_changes = true;
-                return false;
-            }
         });
 
-        if (!has_changes) {
-            Swal.fire({
-                position: "top-end",
-                icon: "warning",
-                title: 'No changes made.',
-                showConfirmButton: false,
-                timer: 1200
+        // for deleting  tasks
+        $(document).on('submit', 'form[id^="deleteTaskForm"]', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var id = form.find('input[name="task_id"]').val();
+            $.ajax({
+                type: 'POST',
+                url: "<?php echo site_url(); ?>/task/delete_task/" + id,
+                data: form.serialize(),
+                success: function(response) {
+                    response = JSON.parse(response);
+                    $('#others_tasks').DataTable().ajax.reload(null, false);
+                    $('#my_tasks').DataTable().ajax.reload(null, false);
+                    form.closest('.modal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "success",
+                        title: response.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                },
+                error: function(xhr, status, error, response) {
+                    response = JSON.parse(response);
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "error",
+                        title: response.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    console.error('AJAX ERROR: ' + xhr.responseText);
+                    console.error('DELETE TASK ERROR: ' + error);
+                }
             });
-            return;
-        }
-
-        $.ajax({
-            type: 'POST',
-            url: "<?php echo site_url(); ?>/task/update_others_task/" + id,
-            data: form.serialize(),
-            success: function(response) {
-                response = JSON.parse(response);
-                $('#others_tasks').DataTable().ajax.reload(null, false);
-                form.closest('.modal').modal('hide');
-                $('body').removeClass('modal-open');
-                $('.modal-backdrop').remove();
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: response.message,
-                    showConfirmButton: false,
-                    timer: 1200
-                });
-            },
-            error: function(xhr, status, error) {
-                var response = JSON.parse(xhr.responseText);
-                Swal.fire({
-                    position: "top-end",
-                    icon: "error",
-                    title: response.message,
-                    showConfirmButton: false,
-                    timer: 1200
-                });
-                console.error('AJAX ERROR: ' + xhr.responseText);
-                console.error('EDIT TASK ERROR: ' + error);
-            }
         });
-    });
 
-    // for deleting  tasks
-    $(document).on('submit', 'form[id^="deleteTaskForm"]', function(e) {
-        e.preventDefault();
-        var form = $(this);
-        var id = form.find('input[name="task_id"]').val();
-        $.ajax({
-            type: 'POST',
-            url: "<?php echo site_url(); ?>/task/delete_task/" + id,
-            data: form.serialize(),
-            success: function(response) {
-                response = JSON.parse(response);
-                $('#others_tasks').DataTable().ajax.reload(null, false);
-                form.closest('.modal').modal('hide');
-                $('body').removeClass('modal-open');
-                $('.modal-backdrop').remove();
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: response.message,
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            },
-            error: function(xhr, status, error, response) {
-                response = JSON.parse(response);
-                Swal.fire({
-                    position: "top-end",
-                    icon: "error",
-                    title: response.message,
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-                console.error('AJAX ERROR: ' + xhr.responseText);
-                console.error('DELETE TASK ERROR: ' + error);
-            }
-        });
     });
 
     // for updating task status
@@ -931,7 +954,7 @@
                 </form>
             </div>
 
-            <!-- Add New Contact Button -->
+            <!-- Add New Task Button -->
             <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewTaskModal">
                 Create Task
             </button>
@@ -957,6 +980,7 @@
             <h5 class="mb-2 mt-4">
                 Tasks assigned to me
             </h5>
+
             <!-- Task Assigned to me Table -->
             <div class="my-tasks-table-container">
                 <table class="table table-sm table-striped" class="display" id="my_tasks">
@@ -1003,9 +1027,9 @@
                             <div class="col assign-error-message">
                                 <p style="color: red;"></p>
                             </div>
-                            <div class="col">
+                            <div class="col mt-3 select_user_dropdown">
                                 <?php if (!empty($user_options)) : ?>
-                                    <select name="user_selected" class="form-select" aria-label="User selected">
+                                    <select name="user_selected" class="form-select" aria-label="User selected" id="user_selected">
                                         <?php foreach ($user_options as $option_value => $option_label) : ?>
                                             <option value="<?php echo $option_value; ?>"><?php echo $option_label; ?></option>
                                         <?php endforeach; ?>
@@ -1014,6 +1038,26 @@
                                     <p>No users to assign with found.</p>
                                 <?php endif; ?>
                             </div>
+                            <div class="col mt-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="team" name="assign_to_team" id="assign_to_team">
+                                    <label class="form-check-label" for="assign_to_team">
+                                        Assign to a team
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col mt-3 select_team_dropdown">
+                                <?php if (!empty($team_options)) : ?>
+                                    <select name="team_selected" class="form-select" aria-label="Team selected" id="team_selected" disabled>
+                                        <?php foreach ($team_options as $option_value => $option_label) : ?>
+                                            <option value="<?php echo $option_value; ?>"><?php echo $option_label; ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                <?php else : ?>
+                                    <p>No team to assign with found.</p>
+                                <?php endif; ?>
+                            </div>
+
                             <div class="col mt-3">
                                 <p><strong>Due date</strong></p>
                             </div>
