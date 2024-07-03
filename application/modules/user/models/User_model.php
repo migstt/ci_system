@@ -17,6 +17,11 @@ class User_model extends MY_Model
         return false;
     }
 
+    public function get_users()
+    {
+        return $this->getRows('*', 'users', '', 'user_first_name ASC');
+    }
+
     public function get_user_row($email)
     {
         $where = 'user_email=' . $email;
@@ -27,6 +32,18 @@ class User_model extends MY_Model
     {
         $where = 'user_id=' . $user_id;
         return $this->getRow('*', 'users', $where);
+    }
+
+    public function get_user_type_row($user_type_id)
+    {
+        $where = 'user_type_id=' . $user_type_id;
+        return $this->getRow('*', 'user_type', $where);
+    }
+
+    public function get_user_team_row($user_team_id)
+    {
+        $where = 'team_id=' . $user_team_id;
+        return $this->getRow('*', 'team', $where);
     }
 
     function get_users_except_current($current_user_id)
@@ -44,4 +61,6 @@ class User_model extends MY_Model
         
         return $users_except_current;
     }
+
+
 }

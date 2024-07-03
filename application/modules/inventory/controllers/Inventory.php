@@ -146,22 +146,22 @@ class Inventory extends MY_Controller
         if (!$this->input->is_ajax_request()) {
             exit('No direct script access allowed');
         }
-    
+
         if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
             echo json_encode(array('error' => 'Login required.'));
             return;
         }
-    
+
         $locations = $this->inventory->get_all_locations();
-    
+
         if ($locations === false || empty($locations)) {
-            $locations = array(); 
+            $locations = array();
         }
-    
+
         $data = array();
         foreach ($locations as $location) {
             $location_added_by = $this->user->get_user_row_by_id($location->location_added_by);
-    
+
             $data[] = array(
                 'location_id'   => $location->location_id,
                 'name'          => $location->location_name,
@@ -170,14 +170,14 @@ class Inventory extends MY_Controller
                 'added_by'      => $location_added_by['user_first_name'] . ' ' . $location_added_by['user_last_name'],
             );
         }
-    
+
         $output = array(
             "draw"              => intval($this->input->get("draw")),
             "recordsTotal"      => count($data),
             "recordsFiltered"   => count($data),
             "data"              => $data
         );
-        
+
         echo json_encode($output);
     }
     // LOCATION MANAGEMENT
@@ -260,22 +260,22 @@ class Inventory extends MY_Controller
         if (!$this->input->is_ajax_request()) {
             exit('No direct script access allowed');
         }
-    
+
         if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
             echo json_encode(array('error' => 'Login required.'));
             return;
         }
-    
+
         $categories = $this->inventory->get_all_categories();
-    
+
         if ($categories === false || empty($categories)) {
             $categories = array();
         }
-    
+
         $data = array();
         foreach ($categories as $category) {
             $category_added_by = $this->user->get_user_row_by_id($category->category_added_by);
-    
+
             $data[] = array(
                 'category_id'   => $category->category_id,
                 'name'          => $category->category_name,
@@ -283,20 +283,17 @@ class Inventory extends MY_Controller
                 'added_by'      => $category_added_by['user_first_name'] . ' ' . $category_added_by['user_last_name'],
             );
         }
-    
+
         $output = array(
             "draw"              => intval($this->input->get("draw")),
             "recordsTotal"      => count($data),
             "recordsFiltered"   => count($data),
             "data"              => $data
         );
-        
+
         echo json_encode($output);
     }
-    
     // CATEGORY MANAGEMENT
-
-
 
 
     // SUPPLIER MANAGEMENT
@@ -406,24 +403,24 @@ class Inventory extends MY_Controller
         if (!$this->input->is_ajax_request()) {
             exit('No direct script access allowed');
         }
-    
+
         if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
             echo json_encode(array('error' => 'Login required.'));
             return;
         }
-    
+
         $suppliers = $this->inventory->get_all_suppliers();
-    
+
         if ($suppliers === false || empty($suppliers)) {
             $suppliers = array();
         }
-    
+
         $data = array();
         foreach ($suppliers as $supplier) {
 
             $supplier_added_by = $this->user->get_user_row_by_id($supplier->supplier_added_by);
             $supplier_details = $this->inventory->get_supplier_row_by_id($supplier->supplier_id);
-    
+
             $data[] = array(
                 'supplier_id'       => $supplier->supplier_id,
                 'name'              => $supplier->supplier_name,
@@ -438,16 +435,166 @@ class Inventory extends MY_Controller
                 'added_by'          => $supplier_added_by['user_first_name'] . ' ' . $supplier_added_by['user_last_name'],
             );
         }
-    
+
         $output = array(
             "draw"              => intval($this->input->get("draw")),
             "recordsTotal"      => count($data),
             "recordsFiltered"   => count($data),
             "data"              => $data
         );
-        
+
         echo json_encode($output);
     }
-    
     // SUPPLIER MANAGEMENT
+
+
+
+    // USER MANAGEMENT
+    function insert_user()
+    {
+
+        $this->form_validation->set_rules('name', 'Supplier name', 'required');
+        $this->form_validation->set_rules('contact_person', 'Supplier name', 'required');
+        $this->form_validation->set_rules('contact_number', 'Supplier name', 'required');
+        $this->form_validation->set_rules('bank_name', 'Supplier name', 'required');
+        $this->form_validation->set_rules('account_name', 'Supplier name', 'required');
+        $this->form_validation->set_rules('account_number', 'Supplier name', 'required');
+
+        if ($this->form_validation->run() == TRUE) {
+
+            $name               = $this->input->post('name');
+            $contact_person     = $this->input->post('contact_person');
+            $contact_number     = $this->input->post('contact_number');
+            $bank_name          = $this->input->post('bank_name');
+            $account_name       = $this->input->post('account_name');
+            $account_number     = $this->input->post('account_number');
+
+            $supplier_form_data = array(
+                'supplier_name'             => $name,
+                'supplier_contact_person'   => $contact_person,
+                'supplier_contact_no'       => $contact_number,
+                'supplier_bank_name'        => $bank_name,
+                'supplier_account_name'     => $account_name,
+                'supplier_account_no'       => $account_number,
+                'supplier_status'           => 0,
+                'supplier_added_by'         => $_SESSION['user_id'],
+                'supplier_added_at'         => date('Y-m-d H:i:s'),
+                'supplier_updated_at'       => null,
+                'supplier_deleted_at'       => null,
+            );
+
+            if ($this->inventory->insert_supplier('suppliers', $supplier_form_data)) {
+                $response = array('status' => 'success', 'message' => 'Supplier added successfully.');
+                echo json_encode($response);
+            } else {
+                $response = array('status' => 'error', 'message' => 'Failed to add supplier. Please try again.');
+                echo json_encode($response);
+            }
+        }
+    }
+
+    function update_user()
+    {
+        $this->form_validation->set_rules('name', 'Supplier name', 'required');
+        $this->form_validation->set_rules('contact_person', 'Supplier name', 'required');
+        $this->form_validation->set_rules('contact_number', 'Supplier name', 'required');
+        $this->form_validation->set_rules('bank_name', 'Supplier name', 'required');
+        $this->form_validation->set_rules('account_name', 'Supplier name', 'required');
+        $this->form_validation->set_rules('account_number', 'Supplier name', 'required');
+
+        if ($this->form_validation->run() == TRUE) {
+
+            $supplier_id        = $this->input->post('supplier_id');
+            $name               = $this->input->post('name');
+            $contact_person     = $this->input->post('contact_person');
+            $contact_number     = $this->input->post('contact_number');
+            $bank_name          = $this->input->post('bank_name');
+            $account_name       = $this->input->post('account_name');
+            $account_number     = $this->input->post('account_number');
+
+            $updated_supplier_form_data = array(
+                'supplier_name'             => $name,
+                'supplier_contact_person'   => $contact_person,
+                'supplier_contact_no'       => $contact_number,
+                'supplier_bank_name'        => $bank_name,
+                'supplier_account_name'     => $account_name,
+                'supplier_account_no'       => $account_number,
+                'supplier_updated_at'       => date('Y-m-d H:i:s'),
+            );
+
+            if ($this->inventory->update_supplier($supplier_id, $updated_supplier_form_data)) {
+                $response = array('status' => 'success', 'message' => 'Location updated.');
+                echo json_encode($response);
+            } else {
+                $response = array('status' => 'error', 'message' => 'Failed to update location. Please try again.');
+                echo json_encode($response);
+            }
+        }
+    }
+
+    function delete_user()
+    {
+        $supplier_id = $this->input->post('supplier_id');
+
+        $updated_supplier_formdata = array(
+            'supplier_status'       => 1,
+            'supplier_updated_at'   => date('Y-m-d H:i:s'),
+            'supplier_deleted_at'   => date('Y-m-d H:i:s')
+        );
+
+        if ($this->inventory->update_supplier($supplier_id, $updated_supplier_formdata)) {
+            $response = array('status' => 'success', 'message' => 'Location set to Inactive.');
+            echo json_encode($response);
+        } else {
+            $response = array('status' => 'error', 'message' => 'Failed to set location to Inactive. Please try again.');
+            echo json_encode($response);
+        }
+    }
+
+    function get_users()
+    {
+        if (!$this->input->is_ajax_request()) {
+            exit('No direct script access allowed');
+        }
+
+        if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
+            echo json_encode(array('error' => 'Login required.'));
+            return;
+        }
+
+        $users = $this->user->get_users();
+
+        if (empty($users)) {
+            $users = array();
+        }
+
+        $data = array();
+
+        foreach ($users as $user) {
+
+            $user_location  = $this->inventory->get_location_row_by_id($user['user_location_id']);
+            $user_type      = $this->user->get_user_type_row($user['user_type_id']);
+            $user_team      = $this->user->get_user_team_row($user['team_id']);
+
+            $data[] = array(
+                'user_id'       => $user['user_id'],
+                'full_name'     => $user['user_first_name'] . ' ' . $user['user_last_name'],
+                'email'         => $user['user_email'],
+                'location'      => $user_location['location_name'],
+                'type'          => $user_type['user_type_name'],
+                'team'          => $user_team['team_name'],
+                'status'        => $user['user_status'] == 0 ? 'Active' : 'Inactive',
+            );
+        }
+
+        $output = array(
+            "draw"              => intval($this->input->get("draw")),
+            "recordsTotal"      => count($data),
+            "recordsFiltered"   => count($data),
+            "data"              => $data
+        );
+
+        echo json_encode($output);
+    }
+    // USER MANAGEMENT
 }

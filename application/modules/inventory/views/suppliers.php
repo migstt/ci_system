@@ -353,6 +353,37 @@
             white-space: nowrap;
             font-size: 0.875rem;
         }
+
+        /* Custom styles for contact details and bank details */
+        .contact-details,
+        .bank-details {
+            padding: 10px;
+            background-color: #f9f9f9;
+            /* Light grey background for better readability */
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        .contact-details strong,
+        .bank-details strong {
+            color: #2c3e50;
+            /* Darker color for labels */
+        }
+
+        table.dataTable td {
+            vertical-align: middle;
+            /* Vertically align text to the middle */
+        }
+
+        /* Optional: Add zebra striping to rows */
+        table.dataTable tbody tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        /* Optional: Add hover effect to rows */
+        table.dataTable tbody tr:hover {
+            background-color: #e0e0e0;
+        }
     </style>
 </head>
 
@@ -389,14 +420,18 @@
                         if (Array.isArray(data)) {
                             return data.map(function(detail) {
                                 return `
-                                    <strong>Person:</strong> ${detail.supplier_contact_person}<br>
-                                    <strong>Number:</strong> ${detail.supplier_contact_no}
+                                    <div class="contact-details">
+                                        <strong>Person:</strong> ${detail.supplier_contact_person}<br>
+                                        <strong>Number:</strong> ${detail.supplier_contact_no}
+                                    </div>
                                 `;
                             }).join('<br><br>');
                         } else if (typeof data === 'object') {
                             return `
-                                <strong>Person:</strong> ${data.supplier_contact_person}<br>
-                                <strong>Number:</strong> ${data.supplier_contact_no}
+                                <div class="contact-details">
+                                    <strong>Person:</strong> ${data.supplier_contact_person}<br>
+                                    <strong>Number:</strong> ${data.supplier_contact_no}
+                                </div>
                             `;
                         } else {
                             return data;
@@ -410,10 +445,22 @@
                     "render": function(data, type, row) {
                         if (Array.isArray(data)) {
                             return data.map(function(detail) {
-                                return `<strong>Bank name: </strong> ${detail.supplier_bank_name}<br><strong>Account name: </strong> ${detail.supplier_account_name}<br><strong>Account no: </strong> ${detail.supplier_account_no}`;
+                                return `
+                                    <div class="bank-details">
+                                        <strong>Bank name: </strong> ${detail.supplier_bank_name}<br>
+                                        <strong>Account name: </strong> ${detail.supplier_account_name}<br>
+                                        <strong>Account no: </strong> ${detail.supplier_account_no}
+                                    </div>
+                                `;
                             }).join('<br><br><br>');
                         } else if (typeof data === 'object') {
-                            return `<strong>Bank name:</strong> ${data.supplier_bank_name}<br><strong>Account name: </strong> ${data.supplier_account_name}<br><strong>Account no: </strong> ${data.supplier_account_no}`;
+                            return `
+                                <div class="bank-details">
+                                    <strong>Bank name:</strong> ${data.supplier_bank_name}<br>
+                                    <strong>Account name: </strong> ${data.supplier_account_name}<br>
+                                    <strong>Account no: </strong> ${data.supplier_account_no}
+                                </div>
+                            `;
                         } else {
                             return data;
                         }
@@ -426,13 +473,13 @@
                     "createdCell": function(td, cellData, rowData, row, col) {
                         if (cellData === 'Active') {
                             $(td).css({
-                                'background-color': '#d4edda', // light green
-                                'color': '#155724' // dark green text for better contrast
+                                'background-color': '#d4edda',
+                                'color': '#155724'
                             });
                         } else if (cellData === 'Inactive') {
                             $(td).css({
-                                'background-color': '#f8d7da', // light red
-                                'color': '#721c24' // dark red text for better contrast
+                                'background-color': '#f8d7da',
+                                'color': '#721c24'
                             });
                         }
                     }
@@ -684,12 +731,13 @@
     });
 
     // for updating supplier status
-    function updateStatus(taskId, newStatus) {
+    function updateStatus(id, newStatus) {
         $.ajax({
             type: 'POST',
-            url: "<?php echo site_url(); ?>/task/update_task_status/" + taskId,
+            url: "<?php echo site_url(); ?>/inventory/update_status/" + taskId,
             data: {
-                task_id: taskId,
+                table: 'suppliers',
+                id: taskId,
                 status: newStatus
             },
             success: function(response) {

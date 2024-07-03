@@ -39,6 +39,12 @@ class Inventory_model extends MY_Model
         $this->db->order_by('location_name', 'ASC');
         return $this->db->get()->result();
     }
+
+    function get_location_row_by_id($location_id)
+    {
+        $where = 'location_id=' . $location_id;
+        return $this->getRow('*', 'locations', $where);
+    }
     // LOCATION MANAGEMENT
 
 
