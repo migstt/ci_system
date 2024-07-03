@@ -943,7 +943,7 @@
                 </div>
                 <ul class="sub-menu mt-1">
                     <li><a class="link_name" href="<?php echo site_url('inventory'); ?>">Inventory</a></li>
-                    <li><a href="<?php echo site_url('inventory/inventory'); ?>">Dashboard</a></li>
+                    <li><a href="<?php echo site_url('inventory'); ?>">Dashboard</a></li>
                     <li><a href="<?php echo site_url('inventory/stocks'); ?>">Stocks</a></li>
                     <li><a href="<?php echo site_url('inventory/location'); ?>">Location</a></li>
                     <li><a href="<?php echo site_url('inventory/category'); ?>">Category</a></li>
@@ -961,19 +961,19 @@
         <i class='bx bx-menu' style='margin-top: .7%;'></i>
         <div class="container-sm">
             <div class="d-flex justify-content-between align-items-center">
-                <h5>Tasks assigned by me</h5>
+                <h5 class="mt-2">Stocks</h5>
                 <?php echo form_open('user/logout'); ?>
-                <button type="submit" class="btn btn-secondary mt-3">Logout</button>
+                <button type="submit" class="btn btn-secondary">Logout</button>
                 </form>
             </div>
 
-            <!-- Add New Task Button -->
+            <!-- Add New Task Button
             <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewTaskModal">
                 Create Task
-            </button>
+            </button> -->
 
             <!-- Other's Tasks Table -->
-            <div class="others-tasks-table-container">
+            <!-- <div class="others-tasks-table-container">
                 <table class="table table-sm table-striped" class="display" id="others_tasks">
                     <thead>
                         <tr>
@@ -987,32 +987,11 @@
                         </tr>
                     </thead>
                 </table>
-            </div>
-
-
-            <h5 class="mb-2 mt-4">
-                Tasks assigned to me
-            </h5>
-
-            <!-- Task Assigned to me Table -->
-            <div class="my-tasks-table-container">
-                <table class="table table-sm table-striped" class="display" id="my_tasks">
-                    <thead>
-                        <tr>
-                            <th class="text-center"></th>
-                            <th class="text-start">Title</th>
-                            <th class="text-start">Description</th>
-                            <th class="text-start">Assigned by</th>
-                            <th class="text-start">Due date</th>
-                            <th class="text-start">Status</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
+            </div> -->
 
 
             <!-- Add New Task Modal -->
-            <div class="modal fade" id="addNewTaskModal" tabindex="-1" aria-labelledby="addNewTaskModal" aria-hidden="true">
+            <!-- <div class="modal fade" id="addNewTaskModal" tabindex="-1" aria-labelledby="addNewTaskModal" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -1088,14 +1067,11 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-
     </section>
-
-
     <script>
         // Sidebar
         let arrow = document.querySelectorAll(".arrow");

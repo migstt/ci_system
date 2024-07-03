@@ -831,12 +831,25 @@
                 </ul>
             </li>
             <li>
-                <a href="#">
-                    <i class='bx bx-receipt'></i>
-                    <span class="link_name">Inventory</span>
-                </a>
-                <ul class="sub-menu blank">
-                    <li><a class="link_name" href="#">Inventory</a></li>
+                <div class="iocn-link">
+                    <a href="<?php echo site_url('inventory'); ?>">
+                        <i class='bx bx-task'></i>
+                        <span class="link_name">Inventory</span>
+                    </a>
+                    <i class='bx bxs-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu mt-1">
+                    <li><a class="link_name" href="<?php echo site_url('inventory'); ?>">Inventory</a></li>
+                    <li><a href="<?php echo site_url('inventory'); ?>">Dashboard</a></li>
+                    <li><a href="<?php echo site_url('inventory/stocks'); ?>">Stocks</a></li>
+                    <li><a href="<?php echo site_url('inventory/location'); ?>">Location</a></li>
+                    <li><a href="<?php echo site_url('inventory/category'); ?>">Category</a></li>
+                    <li><a href="<?php echo site_url('inventory/suppliers'); ?>">Suppliers</a></li>
+                    <li><a href="<?php echo site_url('inventory/items'); ?>">Items</a></li>
+                    <li><a href="<?php echo site_url('inventory/reports'); ?>">Report Log</a></li>
+                    <!-- conditional rendering here, if user is admin, show Users option -->
+                    <!-- also in controller, restrict access if current user user_type_id != 1 or Admin -->
+                    <li><a href="<?php echo site_url('inventory/users'); ?>">Users</a></li>
                 </ul>
             </li>
         </ul>

@@ -60,6 +60,7 @@ $route['translate_uri_dashes'] = FALSE;
 // --------------------------------------------
 $route['contacts'] = 'contact/contacts';
 $route['tasks'] = 'task/tasks';
+$route['inventory'] = 'inventory/dashboard';
 $route['login'] = 'user/login';
 $route['register'] = 'user/register';
 // --------------------------------------------
