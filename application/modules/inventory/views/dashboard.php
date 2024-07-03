@@ -378,7 +378,7 @@
         });
 
         // client side other's tasks datatable
-        $('#others_tasks').DataTable({
+        $('#location_table').DataTable({
             responsive: true,
             searching: true,
             processing: true,
@@ -527,88 +527,6 @@
             ],
         });
 
-        // client side my tasks datatable
-        $('#my_tasks').DataTable({
-            responsive: true,
-            searching: true,
-            processing: true,
-            ajax: {
-                url: '<?php echo site_url(); ?>/task/get_my_tasks',
-                dataSrc: 'data',
-                type: 'POST',
-            },
-            columns: [{
-                    "sortable": false,
-                    "data": null,
-                    "className": "text-center align-middle",
-                    "render": function(data, type, row, meta) {
-                        return meta.row + 1;
-                    }
-                },
-                {
-                    "data": "title",
-                    "className": "text-start align-middle"
-                },
-                {
-                    "data": "description",
-                    "className": "text-start align-middle"
-                },
-                {
-                    "data": "assigned_by",
-                    "className": "text-start align-middle",
-                },
-                {
-                    "data": "due_date",
-                    "className": "text-start align-middle",
-                },
-                {
-                    "data": "status",
-                    "sortable": false,
-                    "className": "text-start align-middle",
-                    "render": function(data, type, row) {
-                        let dropdownItems = '';
-
-                        if (data === 'in_progress') {
-                            dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'done')">Done</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'pending')">Pending</a></li>
-                            `;
-                        } else if (data === 'done') {
-                            dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'in_progress')">In Progress</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'pending')">Pending</a></li>
-                            `;
-                        } else if (data === 'pending') {
-                            dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'in_progress')">In Progress</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'done')">Done</a></li>
-                            `;
-                        }
-
-                        let buttonClass = 'btn-secondary';
-                        if (data === 'in_progress') {
-                            buttonClass = 'btn-primary';
-                        } else if (data === 'done') {
-                            buttonClass = 'btn-success';
-                        } else if (data === 'pending') {
-                            buttonClass = 'btn-danger';
-                        }
-
-                        return `
-                            <div class="dropdown">
-                                <button class="btn btn-fixed-width ${buttonClass} dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    ${data.replace(/_/g, ' ').charAt(0).toUpperCase() + data.replace(/_/g, ' ').slice(1)}
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="statusDropdown">
-                                    ${dropdownItems}
-                                </ul>
-                            </div>
-                        `;
-                    }
-                },
-            ],
-        });
-
         // for Flatpickr bug on month dropdown
         $("[id^='editTaskModal']").modal({
             show: true,
@@ -675,8 +593,8 @@
             }
         });
 
-        // for adding task
-        $(document).on('submit', 'form[id^="addNewTaskForm"]', function(e) {
+        // for adding location
+        $(document).on('submit', 'form[id^="addNewLocationForm"]', function(e) {
             e.preventDefault();
 
             var form = $(this);
@@ -717,7 +635,7 @@
                     }),
                     success: function(response) {
                         response = JSON.parse(response);
-                        $('#others_tasks').DataTable().ajax.reload(null, false);
+                        $('#location_table').DataTable().ajax.reload(null, false);
                         $('#my_tasks').DataTable().ajax.reload(null, false);
                         form.closest('.modal').modal('hide');
                         $('body').removeClass('modal-open');
@@ -732,7 +650,7 @@
                     },
                     error: function(xhr, status, error, response) {
                         response = JSON.parse(response);
-                        $('#others_tasks').DataTable().ajax.reload(null, false);
+                        $('#location_table').DataTable().ajax.reload(null, false);
                         $('#my_tasks').DataTable().ajax.reload(null, false);
                         form.closest('.modal').modal('hide');
                         $('body').removeClass('modal-open');
@@ -783,8 +701,7 @@
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
-                    $('#others_tasks').DataTable().ajax.reload(null, false);
-                    $('#my_tasks').DataTable().ajax.reload(null, false);
+                    $('#location_table').DataTable().ajax.reload(null, false);
                     form.closest('.modal').modal('hide');
                     $('body').removeClass('modal-open');
                     $('.modal-backdrop').remove();
@@ -822,8 +739,7 @@
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
-                    $('#others_tasks').DataTable().ajax.reload(null, false);
-                    $('#my_tasks').DataTable().ajax.reload(null, false);
+                    $('#location_table').DataTable().ajax.reload(null, false);
                     form.closest('.modal').modal('hide');
                     $('body').removeClass('modal-open');
                     $('.modal-backdrop').remove();
@@ -967,14 +883,14 @@
                 </form>
             </div>
 
-            <!-- Add New Task Button
-            <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewTaskModal">
-                Create Task
-            </button> -->
+            <!-- Add New Location Button -->
+            <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewLocationModal">
+                Add Location
+            </button>
 
-            <!-- Other's Tasks Table -->
-            <!-- <div class="others-tasks-table-container">
-                <table class="table table-sm table-striped" class="display" id="others_tasks">
+            <!-- Location Table -->
+            <div class="others-tasks-table-container">
+                <table class="table table-sm table-striped" class="display" id="location_table">
                     <thead>
                         <tr>
                             <th class="text-center"></th>
@@ -987,77 +903,31 @@
                         </tr>
                     </thead>
                 </table>
-            </div> -->
+            </div>
 
 
-            <!-- Add New Task Modal -->
-            <!-- <div class="modal fade" id="addNewTaskModal" tabindex="-1" aria-labelledby="addNewTaskModal" aria-hidden="true">
+            <!-- Add New Location Modal -->
+            <div class="modal fade" id="addNewLocationModal" tabindex="-1" aria-labelledby="addNewLocationModal" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="modalLabek">Create Task</h1>
+                            <h1 class="modal-title fs-5" id="modalLabek">Add location</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <?php echo validation_errors(); ?>
-                            <?php echo form_open('task/insert_task', array('id' => 'addNewTaskForm')); ?>
+                            <?php echo form_open('inventory/insert_location', array('id' => 'addNewLocationForm')); ?>
                             <div class="col">
-                                <p><strong>Task title</strong></p>
+                                <p><strong>Location name</strong></p>
                             </div>
                             <div class="col">
-                                <input name="title" value="<?php echo set_value('title'); ?>" type="text" class="form-control" placeholder="Task title" aria-label="Task title" required />
+                                <input name="name" value="<?php echo set_value('title'); ?>" type="text" class="form-control" placeholder="Location name" aria-label="Location name" required />
                             </div>
                             <div class="col mt-3">
-                                <p><strong>Task description</strong></p>
+                                <p><strong>Location address</strong></p>
                             </div>
                             <div class="col mt-3 mb-3">
-                                <textarea name="description" class="form-control" placeholder="Task description" aria-label="Task description" required rows="5"><?php echo set_value('description'); ?></textarea>
-                            </div>
-                            <div class="col">
-                                <p><strong>Assign to</strong></p>
-                            </div>
-                            <div class="col assign-error-message">
-                                <p style="color: red;"></p>
-                            </div>
-                            <div class="col mt-3 select_user_dropdown">
-                                <?php if (!empty($user_options)) : ?>
-                                    <select name="user_selected" class="form-select" aria-label="User selected" id="user_selected">
-                                        <?php foreach ($user_options as $option_value => $option_label) : ?>
-                                            <option value="<?php echo $option_value; ?>"><?php echo $option_label; ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                <?php else : ?>
-                                    <p>No users to assign with found.</p>
-                                <?php endif; ?>
-                            </div>
-                            <div class="col mt-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="team" name="assign_to_team" id="assign_to_team">
-                                    <label class="form-check-label" for="assign_to_team">
-                                        Assign to a team
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col mt-3 select_team_dropdown">
-                                <?php if (!empty($team_options)) : ?>
-                                    <select name="team_selected" class="form-select" aria-label="Team selected" id="team_selected" disabled>
-                                        <?php foreach ($team_options as $option_value => $option_label) : ?>
-                                            <option value="<?php echo $option_value; ?>"><?php echo $option_label; ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                <?php else : ?>
-                                    <p>No team to assign with found.</p>
-                                <?php endif; ?>
-                            </div>
-
-                            <div class="col mt-3">
-                                <p><strong>Due date</strong></p>
-                            </div>
-                            <div class="col date-error-message">
-                                <p style="color: red;"></p>
-                            </div>
-                            <div class="col">
-                                <input name="due_date" id="due_date" type="date" class="form-control" placeholder="Due date" aria-label="Due date" required />
+                            <input name="address" value="<?php echo set_value('address'); ?>" type="text" class="form-control" placeholder="Location address" aria-label="Location address" required />
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -1067,7 +937,7 @@
                         </div>
                     </div>
                 </div>
-            </div> -->
+            </div>
 
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
