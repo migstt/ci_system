@@ -339,17 +339,12 @@
             }
         }
 
-        .others-tasks-table-container {
+        .supplier-table-container {
             background-color: white;
             padding: 1%;
             border-radius: 5px;
         }
 
-        .my-tasks-table-container {
-            background-color: white;
-            padding: 1%;
-            border-radius: 5px;
-        }
 
         .btn-fixed-width {
             width: 120px;
@@ -364,32 +359,14 @@
 <!-- Custom scripts -->
 <script>
     $(document).ready(function() {
-        // initialize flatpickr for task task due date and time,
-        flatpickr("#due_date", {
-            enableTime: true,
-            dateFormat: "Y-m-d H:i",
-            minDate: "today",
-        });
-
-        // for flatpickr bug on month dropdown
-        $("#addNewTaskModal").modal({
-            show: true,
-            focus: false
-        });
-
-        // client side other's tasks datatable
-        $('#others_tasks').DataTable({
+        // client side suppliers datatable
+        $('#supplier_table').DataTable({
             responsive: true,
             searching: true,
             processing: true,
             ajax: {
-                url: '<?php echo site_url(); ?>/task/get_others_tasks',
+                url: '<?php echo site_url(); ?>/inventory/get_suppliers',
                 // dataSrc: 'data',
-                dataSrc: function(json) {
-                    window.editUserOptions = json.edit_user_options;
-                    window.editTeamOptions = json.edit_team_options;
-                    return json.data;
-                },
                 type: 'POST',
             },
             columns: [{
@@ -401,94 +378,137 @@
                     }
                 },
                 {
-                    "data": "title",
+                    "data": "name",
                     "className": "text-start align-middle"
                 },
                 {
-                    "data": "description",
-                    "className": "text-start align-middle"
-                },
-                {
-                    "data": "assigned_to",
+                    "sortable": false,
+                    "data": "contact_details",
                     "className": "text-start align-middle",
-                },
-                {
-                    "data": "due_date",
-                    "className": "text-start align-middle",
-                },
-                {
-                    "data": "status",
-                    "className": "text-start align-middle",
-                    "render": function(data) {
-                        data = data.replace(/_/g, ' ');
-                        data = data.charAt(0).toUpperCase() + data.slice(1);
-                        return data;
+                    "render": function(data, type, row) {
+                        if (Array.isArray(data)) {
+                            return data.map(function(detail) {
+                                return `
+                                    <strong>Person:</strong> ${detail.supplier_contact_person}<br>
+                                    <strong>Number:</strong> ${detail.supplier_contact_no}
+                                `;
+                            }).join('<br><br>');
+                        } else if (typeof data === 'object') {
+                            return `
+                                <strong>Person:</strong> ${data.supplier_contact_person}<br>
+                                <strong>Number:</strong> ${data.supplier_contact_no}
+                            `;
+                        } else {
+                            return data;
+                        }
                     }
                 },
-                // for the tasks actions (edit, delete) row
+                {
+                    "sortable": false,
+                    "data": "bank_details",
+                    "className": "text-start align-middle",
+                    "render": function(data, type, row) {
+                        if (Array.isArray(data)) {
+                            return data.map(function(detail) {
+                                return `<strong>Bank name: </strong> ${detail.supplier_bank_name}<br><strong>Account name: </strong> ${detail.supplier_account_name}<br><strong>Account no: </strong> ${detail.supplier_account_no}`;
+                            }).join('<br><br><br>');
+                        } else if (typeof data === 'object') {
+                            return `<strong>Bank name:</strong> ${data.supplier_bank_name}<br><strong>Account name: </strong> ${data.supplier_account_name}<br><strong>Account no: </strong> ${data.supplier_account_no}`;
+                        } else {
+                            return data;
+                        }
+                    }
+                },
+                {
+                    "sortable": false,
+                    "data": "status",
+                    "className": "text-center align-middle",
+                    "createdCell": function(td, cellData, rowData, row, col) {
+                        if (cellData === 'Active') {
+                            $(td).css({
+                                'background-color': '#d4edda', // light green
+                                'color': '#155724' // dark green text for better contrast
+                            });
+                        } else if (cellData === 'Inactive') {
+                            $(td).css({
+                                'background-color': '#f8d7da', // light red
+                                'color': '#721c24' // dark red text for better contrast
+                            });
+                        }
+                    }
+                },
+                {
+                    "data": "added_by",
+                    "className": "text-start align-middle",
+                },
+                // for the supplier actions (edit, delete) row
                 {
                     "data": null,
                     "sortable": false,
                     "className": "align-middle",
                     "render": function(data, type, row) {
-                        let options = window.editUserOptions;
-                        let optionsHTML = '';
-                        for (let key in options) {
-                            optionsHTML += `<option value="${key}" ${options[key] == data.assigned_to ? 'selected' : ''}>${options[key]}</option>`;
-                        }
                         return `
                             <div class="d-flex justify-content-end">
                                 <div class="btn-group btn-group-sm" role="group" aria-label="">
                             
-                                    <!-- Update/Edit Task Modal -->
-                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editTaskModal${data.task_id}">
+                                    <!-- Update/Edit Supplier Modal -->
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editSupplierModal${data.supplier_id}">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
 
-                                    <div class="modal fade" id="editTaskModal${data.task_id}" tabindex="-1" aria-labelledby="editTaskModal" aria-hidden="true">
+                                    <div class="modal fade" id="editSupplierModal${data.supplier_id}" tabindex="-1" aria-labelledby="editSupplierModal" aria-hidden="true">
                                         <?php echo validation_errors(); ?>
-                                        <?php echo form_open('task/update_others_task', array('id' => 'editTaskForm${data.task_id}')); ?>
+                                        <?php echo form_open('inventory/update_supplier', array('id' => 'editSupplierForm${data.supplier_id}')); ?>
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="modalLabel">Edit Task</h1>
+                                                    <h1 class="modal-title fs-5" id="modalLabel">Edit Supplier</h1>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <div class="col mb-3">
-                                                        <p class="text-start"><strong>Task title</strong></p>
+                                                    <!-- Supplier Name -->
+                                                    <div class="mb-5">
+                                                        <p class="text-start"><strong>Supplier Name</strong></p>
+                                                        <input name="name" value="${data.name}" type="text" class="form-control" placeholder="Supplier Name" aria-label="Supplier Name" required />
                                                     </div>
-                                                    <div class="col">
-                                                        <input name="title" value="${data.title}" type="text" class="form-control" placeholder="Task title" aria-label="Task title" required />
+
+                                                    <!-- Supplier Contact Details -->
+                                                    <div class="mb-5">
+                                                        <p class="text-start"><strong>Supplier Contact Details</strong></p>
+                                                        <div class="row">
+                                                            <div class="col-md-6 mb-3">
+                                                                <input name="contact_person" value="${data.contact_person}" type="text" class="form-control" placeholder="Contact Person" aria-label="Contact Person" required />
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input name="contact_number" value="${data.contact_no}" type="text" class="form-control" placeholder="Contact Number" aria-label="Contact Number" required />
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div class="col mt-3 mb-3">
-                                                        <p class="text-start"><strong>Task description</strong></p>
+
+                                                    <!-- Supplier Bank Details -->
+                                                    <div class="mb-3">
+                                                        <p class="text-start"><strong>Supplier Bank Details</strong></p>
+                                                        <div class="mb-3">
+                                                            <input name="bank_name" value="${data.bank_name}" type="text" class="form-control" placeholder="Bank Name" aria-label="Bank Name" required />
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <input name="account_name" value="${data.account_name}" type="text" class="form-control" placeholder="Account Name" aria-label="Account Name" required />
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <input name="account_number" value="${data.account_no}" type="text" class="form-control" placeholder="Account Number" aria-label="Account Number" required />
+                                                        </div>
                                                     </div>
-                                                    <div class="col mt-3 mb-3">
-                                                        <textarea name="description" class="form-control" placeholder="Task description" aria-label="Task description" required rows="4">${data.description}</textarea>
-                                                    </div>
-                                                    <div class="col mt-3 mb-3">
-                                                        <p class="text-start"><strong>Task is assigned to: </strong></p>
-                                                    </div>
-                                                    <div class="col">
-                                                        <select name="user_selected" class="form-select" aria-label="User selected">
-                                                            ${optionsHTML}
-                                                        </select>
-                                                    </div> 
-                                                    <div class="col mt-3 text-start">
-                                                        <p><strong>Task due date</strong></p>
-                                                    </div>
-                                                    <div class="col">
-                                                        <input name="due_date" id="due_date" type="text" class="form-control" placeholder="Due date" aria-label="Due date" required value="${data.due_date}" />
-                                                    </div>
-                                                    <div class="col">
-                                                        <input type="hidden" name="task_id" value="${data.task_id}" type="text" class="form-control" placeholder="task_id" aria-label="task_id" required />
-                                                    </div>
+
+                                                    <!-- Hidden Supplier ID -->
+                                                    <input type="hidden" name="supplier_id" value="${data.supplier_id}" />
+
+                                                    <!-- Modal Footer -->
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                                         <button type="submit" class="btn btn-primary">Update</button>
                                                     </div>
                                                 </div>
+
                                             </div>
                                         </div>
                                         </form>
@@ -496,20 +516,20 @@
 
 
                                     <!-- Delete Confirmation Modal -->
-                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal${data.task_id}">
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal${data.supplier_id}">
                                         <i class="bi bi-trash"></i>
                                     </button>
 
-                                    <div class="modal fade" id="confirmDeleteModal${data.task_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
-                                    <?php echo form_open('task/delete_task', array('id' => 'deleteTaskForm${data.task_id}')); ?>
+                                    <div class="modal fade" id="confirmDeleteModal${data.supplier_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
+                                    <?php echo form_open('inventory/delete_supplier', array('id' => 'deleteSupplierForm${data.supplier_id}')); ?>
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmation</h1>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <input type="hidden" name="task_id" value="${data.task_id}" />
-                                                    <p class="text-start">Are you sure you want to delete this task?</p>
+                                                    <input type="hidden" name="supplier_id" value="${data.supplier_id}" />
+                                                    <p class="text-start">Are you sure you want to set this supplier to inactive?</p>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="submit" class="btn btn-danger">Yes</button>
@@ -527,245 +547,59 @@
             ],
         });
 
-        // client side my tasks datatable
-        $('#my_tasks').DataTable({
-            responsive: true,
-            searching: true,
-            processing: true,
-            ajax: {
-                url: '<?php echo site_url(); ?>/task/get_my_tasks',
-                dataSrc: 'data',
+        // for adding supplier
+        $(document).on('submit', 'form[id^="addNewSupplierForm"]', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            $.ajax({
                 type: 'POST',
-            },
-            columns: [{
-                    "sortable": false,
-                    "data": null,
-                    "className": "text-center align-middle",
-                    "render": function(data, type, row, meta) {
-                        return meta.row + 1;
-                    }
+                url: "<?php echo site_url(); ?>/inventory/insert_supplier/",
+                data: form.serialize(),
+                success: function(response) {
+                    response = JSON.parse(response);
+                    $('#supplier_table').DataTable().ajax.reload(null, false);
+                    form.closest('.modal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "success",
+                        title: response.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
                 },
-                {
-                    "data": "title",
-                    "className": "text-start align-middle"
-                },
-                {
-                    "data": "description",
-                    "className": "text-start align-middle"
-                },
-                {
-                    "data": "assigned_by",
-                    "className": "text-start align-middle",
-                },
-                {
-                    "data": "due_date",
-                    "className": "text-start align-middle",
-                },
-                {
-                    "data": "status",
-                    "sortable": false,
-                    "className": "text-start align-middle",
-                    "render": function(data, type, row) {
-                        let dropdownItems = '';
+                error: function(xhr, status, error, response) {
+                    response = JSON.parse(response);
+                    form.closest('.modal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "error",
+                        title: response.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    console.error('AJAX ERROR: ' + xhr.responseText);
+                    console.error('ADD SUPPLIER ERROR: ' + error);
+                }
+            });
 
-                        if (data === 'in_progress') {
-                            dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'done')">Done</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'pending')">Pending</a></li>
-                            `;
-                        } else if (data === 'done') {
-                            dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'in_progress')">In Progress</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'pending')">Pending</a></li>
-                            `;
-                        } else if (data === 'pending') {
-                            dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'in_progress')">In Progress</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'done')">Done</a></li>
-                            `;
-                        }
-
-                        let buttonClass = 'btn-secondary';
-                        if (data === 'in_progress') {
-                            buttonClass = 'btn-primary';
-                        } else if (data === 'done') {
-                            buttonClass = 'btn-success';
-                        } else if (data === 'pending') {
-                            buttonClass = 'btn-danger';
-                        }
-
-                        return `
-                            <div class="dropdown">
-                                <button class="btn btn-fixed-width ${buttonClass} dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    ${data.replace(/_/g, ' ').charAt(0).toUpperCase() + data.replace(/_/g, ' ').slice(1)}
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="statusDropdown">
-                                    ${dropdownItems}
-                                </ul>
-                            </div>
-                        `;
-                    }
-                },
-            ],
         });
 
-        // for Flatpickr bug on month dropdown
-        $("[id^='editTaskModal']").modal({
-            show: true,
-            focus: false
-        });
-
-        // initialize Flatpickr in the dynamically generated modals
-        $(document).on('shown.bs.modal', function(event) {
-            var modal = $(event.target);
-            var input = modal.find('input[id^="due_date"]');
-            if (input.length) {
-                flatpickr(input, {
-                    enableTime: true,
-                    dateFormat: "Y-m-d H:i",
-                    minDate: "today"
-                });
-            }
-        });
-
-        // server side contacts datatable, currently hidden
-        $('#ssp_contacts_table').DataTable({
-            searching: true,
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: '<?php echo site_url(); ?>/contact/get_contacts_ssp',
-                type: 'GET',
-            },
-            columns: [{
-                    "data": null,
-                    "render": function(data, type, row, meta) {
-                        return meta.row + 1;
-                    }
-                },
-                {
-                    data: 'full_name'
-                },
-                {
-                    data: 'company'
-                },
-                {
-                    data: 'phone'
-                },
-                {
-                    data: 'email'
-                },
-                // for the contact actions (edit, share, delete) row
-                {
-                    data: 'actions',
-                    sortable: false,
-                },
-            ],
-        });
-
-        $('#assign_to_team').change(function() {
-            if (this.checked) {
-                $('#team_selected').prop('disabled', false);
-                $('#user_selected').prop('disabled', true);
-                $('#user_selected').val('Default');
-            } else {
-                $('#team_selected').prop('disabled', true);
-                $('#user_selected').prop('disabled', false);
-                $('#team_selected').val('Default');
-            }
-        });
-
-        // for adding task
-        $(document).on('submit', 'form[id^="addNewTaskForm"]', function(e) {
-            e.preventDefault();
-
-            var form = $(this);
-
-            var userSelected = form.find('select[name="user_selected"]').val();
-            var teamSelected = form.find('select[name="team_selected"]').val();
-            var dueDate = form.find('input[name="due_date"]').val();
-
-            const assignErrorMessageElement = document.querySelector('.assign-error-message p');
-            const dateErrorMessageElement = document.querySelector('.date-error-message p');
-
-            let hasError = false;
-
-            if (userSelected === "Default" && teamSelected === "Default") {
-                assignErrorMessageElement.textContent = "Please select a user or team to assign this task to.";
-                hasError = true;
-            } else {
-                assignErrorMessageElement.textContent = "";
-            }
-
-            if (dueDate === "") {
-                dateErrorMessageElement.textContent = "Please select a due date for this task.";
-                hasError = true;
-            } else {
-                dateErrorMessageElement.textContent = "";
-            }
-
-            if (hasError) {
-                event.preventDefault();
-            } else {
-                $.ajax({
-                    type: 'POST',
-                    url: "<?php echo site_url(); ?>/task/insert_task/",
-                    data: form.serialize({
-                        user_selected: userSelected,
-                        team_selected: teamSelected,
-                        due_date: dueDate
-                    }),
-                    success: function(response) {
-                        response = JSON.parse(response);
-                        $('#others_tasks').DataTable().ajax.reload(null, false);
-                        $('#my_tasks').DataTable().ajax.reload(null, false);
-                        form.closest('.modal').modal('hide');
-                        $('body').removeClass('modal-open');
-                        $('.modal-backdrop').remove();
-                        Swal.fire({
-                            position: "top-end",
-                            icon: "success",
-                            title: response.message,
-                            showConfirmButton: false,
-                            timer: 2000
-                        });
-                    },
-                    error: function(xhr, status, error, response) {
-                        response = JSON.parse(response);
-                        $('#others_tasks').DataTable().ajax.reload(null, false);
-                        $('#my_tasks').DataTable().ajax.reload(null, false);
-                        form.closest('.modal').modal('hide');
-                        $('body').removeClass('modal-open');
-                        $('.modal-backdrop').remove();
-                        Swal.fire({
-                            position: "top-end",
-                            icon: "error",
-                            title: response.message,
-                            showConfirmButton: false,
-                            timer: 2000
-                        });
-                        console.error('AJAX ERROR: ' + xhr.responseText);
-                        console.error('ADD TASK ERROR: ' + error);
-                    }
-                });
-            }
-        });
-
-        // for updating  tasks
-        $(document).on('submit', 'form[id^="editTaskForm"]', function(e) {
+        // for updating  supplier
+        $(document).on('submit', 'form[id^="editSupplierForm"]', function(e) {
             e.preventDefault();
             var form = $(this);
-            var id = form.find('input[name="task_id"]').val();
-
+            var id = form.find('input[name="supplier_id"]').val();
             var has_changes = false;
-
-            form.find('input, textarea').each(function() {
+            form.find('input').each(function() {
                 if ($(this).val() !== $(this).attr('value')) {
                     has_changes = true;
                     return false;
                 }
             });
-
             if (!has_changes) {
                 Swal.fire({
                     position: "top-end",
@@ -776,15 +610,13 @@
                 });
                 return;
             }
-
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/task/update_others_task/" + id,
+                url: "<?php echo site_url(); ?>/inventory/update_supplier/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
-                    $('#others_tasks').DataTable().ajax.reload(null, false);
-                    $('#my_tasks').DataTable().ajax.reload(null, false);
+                    $('#supplier_table').DataTable().ajax.reload(null, false);
                     form.closest('.modal').modal('hide');
                     $('body').removeClass('modal-open');
                     $('.modal-backdrop').remove();
@@ -806,24 +638,23 @@
                         timer: 1200
                     });
                     console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('EDIT TASK ERROR: ' + error);
+                    console.error('EDIT SUPPLIER ERROR: ' + error);
                 }
             });
         });
 
-        // for deleting  tasks
-        $(document).on('submit', 'form[id^="deleteTaskForm"]', function(e) {
+        // for deleting supplier
+        $(document).on('submit', 'form[id^="deleteSupplierForm"]', function(e) {
             e.preventDefault();
             var form = $(this);
-            var id = form.find('input[name="task_id"]').val();
+            var id = form.find('input[name="supplier_id"]').val();
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/task/delete_task/" + id,
+                url: "<?php echo site_url(); ?>/inventory/delete_supplier/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
-                    $('#others_tasks').DataTable().ajax.reload(null, false);
-                    $('#my_tasks').DataTable().ajax.reload(null, false);
+                    $('#supplier_table').DataTable().ajax.reload(null, false);
                     form.closest('.modal').modal('hide');
                     $('body').removeClass('modal-open');
                     $('.modal-backdrop').remove();
@@ -845,14 +676,14 @@
                         timer: 1500
                     });
                     console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('DELETE TASK ERROR: ' + error);
+                    console.error('DELETE SUPPLIER ERROR: ' + error);
                 }
             });
         });
 
     });
 
-    // for updating task status
+    // for updating supplier status
     function updateStatus(taskId, newStatus) {
         $.ajax({
             type: 'POST',
@@ -888,6 +719,7 @@
 </script>
 
 <body>
+
     <div class="sidebar close">
         <div class="logo-details">
             <i class='bx bxl-c-plus-plus' style="overflow-y: hidden;"></i>
@@ -957,6 +789,7 @@
             </li>
         </ul>
     </div>
+
     <section class="home-section">
         <i class='bx bx-menu' style='margin-top: .7%;'></i>
         <div class="container-sm">
@@ -967,107 +800,91 @@
                 </form>
             </div>
 
-            <!-- Add New Task Button
-            <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewTaskModal">
-                Create Task
-            </button> -->
+            <!-- Add New Supplier Button -->
+            <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewSupplierModal">
+                Add Supplier
+            </button>
 
-            <!-- Other's Tasks Table -->
-            <!-- <div class="others-tasks-table-container">
-                <table class="table table-sm table-striped" class="display" id="others_tasks">
+
+            <!-- Supplier Table -->
+            <div class="supplier-table-container">
+                <table class="table table-sm table-striped" class="display" id="supplier_table">
                     <thead>
                         <tr>
                             <th class="text-center"></th>
-                            <th class="text-start">Title</th>
-                            <th class="text-start">Description</th>
-                            <th class="text-start">Assigned to</th>
-                            <th class="text-start">Due date</th>
-                            <th class="text-start">Status</th>
-                            <th class="text-end">Actions</th>
+                            <th class="text-start"><strong>Name</strong></th>
+                            <th class="text-start"><strong>Contact Details</strong></th>
+                            <th class="text-start"><strong>Bank Details</strong></th>
+                            <th class="text-start"><strong>Status</strong></th>
+                            <th class="text-start"><strong>Added by</strong></th>
+                            <th class="text-end"><strong>Actions</strong></th>
                         </tr>
                     </thead>
                 </table>
-            </div> -->
+            </div>
 
 
-            <!-- Add New Task Modal -->
-            <!-- <div class="modal fade" id="addNewTaskModal" tabindex="-1" aria-labelledby="addNewTaskModal" aria-hidden="true">
+            <!-- Add New Supplier Modal -->
+            <div class="modal fade" id="addNewSupplierModal" tabindex="-1" aria-labelledby="addNewSupplierModal" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="modalLabek">Create Task</h1>
+                            <h1 class="modal-title fs-5" id="modalLabek">Add Supplier</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
+
                         <div class="modal-body">
                             <?php echo validation_errors(); ?>
-                            <?php echo form_open('task/insert_task', array('id' => 'addNewTaskForm')); ?>
-                            <div class="col">
-                                <p><strong>Task title</strong></p>
-                            </div>
-                            <div class="col">
-                                <input name="title" value="<?php echo set_value('title'); ?>" type="text" class="form-control" placeholder="Task title" aria-label="Task title" required />
-                            </div>
-                            <div class="col mt-3">
-                                <p><strong>Task description</strong></p>
-                            </div>
-                            <div class="col mt-3 mb-3">
-                                <textarea name="description" class="form-control" placeholder="Task description" aria-label="Task description" required rows="5"><?php echo set_value('description'); ?></textarea>
-                            </div>
-                            <div class="col">
-                                <p><strong>Assign to</strong></p>
-                            </div>
-                            <div class="col assign-error-message">
-                                <p style="color: red;"></p>
-                            </div>
-                            <div class="col mt-3 select_user_dropdown">
-                                <?php if (!empty($user_options)) : ?>
-                                    <select name="user_selected" class="form-select" aria-label="User selected" id="user_selected">
-                                        <?php foreach ($user_options as $option_value => $option_label) : ?>
-                                            <option value="<?php echo $option_value; ?>"><?php echo $option_label; ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                <?php else : ?>
-                                    <p>No users to assign with found.</p>
-                                <?php endif; ?>
-                            </div>
-                            <div class="col mt-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="team" name="assign_to_team" id="assign_to_team">
-                                    <label class="form-check-label" for="assign_to_team">
-                                        Assign to a team
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col mt-3 select_team_dropdown">
-                                <?php if (!empty($team_options)) : ?>
-                                    <select name="team_selected" class="form-select" aria-label="Team selected" id="team_selected" disabled>
-                                        <?php foreach ($team_options as $option_value => $option_label) : ?>
-                                            <option value="<?php echo $option_value; ?>"><?php echo $option_label; ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                <?php else : ?>
-                                    <p>No team to assign with found.</p>
-                                <?php endif; ?>
+                            <?php echo form_open('inventory/insert_supplier', array('id' => 'addNewSupplierForm')); ?>
+
+                            <!-- Supplier Name -->
+                            <div class="mb-5">
+                                <p><strong>Supplier Name</strong></p>
+                                <input name="name" value="<?php echo set_value('name'); ?>" type="text" class="form-control" placeholder="Supplier Name" aria-label="Supplier Name" required />
                             </div>
 
-                            <div class="col mt-3">
-                                <p><strong>Due date</strong></p>
+                            <!-- Supplier Contact Details -->
+                            <div class="mb-4">
+                                <p><strong>Supplier Contact Details</strong></p>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <input name="contact_person" value="<?php echo set_value('contact_person'); ?>" type="text" class="form-control" placeholder="Contact Person" aria-label="Contact Person" required />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <input name="contact_number" value="<?php echo set_value('contact_number'); ?>" type="text" class="form-control" placeholder="Contact Number" aria-label="Contact Number" required />
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col date-error-message">
-                                <p style="color: red;"></p>
+
+                            <!-- Supplier Bank Details -->
+                            <div class="mb-3">
+                                <p><strong>Supplier Bank Details</strong></p>
+                                <div class="mb-3">
+                                    <input name="bank_name" value="<?php echo set_value('bank_name'); ?>" type="text" class="form-control" placeholder="Bank Name" aria-label="Bank Name" required />
+                                </div>
+                                <div class="mb-3">
+                                    <input name="account_name" value="<?php echo set_value('account_name'); ?>" type="text" class="form-control" placeholder="Account Name" aria-label="Account Name" required />
+                                </div>
+                                <div class="mb-3">
+                                    <input name="account_number" value="<?php echo set_value('account_number'); ?>" type="text" class="form-control" placeholder="Account Number" aria-label="Account Number" required />
+                                </div>
                             </div>
-                            <div class="col">
-                                <input name="due_date" id="due_date" type="date" class="form-control" placeholder="Due date" aria-label="Due date" required />
-                            </div>
+
+                            <!-- Modal Footer -->
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Create</button>
                             </div>
-                            </form>
+
+                            <?php echo form_close(); ?>
                         </div>
+
+
+                        </form>
                     </div>
                 </div>
-            </div> -->
+            </div>
+        </div>
 
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

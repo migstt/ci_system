@@ -883,61 +883,6 @@
                 </form>
             </div>
 
-            <!-- Add New Location Button -->
-            <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewLocationModal">
-                Add Location
-            </button>
-
-            <!-- Location Table -->
-            <div class="others-tasks-table-container">
-                <table class="table table-sm table-striped" class="display" id="location_table">
-                    <thead>
-                        <tr>
-                            <th class="text-center"></th>
-                            <th class="text-start">Title</th>
-                            <th class="text-start">Description</th>
-                            <th class="text-start">Assigned to</th>
-                            <th class="text-start">Due date</th>
-                            <th class="text-start">Status</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-
-
-            <!-- Add New Location Modal -->
-            <div class="modal fade" id="addNewLocationModal" tabindex="-1" aria-labelledby="addNewLocationModal" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="modalLabek">Add location</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <?php echo validation_errors(); ?>
-                            <?php echo form_open('inventory/insert_location', array('id' => 'addNewLocationForm')); ?>
-                            <div class="col">
-                                <p><strong>Location name</strong></p>
-                            </div>
-                            <div class="col">
-                                <input name="name" value="<?php echo set_value('title'); ?>" type="text" class="form-control" placeholder="Location name" aria-label="Location name" required />
-                            </div>
-                            <div class="col mt-3">
-                                <p><strong>Location address</strong></p>
-                            </div>
-                            <div class="col mt-3 mb-3">
-                            <input name="address" value="<?php echo set_value('address'); ?>" type="text" class="form-control" placeholder="Location address" aria-label="Location address" required />
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Create</button>
-                            </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

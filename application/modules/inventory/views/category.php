@@ -389,7 +389,7 @@
                 {
                     "sortable": false,
                     "data": "status",
-                    "className": "text-start align-middle",
+                    "className": "text-center align-middle",
                     "createdCell": function(td, cellData, rowData, row, col) {
                         if (cellData === 'Active') {
                             $(td).css({
