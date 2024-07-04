@@ -353,6 +353,87 @@
             white-space: nowrap;
             font-size: 0.875rem;
         }
+
+        /* Custom Modal Styling */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background-color: #e6f7e6;
+            /* Light green background color for the modal header */
+            padding: 1rem 1.5rem;
+            /* Equal padding for top and bottom */
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header .modal-title {
+            font-weight: bold;
+            font-size: 1.25rem;
+            color: #333;
+            /* Dark text color for contrast */
+        }
+
+        .modal-body {
+            padding-top: 2rem;
+            /* Added space to move the content away from the header */
+        }
+
+        .modal-footer {
+            border-top: none;
+            justify-content: space-between;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            padding: 0.75rem 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-secondary {
+            border-radius: 8px;
+        }
+
+        .btn-primary {
+            border-radius: 8px;
+            background-color: #007bff;
+            border-color: #007bff;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+
+        /* Custom Close Button */
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+        }
+
+        .btn-close:hover {
+            color: #dc3545;
+            opacity: 0.75;
+        }
     </style>
 </head>
 

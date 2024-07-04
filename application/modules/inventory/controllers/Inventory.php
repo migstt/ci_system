@@ -383,10 +383,10 @@ class Inventory extends MY_Controller
             );
 
             if ($this->inventory->update_supplier($supplier_id, $updated_supplier_form_data)) {
-                $response = array('status' => 'success', 'message' => 'Location updated.');
+                $response = array('status' => 'success', 'message' => 'Supplier updated.');
                 echo json_encode($response);
             } else {
-                $response = array('status' => 'error', 'message' => 'Failed to update location. Please try again.');
+                $response = array('status' => 'error', 'message' => 'Failed to update supplier. Please try again.');
                 echo json_encode($response);
             }
         }

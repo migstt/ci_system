@@ -353,6 +353,87 @@
             white-space: nowrap;
             font-size: 0.875rem;
         }
+
+        /* Custom Modal Styling */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background-color: #e6f7e6;
+            /* Light green background color for the modal header */
+            padding: 1rem 1.5rem;
+            /* Equal padding for top and bottom */
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header .modal-title {
+            font-weight: bold;
+            font-size: 1.25rem;
+            color: #333;
+            /* Dark text color for contrast */
+        }
+
+        .modal-body {
+            padding-top: 2rem;
+            /* Added space to move the content away from the header */
+        }
+
+        .modal-footer {
+            border-top: none;
+            justify-content: space-between;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            padding: 0.75rem 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-secondary {
+            border-radius: 8px;
+        }
+
+        .btn-primary {
+            border-radius: 8px;
+            background-color: #007bff;
+            border-color: #007bff;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+
+        /* Custom Close Button */
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+        }
+
+        .btn-close:hover {
+            color: #dc3545;
+            opacity: 0.75;
+        }
     </style>
 </head>
 
@@ -767,27 +848,23 @@
 
 
             <!-- Add New Location Modal -->
-            <div class="modal fade" id="addNewLocationModal" tabindex="-1" aria-labelledby="addNewLocationModal" aria-hidden="true">
+            <div class="modal fade" id="addNewLocationModal" tabindex="-1" aria-labelledby="addNewLocationModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="modalLabek">Add Location</h1>
+                            <h5 class="modal-title" id="addNewLocationModalLabel">Add Location</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <?php echo validation_errors(); ?>
                             <?php echo form_open('inventory/insert_location', array('id' => 'addNewLocationForm')); ?>
-                            <div class="col">
-                                <p><strong>Location name</strong></p>
+                            <div class="mb-3">
+                                <label for="locationName" class="form-label"><strong>Location Name</strong></label>
+                                <input name="name" value="<?php echo set_value('name'); ?>" type="text" class="form-control" id="locationName" placeholder="Location name" required>
                             </div>
-                            <div class="col">
-                                <input name="name" value="<?php echo set_value('name'); ?>" type="text" class="form-control" placeholder="Location name" aria-label="Location name" required />
-                            </div>
-                            <div class="col mt-3">
-                                <p><strong>Location address</strong></p>
-                            </div>
-                            <div class="col mt-3 mb-3">
-                                <input name="address" value="<?php echo set_value('address'); ?>" type="text" class="form-control" placeholder="Location address" aria-label="Location address" required />
+                            <div class="mb-3">
+                                <label for="locationAddress" class="form-label"><strong>Location Address</strong></label>
+                                <input name="address" value="<?php echo set_value('address'); ?>" type="text" class="form-control" id="locationAddress" placeholder="Location address" required>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -798,6 +875,7 @@
                     </div>
                 </div>
             </div>
+
 
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
