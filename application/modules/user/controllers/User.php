@@ -76,7 +76,7 @@ class User extends MY_Controller
             $password   = $this->input->post('password');
 
             if ($this->verify_user_email($this->db->escape($email))) {
-                $response = array('status' => 'error', 'message' => 'Email already registered.');
+                $response = array('status' => 'error_email_exist', 'message' => 'Email already registered.');
                 echo json_encode($response);
                 return;
             }

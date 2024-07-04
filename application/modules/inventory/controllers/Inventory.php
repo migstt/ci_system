@@ -58,11 +58,12 @@ class Inventory extends MY_Controller
 
     function users()
     {
-        $this->load->view('inventory/users');
+        $data['active_locations']   = $this->inventory->get_active_locations();
+        $data['active_teams']       = $this->team->get_all_teams();
+        $data['user_types']         = $this->user->get_active_user_types();
+
+        $this->load->view('inventory/users', $data);
     }
-
-
-
 
     // LOCATION MANAGEMENT
     function insert_location()
@@ -301,11 +302,11 @@ class Inventory extends MY_Controller
     {
 
         $this->form_validation->set_rules('name', 'Supplier name', 'required');
-        $this->form_validation->set_rules('contact_person', 'Supplier name', 'required');
-        $this->form_validation->set_rules('contact_number', 'Supplier name', 'required');
-        $this->form_validation->set_rules('bank_name', 'Supplier name', 'required');
-        $this->form_validation->set_rules('account_name', 'Supplier name', 'required');
-        $this->form_validation->set_rules('account_number', 'Supplier name', 'required');
+        $this->form_validation->set_rules('contact_person', 'Supplier contact_person', 'required');
+        $this->form_validation->set_rules('contact_number', 'Supplier contact_number', 'required');
+        $this->form_validation->set_rules('bank_name', 'Supplier bank_name', 'required');
+        $this->form_validation->set_rules('account_name', 'Supplier account_name', 'required');
+        $this->form_validation->set_rules('account_number', 'Supplier account_number', 'required');
 
         if ($this->form_validation->run() == TRUE) {
 
@@ -450,44 +451,51 @@ class Inventory extends MY_Controller
 
 
     // USER MANAGEMENT
-    function insert_user()
+    public function insert_user()
     {
+        $this->form_validation->set_rules('first_name', 'First Name', 'required');
+        $this->form_validation->set_rules('last_name', 'Last Name', 'required');
+        $this->form_validation->set_rules('email', 'Email', 'required');
+        $this->form_validation->set_rules('password', 'Password', 'required');
+        $this->form_validation->set_rules('team_id', 'Team ID', 'required');
+        $this->form_validation->set_rules('user_type_id', 'User Type ID', 'required');
+        $this->form_validation->set_rules('status', 'Status', 'required');
+        $this->form_validation->set_rules('location_id', 'Location ID', 'required');
 
-        $this->form_validation->set_rules('name', 'Supplier name', 'required');
-        $this->form_validation->set_rules('contact_person', 'Supplier name', 'required');
-        $this->form_validation->set_rules('contact_number', 'Supplier name', 'required');
-        $this->form_validation->set_rules('bank_name', 'Supplier name', 'required');
-        $this->form_validation->set_rules('account_name', 'Supplier name', 'required');
-        $this->form_validation->set_rules('account_number', 'Supplier name', 'required');
+        $first_name    = $this->input->post('first_name');
+        $last_name     = $this->input->post('last_name');
+        $email         = $this->input->post('email');
+        $password      = password_hash($this->input->post('password'), PASSWORD_DEFAULT);
+        $team_id       = $this->input->post('team_id');
+        $user_type_id  = $this->input->post('user_type_id');
+        $status        = $this->input->post('status');
+        $location_id   = $this->input->post('location_id');
+
+        if ($this->inventory->verify_user_email($this->db->escape($email))) {
+            $response = array('status' => 'error_email_exist', 'message' => 'Email already registered. Please use a different email.');
+            echo json_encode($response);
+            return;
+        }
 
         if ($this->form_validation->run() == TRUE) {
 
-            $name               = $this->input->post('name');
-            $contact_person     = $this->input->post('contact_person');
-            $contact_number     = $this->input->post('contact_number');
-            $bank_name          = $this->input->post('bank_name');
-            $account_name       = $this->input->post('account_name');
-            $account_number     = $this->input->post('account_number');
-
-            $supplier_form_data = array(
-                'supplier_name'             => $name,
-                'supplier_contact_person'   => $contact_person,
-                'supplier_contact_no'       => $contact_number,
-                'supplier_bank_name'        => $bank_name,
-                'supplier_account_name'     => $account_name,
-                'supplier_account_no'       => $account_number,
-                'supplier_status'           => 0,
-                'supplier_added_by'         => $_SESSION['user_id'],
-                'supplier_added_at'         => date('Y-m-d H:i:s'),
-                'supplier_updated_at'       => null,
-                'supplier_deleted_at'       => null,
+            $user_form_data = array(
+                'user_first_name'   => $first_name,
+                'user_last_name'    => $last_name,
+                'user_email'        => $email,
+                'user_password'     => $password,
+                'user_created_at'   => date('Y-m-d H:i:s'),
+                'team_id'           => $team_id,
+                'user_type_id'      => $user_type_id,
+                'user_status'       => $status,
+                'user_location_id'  => $location_id,
             );
 
-            if ($this->inventory->insert_supplier('suppliers', $supplier_form_data)) {
-                $response = array('status' => 'success', 'message' => 'Supplier added successfully.');
+            if ($this->user->insert_user($user_form_data)) {
+                $response = array('status' => 'success', 'message' => 'User added successfully.');
                 echo json_encode($response);
             } else {
-                $response = array('status' => 'error', 'message' => 'Failed to add supplier. Please try again.');
+                $response = array('status' => 'error', 'message' => 'Failed to add user. Please try again.');
                 echo json_encode($response);
             }
         }
@@ -495,38 +503,50 @@ class Inventory extends MY_Controller
 
     function update_user()
     {
-        $this->form_validation->set_rules('name', 'Supplier name', 'required');
-        $this->form_validation->set_rules('contact_person', 'Supplier name', 'required');
-        $this->form_validation->set_rules('contact_number', 'Supplier name', 'required');
-        $this->form_validation->set_rules('bank_name', 'Supplier name', 'required');
-        $this->form_validation->set_rules('account_name', 'Supplier name', 'required');
-        $this->form_validation->set_rules('account_number', 'Supplier name', 'required');
+        $this->form_validation->set_rules('first_name', 'First Name', 'required');
+        $this->form_validation->set_rules('last_name', 'Last Name', 'required');
+        $this->form_validation->set_rules('email', 'Email', 'required');
+        $this->form_validation->set_rules('password', 'Password', 'required');
+        $this->form_validation->set_rules('team_id', 'Team ID', 'required');
+        $this->form_validation->set_rules('user_type_id', 'User Type ID', 'required');
+        $this->form_validation->set_rules('status', 'Status', 'required');
+        $this->form_validation->set_rules('location_id', 'Location ID', 'required');
+
+        $user_id       = $this->input->post('user_id');
+        $first_name    = $this->input->post('first_name');
+        $last_name     = $this->input->post('last_name');
+        $email         = $this->input->post('email');
+        $password      = password_hash($this->input->post('password'), PASSWORD_DEFAULT);
+        $team_id       = $this->input->post('team_id');
+        $user_type_id  = $this->input->post('user_type_id');
+        $status        = $this->input->post('status');
+        $location_id   = $this->input->post('location_id');
+
+        if ($this->inventory->verify_user_email($this->db->escape($email))) {
+            $response = array('status' => 'error_email_exist', 'message' => 'Email already registered. Please use a different email.');
+            echo json_encode($response);
+            return;
+        }
 
         if ($this->form_validation->run() == TRUE) {
 
-            $supplier_id        = $this->input->post('supplier_id');
-            $name               = $this->input->post('name');
-            $contact_person     = $this->input->post('contact_person');
-            $contact_number     = $this->input->post('contact_number');
-            $bank_name          = $this->input->post('bank_name');
-            $account_name       = $this->input->post('account_name');
-            $account_number     = $this->input->post('account_number');
-
-            $updated_supplier_form_data = array(
-                'supplier_name'             => $name,
-                'supplier_contact_person'   => $contact_person,
-                'supplier_contact_no'       => $contact_number,
-                'supplier_bank_name'        => $bank_name,
-                'supplier_account_name'     => $account_name,
-                'supplier_account_no'       => $account_number,
-                'supplier_updated_at'       => date('Y-m-d H:i:s'),
+            $updated_user_form_data = array(
+                'user_first_name'   => $first_name,
+                'user_last_name'    => $last_name,
+                'user_email'        => $email,
+                'user_password'     => $password,
+                'user_created_at'   => date('Y-m-d H:i:s'),
+                'team_id'           => $team_id,
+                'user_type_id'      => $user_type_id,
+                'user_status'       => $status,
+                'user_location_id'  => $location_id,
             );
 
-            if ($this->inventory->update_supplier($supplier_id, $updated_supplier_form_data)) {
-                $response = array('status' => 'success', 'message' => 'Location updated.');
+            if ($this->user->updated_user($user_id, $updated_user_form_data)) {
+                $response = array('status' => 'success', 'message' => 'User updated successfully.');
                 echo json_encode($response);
             } else {
-                $response = array('status' => 'error', 'message' => 'Failed to update location. Please try again.');
+                $response = array('status' => 'error', 'message' => 'Failed to update user. Please try again.');
                 echo json_encode($response);
             }
         }

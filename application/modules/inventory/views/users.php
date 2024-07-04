@@ -37,6 +37,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <!-- sidebar styles -->
     <style>
         /* Google Fonts Import Link */
@@ -390,7 +394,7 @@
 <!-- Custom scripts -->
 <script>
     $(document).ready(function() {
-        // client side suppliers datatable
+        // client side users datatable
         $('#users_table').DataTable({
             responsive: true,
             searching: true,
@@ -430,9 +434,22 @@
                 },
                 {
                     "data": "status",
-                    "className": "text-start align-middle"
+                    "className": "text-start align-middle",
+                    "createdCell": function(td, cellData, rowData, row, col) {
+                        if (cellData === 'Active') {
+                            $(td).css({
+                                'background-color': '#d4edda',
+                                'color': '#155724'
+                            });
+                        } else if (cellData === 'Inactive') {
+                            $(td).css({
+                                'background-color': '#f8d7da',
+                                'color': '#721c24'
+                            });
+                        }
+                    }
                 },
-                // for the supplier actions (edit, delete) row
+                // for the user actions (edit, delete) row
                 {
                     "data": null,
                     "sortable": false,
@@ -442,30 +459,23 @@
                             <div class="d-flex justify-content-end">
                                 <div class="btn-group btn-group-sm" role="group" aria-label="">
                             
-                                    <!-- Update/Edit Supplier Modal -->
-                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editSupplierModal${data.supplier_id}">
+                                    <!-- Update/Edit User Modal -->
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editUserModal${data.user_id}">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
 
-                                    <div class="modal fade" id="editSupplierModal${data.supplier_id}" tabindex="-1" aria-labelledby="editSupplierModal" aria-hidden="true">
+                                    <div class="modal fade" id="editUserModal${data.user_id}" tabindex="-1" aria-labelledby="editUserModal" aria-hidden="true">
                                         <?php echo validation_errors(); ?>
-                                        <?php echo form_open('inventory/update_supplier', array('id' => 'editSupplierForm${data.supplier_id}')); ?>
+                                        <?php echo form_open('inventory/update_user', array('id' => 'editUserForm${data.user_id}')); ?>
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="modalLabel">Edit Supplier</h1>
+                                                    <h1 class="modal-title fs-5" id="modalLabel">Edit User</h1>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <!-- Supplier Name -->
-                                                    <div class="mb-5">
-                                                        <p class="text-start"><strong>Supplier Name</strong></p>
-                                                        <input name="name" value="${data.name}" type="text" class="form-control" placeholder="Supplier Name" aria-label="Supplier Name" required />
-                                                    </div>
 
-                                                    <!-- Supplier Contact Details -->
                                                     <div class="mb-5">
-                                                        <p class="text-start"><strong>Supplier Contact Details</strong></p>
                                                         <div class="row">
                                                             <div class="col-md-6 mb-3">
                                                                 <input name="contact_person" value="${data.contact_person}" type="text" class="form-control" placeholder="Contact Person" aria-label="Contact Person" required />
@@ -476,9 +486,7 @@
                                                         </div>
                                                     </div>
 
-                                                    <!-- Supplier Bank Details -->
                                                     <div class="mb-3">
-                                                        <p class="text-start"><strong>Supplier Bank Details</strong></p>
                                                         <div class="mb-3">
                                                             <input name="bank_name" value="${data.bank_name}" type="text" class="form-control" placeholder="Bank Name" aria-label="Bank Name" required />
                                                         </div>
@@ -490,8 +498,8 @@
                                                         </div>
                                                     </div>
 
-                                                    <!-- Hidden Supplier ID -->
-                                                    <input type="hidden" name="supplier_id" value="${data.supplier_id}" />
+                                                    <!-- Hidden User ID -->
+                                                    <input type="hidden" name="user_id" value="${data.user_id}" />
 
                                                     <!-- Modal Footer -->
                                                     <div class="modal-footer">
@@ -507,20 +515,20 @@
 
 
                                     <!-- Delete Confirmation Modal -->
-                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal${data.supplier_id}">
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal${data.user_id}">
                                         <i class="bi bi-trash"></i>
                                     </button>
 
-                                    <div class="modal fade" id="confirmDeleteModal${data.supplier_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
-                                    <?php echo form_open('inventory/delete_supplier', array('id' => 'deleteSupplierForm${data.supplier_id}')); ?>
+                                    <div class="modal fade" id="confirmDeleteModal${data.user_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
+                                    <?php echo form_open('inventory/delete_user', array('id' => 'deleteUserForm${data.user_id}')); ?>
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmation</h1>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <input type="hidden" name="supplier_id" value="${data.supplier_id}" />
-                                                    <p class="text-start">Are you sure you want to set this supplier to inactive?</p>
+                                                    <input type="hidden" name="user_id" value="${data.user_id}" />
+                                                    <p class="text-start">Are you sure you want to set this user to inactive?</p>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="submit" class="btn btn-danger">Yes</button>
@@ -538,33 +546,48 @@
             ],
         });
 
-        // for adding supplier
-        $(document).on('submit', 'form[id^="addNewSupplierForm"]', function(e) {
+        // for adding user
+        $(document).on('submit', 'form[id^="addNewUserForm"]', function(e) {
             e.preventDefault();
             var form = $(this);
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/insert_supplier/",
+                url: "<?php echo site_url(); ?>/inventory/insert_user/",
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
-                    $('#users_table').DataTable().ajax.reload(null, false);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "success",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 2000
-                    });
+                    if (response.status === 'error_email_exist') {
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "warning",
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    } else if (response.status === 'success') {
+                        $('#users_table').DataTable().ajax.reload(null, false);
+                        form.closest('.modal').modal('hide');
+                        $('body').removeClass('modal-open');
+                        $('.modal-backdrop').remove();
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "success",
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    } else {
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "error",
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
                 },
-                error: function(xhr, status, error, response) {
-                    response = JSON.parse(response);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
+                error: function(xhr, status, error) {
+                    var response = JSON.parse(xhr.responseText);
                     Swal.fire({
                         position: "top-end",
                         icon: "error",
@@ -573,17 +596,16 @@
                         timer: 2000
                     });
                     console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('ADD SUPPLIER ERROR: ' + error);
+                    console.error('ADD USER ERROR: ' + error);
                 }
             });
-
         });
 
-        // for updating  supplier
-        $(document).on('submit', 'form[id^="editSupplierForm"]', function(e) {
+        // for updating  user
+        $(document).on('submit', 'form[id^="editUserForm"]', function(e) {
             e.preventDefault();
             var form = $(this);
-            var id = form.find('input[name="supplier_id"]').val();
+            var id = form.find('input[name="user_id"]').val();
             var has_changes = false;
             form.find('input').each(function() {
                 if ($(this).val() !== $(this).attr('value')) {
@@ -603,7 +625,7 @@
             }
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/update_supplier/" + id,
+                url: "<?php echo site_url(); ?>/inventory/update_user/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -629,19 +651,19 @@
                         timer: 1200
                     });
                     console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('EDIT SUPPLIER ERROR: ' + error);
+                    console.error('EDIT USER ERROR: ' + error);
                 }
             });
         });
 
-        // for deleting supplier
-        $(document).on('submit', 'form[id^="deleteSupplierForm"]', function(e) {
+        // for deleting user
+        $(document).on('submit', 'form[id^="deleteUserForm"]', function(e) {
             e.preventDefault();
             var form = $(this);
-            var id = form.find('input[name="supplier_id"]').val();
+            var id = form.find('input[name="user_id"]').val();
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/delete_supplier/" + id,
+                url: "<?php echo site_url(); ?>/inventory/delete_user/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -667,20 +689,23 @@
                         timer: 1500
                     });
                     console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('DELETE SUPPLIER ERROR: ' + error);
+                    console.error('DELETE USER ERROR: ' + error);
                 }
             });
         });
 
+        $('.team_select').select2();
+        $('.location_select').select2();
+        $('.user_type_select').select2();
     });
 
-    // for updating supplier status
-    function updateStatus(taskId, newStatus) {
+    // for updating user status
+    function updateStatus(userId, newStatus) {
         $.ajax({
             type: 'POST',
-            url: "<?php echo site_url(); ?>/task/update_task_status/" + taskId,
+            url: "<?php echo site_url(); ?>/task/update_user_status/" + userId,
             data: {
-                task_id: taskId,
+                user_id: userId,
                 status: newStatus
             },
             success: function(response) {
@@ -791,13 +816,13 @@
                 </form>
             </div>
 
-            <!-- Add New Supplier Button -->
-            <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewSupplierModal">
+            <!-- Add New User Button -->
+            <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewUserModal">
                 Add User
             </button>
 
 
-            <!-- Supplier Table -->
+            <!-- Users Table -->
             <div class="user-table-container">
                 <table class="table table-sm table-striped" class="display" id="users_table">
                     <thead>
@@ -806,8 +831,8 @@
                             <th class="text-start"><strong>Name</strong></th>
                             <th class="text-start"><strong>Email</strong></th>
                             <th class="text-start"><strong>Location</strong></th>
-                            <th class="text-start"><strong>Team</strong></th>
                             <th class="text-start"><strong>Type</strong></th>
+                            <th class="text-start"><strong>Team</strong></th>
                             <th class="text-start"><strong>Status</strong></th>
                             <th class="text-end"><strong>Actions</strong></th>
                         </tr>
@@ -816,8 +841,8 @@
             </div>
 
 
-            <!-- Add New Supplier Modal -->
-            <div class="modal fade" id="addNewSupplierModal" tabindex="-1" aria-labelledby="addNewSupplierModal" aria-hidden="true">
+            <!-- Add New User Modal -->
+            <div class="modal fade" id="addNewUserModal" tabindex="-1" aria-labelledby="addNewUserModal" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -827,39 +852,73 @@
 
                         <div class="modal-body">
                             <?php echo validation_errors(); ?>
-                            <?php echo form_open('inventory/insert_supplier', array('id' => 'addNewSupplierForm')); ?>
+                            <?php echo form_open('inventory/insert_user', array('id' => 'addNewUserForm')); ?>
 
-                            <!-- Supplier Name -->
-                            <div class="mb-5">
-                                <p><strong>Supplier Name</strong></p>
-                                <input name="name" value="<?php echo set_value('name'); ?>" type="text" class="form-control" placeholder="Supplier Name" aria-label="Supplier Name" required />
-                            </div>
-
-                            <!-- Supplier Contact Details -->
-                            <div class="mb-4">
-                                <p><strong>Supplier Contact Details</strong></p>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <input name="contact_person" value="<?php echo set_value('contact_person'); ?>" type="text" class="form-control" placeholder="Contact Person" aria-label="Contact Person" required />
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <input name="contact_number" value="<?php echo set_value('contact_number'); ?>" type="text" class="form-control" placeholder="Contact Number" aria-label="Contact Number" required />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Supplier Bank Details -->
+                            <!-- User First Name -->
                             <div class="mb-3">
-                                <p><strong>Supplier Bank Details</strong></p>
-                                <div class="mb-3">
-                                    <input name="bank_name" value="<?php echo set_value('bank_name'); ?>" type="text" class="form-control" placeholder="Bank Name" aria-label="Bank Name" required />
-                                </div>
-                                <div class="mb-3">
-                                    <input name="account_name" value="<?php echo set_value('account_name'); ?>" type="text" class="form-control" placeholder="Account Name" aria-label="Account Name" required />
-                                </div>
-                                <div class="mb-3">
-                                    <input name="account_number" value="<?php echo set_value('account_number'); ?>" type="text" class="form-control" placeholder="Account Number" aria-label="Account Number" required />
-                                </div>
+                                <p><strong>First Name</strong></p>
+                                <input name="first_name" value="<?php echo set_value('first_name'); ?>" type="text" class="form-control" placeholder="First Name" aria-label="First Name" required />
+                            </div>
+
+                            <!-- User Last Name -->
+                            <div class="mb-3">
+                                <p><strong>Last Name</strong></p>
+                                <input name="last_name" value="<?php echo set_value('last_name'); ?>" type="text" class="form-control" placeholder="Last Name" aria-label="Last Name" required />
+                            </div>
+
+                            <!-- User Email -->
+                            <div class="mb-3">
+                                <p><strong>Email</strong></p>
+                                <input name="email" value="<?php echo set_value('email'); ?>" type="email" class="form-control" placeholder="Email" aria-label="Email" required />
+                            </div>
+
+                            <!-- User Password -->
+                            <div class="mb-3">
+                                <p><strong>Password</strong></p>
+                                <input name="password" value="<?php echo set_value('password'); ?>" type="password" class="form-control" placeholder="Password" aria-label="Password" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <p class="location_error" style="color:red;"></p>
+                                <p><strong>Location</strong></p>
+                                <select name="location_id" class="form-control" required>
+                                    <option value="">Select Location</option>
+                                    <?php foreach ($active_locations as $location) : ?>
+                                        <option value="<?php echo $location->location_id; ?>"><?php echo $location->location_name; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <p><strong>Team</strong></p>
+                                <p class="team_error" style="color:red;"></p>
+                                <select name="team_id" class="form-control" required>
+                                    <option value="">Select Team</option>
+                                    <?php foreach ($active_teams as $team) : ?>
+                                        <option value="<?php echo $team['team_id']; ?>"><?php echo $team['team_name']; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <p class="type_error" style="color:red;"></p>
+                                <p><strong>User Type</strong></p>
+                                <select name="user_type_id" class="form-control" required>
+                                    <option value="">Select User Type</option>
+                                    <?php foreach ($user_types as $type) : ?>
+                                        <option value="<?php echo $type['user_type_id']; ?>"><?php echo $type['user_type_name']; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+
+                            <!-- User Status -->
+                            <div class="mb-3">
+                                <p><strong>Status</strong></p>
+                                <select name="status" class="form-control" required>
+                                    <option value="0">Active</option>
+                                    <option value="1">Inactive</option>
+                                </select>
                             </div>
 
                             <!-- Modal Footer -->
@@ -872,6 +931,7 @@
                         </div>
 
 
+
                         </form>
                     </div>
                 </div>
@@ -879,8 +939,9 @@
         </div>
 
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     </section>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
     <script>
         // Sidebar
         let arrow = document.querySelectorAll(".arrow");

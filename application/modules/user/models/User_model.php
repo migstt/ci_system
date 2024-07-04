@@ -17,6 +17,18 @@ class User_model extends MY_Model
         return false;
     }
 
+    public function update_user($user_id, $updated_user_formdata)
+    {
+        $this->db->where('user_id', $user_id);
+        $result = $this->db->update('users', $updated_user_formdata);
+
+        if ($result) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public function get_users()
     {
         return $this->getRows('*', 'users', '', 'user_first_name ASC');
@@ -44,6 +56,11 @@ class User_model extends MY_Model
     {
         $where = 'team_id=' . $user_team_id;
         return $this->getRow('*', 'team', $where);
+    }
+
+    public function get_active_user_types()
+    {
+        return $this->getRows('*', 'user_type', '', 'user_type_name ASC');
     }
 
     function get_users_except_current($current_user_id)

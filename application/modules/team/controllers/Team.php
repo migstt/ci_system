@@ -1,6 +1,6 @@
 <?php
 
-class Contact extends MY_Controller
+class Team extends MY_Controller
 {
 
     function __construct()
@@ -14,11 +14,5 @@ class Contact extends MY_Controller
         $this->load->library('pagination');
         $this->load->library('session');
     }
-
-    function index()
-    {
-        $this->contacts();
-    }
-
 
 }

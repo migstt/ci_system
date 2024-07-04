@@ -40,6 +40,15 @@ class Inventory_model extends MY_Model
         return $this->db->get()->result();
     }
 
+    function get_active_locations()
+    {
+        $this->db->select('*');
+        $this->db->from('locations');
+        $this->db->where('location_status', 0);
+        $this->db->order_by('location_name', 'ASC');
+        return $this->db->get()->result();
+    }
+
     function get_location_row_by_id($location_id)
     {
         $where = 'location_id=' . $location_id;
@@ -115,4 +124,17 @@ class Inventory_model extends MY_Model
         return $this->getRow('*', 'suppliers', $where);
     }
     // SUPPLIER MANAGEMENT
+
+
+    // USER MANAGEMENT
+    function verify_user_email($user_email)
+    {
+        $where = 'user_email=' . $user_email;
+        $user = $this->getRow('*', 'users', $where);
+        if ($user) {
+            return true;
+        }
+        return false;
+    }
+    // USER MANAGEMENT
 }
