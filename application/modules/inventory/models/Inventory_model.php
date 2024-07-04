@@ -78,6 +78,15 @@ class Inventory_model extends MY_Model
         }
     }
 
+    function get_active_categories()
+    {
+        $this->db->select('*');
+        $this->db->from('categories');
+        $this->db->where('category_status', 0);
+        $this->db->order_by('category_name', 'ASC');
+        return $this->db->get()->result();
+    }
+
     function get_all_categories()
     {
         $this->db->select('*');
@@ -85,6 +94,12 @@ class Inventory_model extends MY_Model
         // $this->db->where('category_status', 0);
         $this->db->order_by('category_name', 'ASC');
         return $this->db->get()->result();
+    }
+
+    function get_category_row_by_id($category_id)
+    {
+        $where = 'category_id=' . $category_id;
+        return $this->getRow('*', 'categories', $where);
     }
     // CATEGORY MANAGEMENT
 
@@ -125,6 +140,44 @@ class Inventory_model extends MY_Model
     }
     // SUPPLIER MANAGEMENT
 
+    // ITEM MANAGEMENT
+    function insert_item($table, $item_form_data)
+    {
+        if ($this->db->insert($table, $item_form_data)) {
+            return true;
+        }
+        return false;
+    }
+
+    function update_item($item_id, $updated_item_formdata)
+    {
+        $this->db->where('item_id', $item_id);
+        $result = $this->db->update('items', $updated_item_formdata);
+
+        if ($result) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function get_all_items()
+    {
+        $this->db->select('*');
+        $this->db->from('items');
+        $this->db->order_by('item_name', 'ASC');
+        return $this->db->get()->result();
+    }
+
+    function get_active_items()
+    {
+        $this->db->select('*');
+        $this->db->from('items');
+        $this->db->where('item_status', 0);
+        $this->db->order_by('item_name', 'ASC');
+        return $this->db->get()->result();
+    }
+    // ITEM MANAGEMENT
 
     // USER MANAGEMENT
     function verify_user_email($user_email)

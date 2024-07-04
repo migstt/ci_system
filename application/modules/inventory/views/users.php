@@ -463,56 +463,91 @@
                                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editUserModal${data.user_id}">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
+                                    <div class="d-flex justify-content-end">
+                                        <div class="btn-group btn-group-sm" role="group" aria-label="">
+                                            <div class="modal fade" id="editUserModal${data.user_id}" tabindex="-1" aria-labelledby="editUserModal" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h1 class="modal-title fs-5" id="modalLabel">Edit User</h1>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <?php echo validation_errors(); ?>
+                                                            <?php echo form_open('inventory/update_user', array('id' => 'editUserForm${data.user_id}')); ?>
 
-                                    <div class="modal fade" id="editUserModal${data.user_id}" tabindex="-1" aria-labelledby="editUserModal" aria-hidden="true">
-                                        <?php echo validation_errors(); ?>
-                                        <?php echo form_open('inventory/update_user', array('id' => 'editUserForm${data.user_id}')); ?>
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="modalLabel">Edit User</h1>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-
-                                                    <div class="mb-5">
-                                                        <div class="row">
-                                                            <div class="col-md-6 mb-3">
-                                                                <input name="contact_person" value="${data.contact_person}" type="text" class="form-control" placeholder="Contact Person" aria-label="Contact Person" required />
+                                                            <!-- User First Name -->
+                                                            <div class="mb-2">
+                                                                <label><strong>First Name</strong></label>
+                                                                <input name="first_name" value="${data.first_name}" type="text" class="form-control" placeholder="First Name" aria-label="First Name" required />
                                                             </div>
-                                                            <div class="col-md-6">
-                                                                <input name="contact_number" value="${data.contact_no}" type="text" class="form-control" placeholder="Contact Number" aria-label="Contact Number" required />
+
+                                                            <!-- User Last Name -->
+                                                            <div class="mb-2">
+                                                                <label><strong>Last Name</strong></label>
+                                                                <input name="last_name" value="${data.last_name}" type="text" class="form-control" placeholder="Last Name" aria-label="Last Name" required />
                                                             </div>
-                                                        </div>
-                                                    </div>
 
-                                                    <div class="mb-3">
-                                                        <div class="mb-3">
-                                                            <input name="bank_name" value="${data.bank_name}" type="text" class="form-control" placeholder="Bank Name" aria-label="Bank Name" required />
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <input name="account_name" value="${data.account_name}" type="text" class="form-control" placeholder="Account Name" aria-label="Account Name" required />
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <input name="account_number" value="${data.account_no}" type="text" class="form-control" placeholder="Account Number" aria-label="Account Number" required />
-                                                        </div>
-                                                    </div>
+                                                            <!-- User Email -->
+                                                            <div class="mb-2">
+                                                                <label><strong>Email</strong></label>
+                                                                <input name="email" value="${data.email}" type="email" class="form-control" placeholder="Email" aria-label="Email" required disabled />
+                                                            </div>
 
-                                                    <!-- Hidden User ID -->
-                                                    <input type="hidden" name="user_id" value="${data.user_id}" />
+                                                            <!-- Location -->
+                                                            <div class="mb-2">
+                                                                <label><strong>Location</strong></label>
+                                                                <select name="location_id" class="form-control" required>
+                                                                    <option value="${data.location_id}">${data.location}</option>
+                                                                    <?php foreach ($active_locations as $location) : ?>
+                                                                        <option value="<?php echo $location->location_id; ?>" ${data.location_id == "<?php echo $location->location_id; ?>" ? 'selected' : ''}>
+                                                                            <?php echo $location->location_name; ?>
+                                                                        </option>
+                                                                    <?php endforeach; ?>
+                                                                </select>
+                                                            </div>
 
-                                                    <!-- Modal Footer -->
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                        <button type="submit" class="btn btn-primary">Update</button>
+                                                            <!-- Team -->
+                                                            <div class="mb-2">
+                                                                <label><strong>Team</strong></label>
+                                                                <select name="team_id" class="form-control" required>
+                                                                    <option value="${data.team_id}">${data.team}</option>
+                                                                    <?php foreach ($active_teams as $team) : ?>
+                                                                        <option value="<?php echo $team['team_id']; ?>" ${data.team_id == "<?php echo $team['team_id']; ?>" ? 'selected' : ''}>
+                                                                            <?php echo $team['team_name']; ?>
+                                                                        </option>
+                                                                    <?php endforeach; ?>
+                                                                </select>
+                                                            </div>
+
+                                                            <!-- User Type -->
+                                                            <div class="mb-2">
+                                                                <label><strong>User Type</strong></label>
+                                                                <select name="user_type_id" class="form-control" required>
+                                                                    <option value="${data.type_id}">${data.type}</option>
+                                                                    <?php foreach ($user_types as $type) : ?>
+                                                                        <option value="<?php echo $type['user_type_id']; ?>" ${data.user_type_id == "<?php echo $type['user_type_id']; ?>" ? 'selected' : ''}>
+                                                                            <?php echo $type['user_type_name']; ?>
+                                                                        </option>
+                                                                    <?php endforeach; ?>
+                                                                </select>
+                                                            </div>
+
+                                                            <!-- Hidden User ID -->
+                                                            <input type="hidden" name="user_id" value="${data.user_id}" />
+
+                                                            <!-- Modal Footer -->
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-primary">Update</button>
+                                                            </div>
+                                                            <?php echo form_close(); ?>
+                                                        </div>
                                                     </div>
                                                 </div>
-
                                             </div>
                                         </div>
-                                        </form>
                                     </div>
-
 
                                     <!-- Delete Confirmation Modal -->
                                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal${data.user_id}">
@@ -601,28 +636,13 @@
             });
         });
 
-        // for updating  user
+        // for updating user
         $(document).on('submit', 'form[id^="editUserForm"]', function(e) {
             e.preventDefault();
             var form = $(this);
             var id = form.find('input[name="user_id"]').val();
             var has_changes = false;
-            form.find('input').each(function() {
-                if ($(this).val() !== $(this).attr('value')) {
-                    has_changes = true;
-                    return false;
-                }
-            });
-            if (!has_changes) {
-                Swal.fire({
-                    position: "top-end",
-                    icon: "warning",
-                    title: 'No changes made.',
-                    showConfirmButton: false,
-                    timer: 1200
-                });
-                return;
-            }
+
             $.ajax({
                 type: 'POST',
                 url: "<?php echo site_url(); ?>/inventory/update_user/" + id,
@@ -655,6 +675,7 @@
                 }
             });
         });
+
 
         // for deleting user
         $(document).on('submit', 'form[id^="deleteUserForm"]', function(e) {
@@ -928,11 +949,8 @@
                             </div>
 
                             <?php echo form_close(); ?>
+                            </form>
                         </div>
-
-
-
-                        </form>
                     </div>
                 </div>
             </div>
