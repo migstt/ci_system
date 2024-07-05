@@ -24,7 +24,12 @@ class Location extends MY_Controller
 
     function locations()
     {
-        $this->load->view('inventory/location');
+        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
+            $view = $this->load->view('inventory/location', '', true);
+            $this->template($view);
+        } else {
+            redirect('forbidden');
+        }
     }
 
     function insert_location()

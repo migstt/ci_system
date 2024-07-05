@@ -23,6 +23,11 @@ class Stock extends MY_Controller
 
     function stocks()
     {
-        $this->load->view('inventory/stocks');
+        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
+            $view = $this->load->view('inventory/stocks', '', true);
+            $this->template($view);
+        } else {
+            redirect('forbidden');
+        }
     }
 }

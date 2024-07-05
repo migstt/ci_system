@@ -23,7 +23,12 @@ class Inventory extends MY_Controller
 
     function dashboard()
     {
-        $this->load->view('inventory/dashboard');
+        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
+            $view = $this->load->view('inventory/dashboard', '', true);
+            $this->template($view);
+        } else {
+            redirect('forbidden');
+        }
     }
 
     function stocks()

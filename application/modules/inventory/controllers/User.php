@@ -24,20 +24,12 @@ class User extends MY_Controller
 
     function users()
     {
-
-        $current_user       = $this->user->get_user_row_by_id($_SESSION['user_id']);
-        $current_user_type  = $this->user->get_user_type_row($current_user['user_type_id']);
-
-        if ($current_user_type['user_type_name'] != 'Admin') {
+        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
+            $view = $this->load->view('inventory/users', '', true);
+            $this->template($view);
+        } else {
             redirect('forbidden');
-            return;
         }
-
-        $data['active_locations']   = $this->location->get_active_locations();
-        $data['active_teams']       = $this->team->get_all_teams();
-        $data['user_types']         = $this->user->get_active_user_types();
-
-        $this->load->view('inventory/users', $data);
     }
 
     public function insert_user()

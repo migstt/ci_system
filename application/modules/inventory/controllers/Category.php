@@ -25,7 +25,12 @@ class Category extends MY_Controller
 
     function categories()
     {
-        $this->load->view('inventory/category');
+        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
+            $view = $this->load->view('inventory/category', '', true);
+            $this->template($view);
+        } else {
+            redirect('forbidden');
+        }
     }
 
     function insert_category()

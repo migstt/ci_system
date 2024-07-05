@@ -380,7 +380,6 @@
     }
 </script>
 
-
 <!-- Page Contents -->
 <i class='bx bx-menu' style='margin-top: .7%;'></i>
 <div class="container-sm">
