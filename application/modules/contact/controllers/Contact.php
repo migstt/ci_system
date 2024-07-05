@@ -73,8 +73,12 @@ class Contact extends MY_Controller
                 $data['contacts'] = array();
             }
 
-            // $this->load->view('contact/contacts', $data);
-            $this->load->view('contact/contactsv2', $data);
+            if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
+                $view = $this->load->view('contact/contactsv2', $data, true);
+                $this->template($view);
+            } else {
+                redirect('forbidden');
+            }
 
         } else {
             redirect('login');

@@ -40,7 +40,12 @@ class Task extends MY_Controller
                 $data['team_options'][$team['team_id']] = $team['team_name'];
             }
 
-            $this->load->view('task/tasks', $data);
+            if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
+                $view = $this->load->view('task/tasks', $data, true);
+                $this->template($view);
+            } else {
+                redirect('forbidden');
+            }
         } else {
             redirect('login');
         }
@@ -118,7 +123,7 @@ class Task extends MY_Controller
         }
 
         foreach ($all_teams as $team) {
-            $edit_team_options[$team['team_id']] = 'Team ' . $team['team_name']; ;
+            $edit_team_options[$team['team_id']] = 'Team ' . $team['team_name'];;
         }
 
         $output = array(
@@ -227,7 +232,6 @@ class Task extends MY_Controller
                     $response = array('status' => 'error', 'message' => 'Failed to create task. Please try again.');
                     echo json_encode($response);
                 }
-
             } else if ($assigned_team == '') {
 
                 $assigned_to_row        = $this->user->get_user_row_by_id($assigned_user);

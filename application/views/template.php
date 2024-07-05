@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bisag Unsa System</title>
 
-    <!-- for favicon.ico error -->
+    <!-- For favicon.ico error -->
     <link rel="shortcut icon" href="#">
 
     <!-- Boxicons CDN Link -->
@@ -38,7 +38,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-    <!-- sidebar styles -->
+    <!-- Custom Styles -->
     <style>
         /* Google Fonts Import Link */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -593,36 +593,9 @@
             /* Adjust padding as needed */
         }
 
-        .sidebar .logout {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            margin-top: auto;
-            /* Push the logout button to the bottom */
-        }
-
-        .sidebar .logout a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* Center align in closed state */
-            text-decoration: none;
-            color: #fff;
-            padding: 15px 20px;
-            background-color: #f44336;
-            /* Red background for logout */
-            transition: background-color 0.3s ease;
-            /* Smooth transition for background color */
-        }
-
-        .sidebar .logout a:hover {
-            background-color: #d32f2f;
-            /* Darker red on hover */
-        }
-
-        .sidebar.close .logout a {
-            padding: 10px 0;
-            justify-content: center;
+        .sidebar .nav-links.logout-link {
+            padding: 0 0 30px 0;
+            margin-top: 210px;
         }
     </style>
 

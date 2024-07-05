@@ -1,6 +1,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+
 <!-- Custom scripts -->
 <script>
     $(document).ready(function() {
@@ -369,16 +370,13 @@
 <div class="container-sm">
     <div class="d-flex justify-content-between align-items-center">
         <h5 class="mt-2">Users</h5>
-        <?php echo form_open('user/logout'); ?>
-        <button type="submit" class="btn btn-secondary">Logout</button>
-        </form>
     </div>
 
     <!-- Add New User Button -->
     <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewUserModal">
         Add User
     </button>
-    
+
     <!-- Users Table -->
     <div class="user-table-container">
         <table class="table table-sm table-striped" class="display" id="users_table">
