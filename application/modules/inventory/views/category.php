@@ -451,7 +451,7 @@
             searching: true,
             processing: true,
             ajax: {
-                url: '<?php echo site_url(); ?>/inventory/get_categories',
+                url: '<?php echo site_url(); ?>/inventory/category/get_categories',
                 // dataSrc: 'data',
                 type: 'POST',
             },
@@ -572,7 +572,7 @@
             var form = $(this);
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/insert_category/",
+                url: "<?php echo site_url(); ?>/inventory/category/insert_category/",
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -631,7 +631,7 @@
             }
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/update_category/" + id,
+                url: "<?php echo site_url(); ?>/inventory/category/update_category/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -669,7 +669,7 @@
             var id = form.find('input[name="category_id"]').val();
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/delete_category/" + id,
+                url: "<?php echo site_url(); ?>/inventory/category/delete_category/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);

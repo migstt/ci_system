@@ -465,6 +465,164 @@
             color: #dc3545;
             opacity: 0.75;
         }
+
+
+
+        /* Custom styles for the user profile */
+
+        .user-profile {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar {
+            width: 250px;
+            /* Width when sidebar is open */
+            transition: width 0.3s ease;
+            /* Smooth transition for width */
+        }
+
+        .sidebar.close {
+            width: 78px;
+            /* Width when sidebar is closed */
+        }
+
+        .sidebar .logo-details {
+            height: 60px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            /* Smooth transition for opacity and visibility */
+        }
+
+        .sidebar .logo-details i {
+            font-size: 30px;
+            color: #fff;
+            height: 50px;
+            min-width: 78px;
+            text-align: center;
+            line-height: 50px;
+            transition: font-size 0.3s ease;
+            /* Smooth transition for font size */
+        }
+
+        .sidebar .logo-details .logo_name {
+            font-size: 22px;
+            color: #fff;
+            font-weight: 600;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            /* Smooth transition for opacity and visibility */
+        }
+
+        .sidebar.close .logo-details .logo_name {
+            opacity: 0;
+            visibility: hidden;
+            /* Hide logo name when sidebar is closed */
+        }
+
+        .sidebar .nav-links {
+            height: 100%;
+            padding: 30px 0 150px 0;
+            overflow: auto;
+            transition: padding 0.3s ease;
+            /* Smooth transition for padding */
+        }
+
+        .sidebar.close .nav-links {
+            padding: 30px 0 50px 0;
+            /* Adjusted padding for closed state */
+        }
+
+        .user-profile {
+            text-align: center;
+            padding: 10px;
+            color: #fff;
+            margin-bottom: 10px;
+            transition: height 0.3s ease, padding 0.3s ease;
+            /* Smooth transition for height and padding */
+        }
+
+        .user-initials {
+            width: 50px;
+            height: 50px;
+            background-color: #fff;
+            color: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 10px auto;
+            font-weight: bold;
+            transition: width 0.3s ease, height 0.3s ease, font-size 0.3s ease, margin 0.3s ease;
+            /* Smooth transition for size and margin */
+        }
+
+        .user-info {
+            text-align: center;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            /* Smooth transition for opacity and visibility */
+        }
+
+        .user_name {
+            display: block;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .user_role {
+            display: block;
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        /* Additional styles for the closed sidebar state */
+        .sidebar.close .user-info {
+            opacity: 0;
+            visibility: hidden;
+            /* Hide user info when sidebar is closed */
+        }
+
+        .sidebar.close .user-profile {
+            height: 70px;
+            /* Adjust height as needed */
+            padding: 10px 0;
+            /* Adjust padding as needed */
+        }
+
+        .sidebar .logout {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            margin-top: auto;
+            /* Push the logout button to the bottom */
+        }
+
+        .sidebar .logout a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Center align in closed state */
+            text-decoration: none;
+            color: #fff;
+            padding: 15px 20px;
+            background-color: #f44336;
+            /* Red background for logout */
+            transition: background-color 0.3s ease;
+            /* Smooth transition for background color */
+        }
+
+        .sidebar .logout a:hover {
+            background-color: #d32f2f;
+            /* Darker red on hover */
+        }
+
+        .sidebar.close .logout a {
+            padding: 10px 0;
+            justify-content: center;
+        }
     </style>
 </head>
 
@@ -477,7 +635,7 @@
             searching: true,
             processing: true,
             ajax: {
-                url: '<?php echo site_url(); ?>/inventory/get_suppliers',
+                url: '<?php echo site_url(); ?>/inventory/supplier/get_suppliers',
                 // dataSrc: 'data',
                 type: 'POST',
             },
@@ -586,7 +744,7 @@
 
                                     <div class="modal fade" id="editSupplierModal${data.supplier_id}" tabindex="-1" aria-labelledby="editSupplierModal" aria-hidden="true">
                                         <?php echo validation_errors(); ?>
-                                        <?php echo form_open('inventory/update_supplier', array('id' => 'editSupplierForm${data.supplier_id}')); ?>
+                                        <?php echo form_open('inventory/supplier/update_supplier', array('id' => 'editSupplierForm${data.supplier_id}')); ?>
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
@@ -649,7 +807,7 @@
                                     </button>
 
                                     <div class="modal fade" id="confirmDeleteModal${data.supplier_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
-                                    <?php echo form_open('inventory/delete_supplier', array('id' => 'deleteSupplierForm${data.supplier_id}')); ?>
+                                    <?php echo form_open('inventory/supplier/delete_supplier', array('id' => 'deleteSupplierForm${data.supplier_id}')); ?>
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
@@ -681,7 +839,7 @@
             var form = $(this);
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/insert_supplier/",
+                url: "<?php echo site_url(); ?>/inventory/supplier/insert_supplier/",
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -740,7 +898,7 @@
             }
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/update_supplier/" + id,
+                url: "<?php echo site_url(); ?>/inventory/supplier/update_supplier/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -778,7 +936,7 @@
             var id = form.find('input[name="supplier_id"]').val();
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/delete_supplier/" + id,
+                url: "<?php echo site_url(); ?>/inventory/supplier/delete_supplier/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -815,7 +973,7 @@
     function updateStatus(id, newStatus) {
         $.ajax({
             type: 'POST',
-            url: "<?php echo site_url(); ?>/inventory/update_status/" + taskId,
+            url: "<?php echo site_url(); ?>/inventory/supplier/update_status/" + taskId,
             data: {
                 table: 'suppliers',
                 id: taskId,
@@ -854,6 +1012,18 @@
             <i class='bx bxl-c-plus-plus' style="overflow-y: hidden;"></i>
             <span class="logo_name">Cilog</span>
         </div>
+        <div class="user-profile">
+            <div class="user-initials">
+                <?php
+                $initials = strtoupper($current_user_first_name[0] . $current_user_last_name[0]);
+                echo $initials;
+                ?>
+            </div>
+            <div class="user-info">
+                <span class="user_name"><?php echo $current_user_full_name ?></span>
+                <span class="user_role"><?php echo $current_user_type ?></span>
+            </div>
+        </div>
         <ul class="nav-links">
             <li>
                 <a href="#">
@@ -870,13 +1040,9 @@
                         <i class='bx bx-group'></i>
                         <span class="link_name">Contacts</span>
                     </a>
-                    <!-- <i class='bx bxs-chevron-down arrow'></i> -->
                 </div>
                 <ul class="sub-menu">
                     <li><a class="link_name" href="<?php echo site_url('contacts'); ?>">Contacts</a></li>
-                    <!-- <li><a href="#">HTML & CSS</a></li>
-                    <li><a href="#">JavaScript</a></li>
-                    <li><a href="#">PHP & MySQL</a></li> -->
                 </ul>
             </li>
             <li>
@@ -910,11 +1076,19 @@
                     <li><a href="<?php echo site_url('inventory/category'); ?>">Category</a></li>
                     <li><a href="<?php echo site_url('inventory/suppliers'); ?>">Suppliers</a></li>
                     <li><a href="<?php echo site_url('inventory/items'); ?>">Items</a></li>
-                    <li><a href="<?php echo site_url('inventory/reports'); ?>">Report Log</a></li>
-                    <!-- conditional rendering here, if user is admin, show Users option -->
-                    <!-- also in controller, restrict access if current user user_type_id != 1 or Admin -->
-                    <li><a href="<?php echo site_url('inventory/users'); ?>">Users</a></li>
+                    <li><a href="<?php echo site_url('inventory/reports'); ?>">Report Log</a></li>   
+                    <?php if ($current_user_type == 'Admin'): ?>
+                        <li><a href="<?php echo site_url('inventory/users'); ?>">Users</a></li>
+                    <?php endif; ?>
                 </ul>
+            </li>
+        </ul>
+        <ul class="logout">
+            <li class="logout">
+                <a href="<?php echo site_url('logout'); ?>">
+                    <i class='bx bx-log-out'></i>
+                    <span class="link_name">Logout</span>
+                </a>
             </li>
         </ul>
     </div>
@@ -964,7 +1138,7 @@
 
                         <div class="modal-body">
                             <?php echo validation_errors(); ?>
-                            <?php echo form_open('inventory/insert_supplier', array('id' => 'addNewSupplierForm')); ?>
+                            <?php echo form_open('inventory/supplier/insert_supplier', array('id' => 'addNewSupplierForm')); ?>
 
                             <!-- Supplier Name -->
                             <div class="mb-5">
@@ -1007,8 +1181,6 @@
 
                             <?php echo form_close(); ?>
                         </div>
-
-
                         </form>
                     </div>
                 </div>

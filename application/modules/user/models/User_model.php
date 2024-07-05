@@ -75,9 +75,24 @@ class User_model extends MY_Model
             $users_except_current = array();
             return $users_except_current;
         }
-        
+
         return $users_except_current;
     }
 
+    function get_current_user_type($user_type_id)
+    {
+        $where       = 'user_type_id=' . $user_type_id;
+        $user_type   = $this->getRow('*', 'user_type', $where);
+        return $user_type['user_type_name'];
+    }
 
+    function verify_user_email($user_email)
+    {
+        $where = 'user_email=' . $user_email;
+        $user = $this->getRow('*', 'users', $where);
+        if ($user) {
+            return true;
+        }
+        return false;
+    }
 }

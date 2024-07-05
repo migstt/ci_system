@@ -372,7 +372,7 @@
         });
 
         // for flatpickr bug on month dropdown
-        $("#addNewTaskModal").modal({
+        $("#addNewStocksModal").modal({
             show: true,
             focus: false
         });
@@ -967,31 +967,14 @@
                 </form>
             </div>
 
-            <!-- Add New Task Button
-            <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewTaskModal">
-                Create Task
-            </button> -->
-
-            <!-- Other's Tasks Table -->
-            <!-- <div class="others-tasks-table-container">
-                <table class="table table-sm table-striped" class="display" id="others_tasks">
-                    <thead>
-                        <tr>
-                            <th class="text-center"></th>
-                            <th class="text-start">Title</th>
-                            <th class="text-start">Description</th>
-                            <th class="text-start">Assigned to</th>
-                            <th class="text-start">Due date</th>
-                            <th class="text-start">Status</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div> -->
+            <!-- Add New Stocks Button -->
+            <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewStocksModal">
+                Add stocks
+            </button>
 
 
-            <!-- Add New Task Modal -->
-            <!-- <div class="modal fade" id="addNewTaskModal" tabindex="-1" aria-labelledby="addNewTaskModal" aria-hidden="true">
+            <!-- Add New Stocks Modal -->
+            <div class="modal fade" id="addNewStocksModal" tabindex="-1" aria-labelledby="addNewStocksModal" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -1067,7 +1050,7 @@
                         </div>
                     </div>
                 </div>
-            </div> -->
+            </div>
 
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

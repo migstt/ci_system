@@ -446,7 +446,7 @@
             searching: true,
             processing: true,
             ajax: {
-                url: '<?php echo site_url(); ?>/inventory/get_locations',
+                url: '<?php echo site_url(); ?>/inventory/location/get_locations',
                 // dataSrc: 'data',
                 type: 'POST',
             },
@@ -577,7 +577,7 @@
             var form = $(this);
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/insert_location/",
+                url: "<?php echo site_url(); ?>/inventory/location/insert_location/",
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -636,7 +636,7 @@
             }
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/update_location/" + id,
+                url: "<?php echo site_url(); ?>/inventory/location/update_location/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -674,7 +674,7 @@
             var id = form.find('input[name="location_id"]').val();
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/delete_location/" + id,
+                url: "<?php echo site_url(); ?>/inventory/location/delete_location/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);

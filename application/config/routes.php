@@ -63,6 +63,17 @@ $route['tasks'] = 'task/tasks';
 $route['inventory'] = 'inventory/dashboard';
 $route['login'] = 'user/login';
 $route['register'] = 'user/register';
+$route['forbidden'] = 'inventory/forbidden';
+
+
+// INVENTORY MODULE
+$route['inventory/stocks'] = 'inventory/stock/stocks';
+$route['inventory/suppliers'] = 'inventory/supplier/suppliers';
+$route['inventory/reports'] = 'inventory/report/reports';
+$route['inventory/category'] = 'inventory/category/categories';
+$route['inventory/items'] = 'inventory/item/items';
+$route['inventory/users'] = 'inventory/user/users';
+
 // --------------------------------------------
 // my URIs
 // --------------------------------------------

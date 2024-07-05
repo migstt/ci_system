@@ -481,7 +481,7 @@
             searching: true,
             processing: true,
             ajax: {
-                url: '<?php echo site_url(); ?>/inventory/get_users',
+                url: '<?php echo site_url(); ?>/inventory/user/get_users',
                 // dataSrc: 'data',
                 type: 'POST',
             },
@@ -555,7 +555,7 @@
                                                         </div>
                                                         <div class="modal-body">
                                                             <?php echo validation_errors(); ?>
-                                                            <?php echo form_open('inventory/update_user', array('id' => 'editUserForm${data.user_id}')); ?>
+                                                            <?php echo form_open('inventory/user/update_user', array('id' => 'editUserForm${data.user_id}')); ?>
 
                                                             <!-- User First Name -->
                                                             <div class="mb-2">
@@ -636,7 +636,7 @@
                                     </button>
 
                                     <div class="modal fade" id="confirmDeleteModal${data.user_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
-                                    <?php echo form_open('inventory/delete_user', array('id' => 'deleteUserForm${data.user_id}')); ?>
+                                    <?php echo form_open('inventory/user/delete_user', array('id' => 'deleteUserForm${data.user_id}')); ?>
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
@@ -668,7 +668,7 @@
             var form = $(this);
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/insert_user/",
+                url: "<?php echo site_url(); ?>/inventory/user/insert_user/",
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -726,7 +726,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/update_user/" + id,
+                url: "<?php echo site_url(); ?>/inventory/user/update_user/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -765,7 +765,7 @@
             var id = form.find('input[name="user_id"]').val();
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/delete_user/" + id,
+                url: "<?php echo site_url(); ?>/inventory/user/delete_user/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -954,7 +954,7 @@
 
                         <div class="modal-body">
                             <?php echo validation_errors(); ?>
-                            <?php echo form_open('inventory/insert_user', array('id' => 'addNewUserForm')); ?>
+                            <?php echo form_open('inventory/user/insert_user', array('id' => 'addNewUserForm')); ?>
 
                             <!-- User First Name -->
                             <div class="mb-3">

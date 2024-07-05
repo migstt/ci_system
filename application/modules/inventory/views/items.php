@@ -446,7 +446,7 @@
             searching: true,
             processing: true,
             ajax: {
-                url: '<?php echo site_url(); ?>/inventory/get_items',
+                url: '<?php echo site_url(); ?>/inventory/item/get_items',
                 // dataSrc: 'data',
                 type: 'POST',
             },
@@ -508,7 +508,7 @@
 
                                     <div class="modal fade" id="editItemModal${data.item_id}" tabindex="-1" aria-labelledby="editItemModal" aria-hidden="true">
                                         <?php echo validation_errors(); ?>
-                                        <?php echo form_open('inventory/update_item', array('id' => 'editItemForm${data.item_id}')); ?>
+                                        <?php echo form_open('inventory/item/update_item', array('id' => 'editItemForm${data.item_id}')); ?>
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
@@ -571,7 +571,7 @@
                                     </button>
 
                                     <div class="modal fade" id="confirmDeleteModal${data.item_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
-                                    <?php echo form_open('inventory/delete_item', array('id' => 'deleteItemForm${data.item_id}')); ?>
+                                    <?php echo form_open('inventory/item/delete_item', array('id' => 'deleteItemForm${data.item_id}')); ?>
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
@@ -603,7 +603,7 @@
             var form = $(this);
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/insert_item/",
+                url: "<?php echo site_url(); ?>/inventory/item/insert_item/",
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -645,7 +645,7 @@
             var id = form.find('input[name="item_id"]').val();
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/update_item/" + id,
+                url: "<?php echo site_url(); ?>/inventory/item/update_item/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -683,7 +683,7 @@
             var id = form.find('input[name="item_id"]').val();
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/delete_item/" + id,
+                url: "<?php echo site_url(); ?>/inventory/item/delete_item/" + id,
                 data: form.serialize(),
                 success: function(response) {
                     response = JSON.parse(response);
@@ -867,7 +867,7 @@
                         </div>
                         <div class="modal-body">
                             <?php echo validation_errors(); ?>
-                            <?php echo form_open('inventory/insert_item', array('id' => 'addNewItemForm')); ?>
+                            <?php echo form_open('inventory/item/insert_item', array('id' => 'addNewItemForm')); ?>
 
                             <div class="col">
                                 <p><strong>Name</strong></p>
