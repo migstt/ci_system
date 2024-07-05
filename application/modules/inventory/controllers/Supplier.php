@@ -15,6 +15,7 @@ class Supplier extends MY_Controller
         $this->load->library('form_validation');
         $this->load->library('pagination');
         $this->load->library('session');
+        $this->load->library('parser');
     }
 
     function index()
@@ -37,7 +38,8 @@ class Supplier extends MY_Controller
             'current_user_full_name'    => $current_user_full_name
         );
 
-        $this->load->view('inventory/suppliers', $data);
+        $data['content'] = $this->load->view('inventory/suppliers', '', true);
+        $this->parser->parse('template', $data);
     }
 
     function insert_supplier()
@@ -148,8 +150,7 @@ class Supplier extends MY_Controller
         }
 
         if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
-            echo json_encode(array('error' => 'Login required.'));
-            return;
+            redirect('login');
         }
 
         $suppliers = $this->supplier->get_all_suppliers();
@@ -162,7 +163,6 @@ class Supplier extends MY_Controller
         foreach ($suppliers as $supplier) {
 
             $supplier_added_by = $this->user->get_user_row_by_id($supplier->supplier_added_by);
-            $supplier_details = $this->supplier->get_supplier_row_by_id($supplier->supplier_id);
 
             $data[] = array(
                 'supplier_id'       => $supplier->supplier_id,

@@ -14,6 +14,7 @@ class Report extends MY_Controller
         $this->load->library('form_validation');
         $this->load->library('pagination');
         $this->load->library('session');
+
     }
 
     function index()
@@ -23,7 +24,19 @@ class Report extends MY_Controller
 
     function reports()
     {
-        $this->load->view('inventory/reports');
-    }
+        $current_user_row           = $this->user->get_user_row_by_id($_SESSION['user_id']);
+        $current_user_type          = $this->user->get_current_user_type($current_user_row['user_type_id']);
+        $current_user_first_name    = $current_user_row['user_first_name'];
+        $current_user_last_name     = $current_user_row['user_last_name'];
+        $current_user_full_name     = $current_user_first_name . ' ' . $current_user_last_name;
 
+        $data = array(
+            'current_user_type'         => $current_user_type,
+            'current_user_first_name'   => $current_user_first_name,
+            'current_user_last_name'    => $current_user_last_name,
+            'current_user_full_name'    => $current_user_full_name
+        );
+        $data['content'] = $this->load->view('inventory/reports', '', true);
+        $this->parser->parse('template', $data);
+    }
 }
