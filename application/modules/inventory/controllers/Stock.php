@@ -30,6 +30,7 @@ class Stock extends MY_Controller
         $data['active_suppliers']   = $this->supplier->get_active_suppliers();
         $data['active_locations']   = $this->location->get_active_locations();
         $data['active_items']       = $this->item->get_active_items();
+        $data['batch_code']         = $this->generate_batch_code();
 
         if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             $view = $this->load->view('inventory/stocks', $data, true);
@@ -67,43 +68,52 @@ class Stock extends MY_Controller
                 'inv_trk_status'            => 0,
                 'inv_trk_added_by'          => $added_by,
                 'inv_trk_added_at'          => date('Y-m-d H:i:s'),
-                'inv_trk_attachment'        => $attachment,
+                // 'inv_trk_attachment'        => $attachment,
                 'inv_trk_updated_at'        => NULL
             );
 
-            $tracking_id = $this->stock->insert_stocks($tracking_data);
 
-            $items = $this->input->post('items');
-            foreach ($items as $item) {
-                $item_data = array(
-                    'tracking_id'   => $tracking_id,
-                    'item_id'       => $item['item_id'],
-                    'unit_cost'     => $item['amount'],
-                    'quantity'      => $item['quantity'],
-                    'brand'         => NULL,
-                    'serial'        => NULL,
-                    'attachment'    => NULL,
-                    'assigned_to'   => $location_id,
-                    'status'        => 1,
-                    'added_by'      => $added_by,
-                    'date_added'    => date('Y-m-d H:i:s'),
-                    'date_updated'  => NULL
-                );
+            if ($this->stock->insert_stock($tracking_data)) {
+                // $items = $this->input->post('items');
+                // foreach ($items as $item) {
+                //     $item_data = array(
+                //         'tracking_id'   => $batch_code,
+                //         'item_id'       => $item['item_id'],
+                //         'unit_cost'     => $this->input->post('unit_cost'),
+                //         'quantity'      => 1,
+                //         'brand'         => $this->input->post('brand'),
+                //         'serial'        => $this->input->post('serial'),
+                //         'attachment'    => $attachment,
+                //         'assigned_to'   => $location_id,
+                //         'status'        => 1,
+                //         'added_by'      => $added_by,
+                //         'date_added'    => date('Y-m-d H:i:s'),
+                //         'date_updated'  => NULL
+                //     );
 
-                $this->inventory->insert_items($item_data);
+                //     $this->inventory->insert_items($item_data);
+                // }
+
+                $response = array('status' => 'success', 'message' => 'Stocks added successfully.');
+                echo json_encode($response);
+            } else {
+                $response = array('status' => 'error_item_insert', 'message' => 'Database error. Please try again.');
+                echo json_encode($response);
             }
-
-            $response = array('status' => 'success', 'message' => 'Stocks added successfully.');
-            echo json_encode($response);
-        } else {
-            $response = array('status' => 'error', 'message' => 'Failed to add stocks. Please try again.');
-            echo json_encode($response);
         }
     }
 
     private function generate_batch_code()
     {
-        return 'B00000001';
+        $last_inserted_batch_number = $this->stock->get_last_inserted_batch_number();
+        if (!$last_inserted_batch_number) {
+            return 'B00000001';
+        } else {
+            $last_inserted_batch_number = $last_inserted_batch_number['inv_trk_batch_num'];
+            $last_inserted_batch_number = substr($last_inserted_batch_number, 1);
+            $new_batch_number = $last_inserted_batch_number + 1;
+            return 'B' . str_pad($new_batch_number, 8, '0', STR_PAD_LEFT);
+        }
     }
 
     private function generate_serial_code()

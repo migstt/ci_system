@@ -621,7 +621,6 @@
         .select2-selection__arrow {
             height: 44px !important;
         }
-
     </style>
 
 </head>

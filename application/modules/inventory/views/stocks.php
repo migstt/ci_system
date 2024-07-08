@@ -551,7 +551,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="batchCode" class="form-label">Batch Code</label>
-                            <input type="text" class="form-control" name="batch_code" id="batchCode" placeholder="0000371">
+                            <input type="text" class="form-control" name="batch_code" id="batchCode" value="<?php echo $batch_code; ?>" readonly>
                         </div>
                         <div class="col-md-6">
                             <label for="totalCost" class="form-label">Total Cost</label>
