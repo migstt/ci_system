@@ -30,10 +30,10 @@
                     "data": "category",
                     "className": "text-start align-middle"
                 },
-                {
-                    "data": "location",
-                    "className": "text-start align-middle"
-                },
+                // {
+                //     "data": "location",
+                //     "className": "text-start align-middle"
+                // },
                 {
                     "data": "status",
                     "className": "text-center align-middle",
@@ -335,7 +335,7 @@
                     <th class="text-center"></th>
                     <th class="text-start">Name</th>
                     <th class="text-start">Category</th>
-                    <th class="text-start">Location</th>
+                    <!-- <th class="text-start">Location</th> -->
                     <th class="text-start">Status</th>
                     <th class="text-start">Added by</th>
                     <th class="text-end">Actions</th>

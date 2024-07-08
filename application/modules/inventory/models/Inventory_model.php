@@ -9,4 +9,8 @@ class Inventory_model extends MY_Model
         parent::__construct();
     }
 
+    public function insert_items()
+    {
+        
+    }
 }

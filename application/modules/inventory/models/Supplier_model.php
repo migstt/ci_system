@@ -48,6 +48,7 @@ class Supplier_model extends MY_Model
     function get_supplier_row_by_id($supplier_id)
     {
         $where = 'supplier_id=' . $supplier_id;
-        return $this->getRow('*', 'suppliers', $where);
+        $table = 'suppliers';
+        return $this->getRow('*', $table, $where);
     }
 }

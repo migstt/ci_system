@@ -39,10 +39,9 @@ class Item_model extends MY_Model
 
     function get_active_items()
     {
-        $this->db->select('*');
-        $this->db->from('items');
-        $this->db->where('item_status', 0);
-        $this->db->order_by('item_name', 'ASC');
-        return $this->db->get()->result();
+        $table      = 'items';
+        $where      = 'item_status=0';
+        $orderby    = 'item_name ASC';
+        return $this->getRows('*', $table, $where, $orderby);
     }
 }

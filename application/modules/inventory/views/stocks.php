@@ -1,7 +1,6 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-
 <!-- Custom scripts -->
 <script>
     $(document).ready(function() {
@@ -547,117 +546,214 @@
                     <h5 class="modal-title" id="addNewStocksModalLabel">Add stocks</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                <?php echo form_open('inventory/stock/insert_stocks', array('id' => 'addNewStocksForm')); ?>
                 <div class="modal-body">
-                    <form>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="batchCode" class="form-label">Batch Code</label>
-                                <input type="text" class="form-control" id="batchCode" placeholder="0000371" disabled>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="totalCost" class="form-label">Total Cost</label>
-                                <input type="text" class="form-control" id="totalCost" placeholder="₱ 0" disabled>
-                            </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="batchCode" class="form-label">Batch Code</label>
+                            <input type="text" class="form-control" name="batch_code" id="batchCode" placeholder="0000371">
                         </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="supplier" class="form-label">Supplier</label>
-                                <select class="form-select" id="supplier">
-                                    <option selected>Choose Supplier</option>
-                                    <!-- Add supplier options here -->
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="remarks" class="form-label">Remarks</label>
-                                <textarea type="text" class="form-control" id="remarks" placeholder="Enter remarks here..."></textarea>
-                            </div>
+                        <div class="col-md-6">
+                            <label for="totalCost" class="form-label">Total Cost</label>
+                            <input type="text" class="form-control" name="total_cost" id="totalCost" placeholder="₱ 0" disabled>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="dateReceived" class="form-label">Date Received</label>
-                                <input type="date" class="form-control" id="dateReceived">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="location" class="form-label">Location</label>
-                                <select class="form-select" id="location">
-                                    <option selected>Choose Location</option>
-                                    <!-- Add location options here -->
-                                </select>
-                            </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="supplier" class="form-label">Supplier</label>
+                            <select name="supplier_id" class="form-control supplier_select" required>
+                                <option value="">Select supplier</option>
+                                <?php foreach ($active_suppliers as $supplier) : ?>
+                                    <option value="<?php echo $supplier['supplier_id']; ?>"><?php echo $supplier['supplier_name']; ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="attachment" class="form-label">Attachment</label>
-                                <input type="file" class="form-control" id="attachment">
-                            </div>
+                        <div class="col-md-6">
+                            <label for="remarks" class="form-label">Remarks</label>
+                            <textarea name="remarks" class="form-control" id="remarks" placeholder="Enter remarks here..."></textarea>
                         </div>
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="itemsTable">
-                                <thead>
-                                    <tr>
-                                        <th>Item details</th>
-                                        <th>Amount</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <select class="form-select">
-                                                <option selected>Item</option>
-                                                <!-- Add item options here -->
-                                            </select>
-                                            <input type="text" class="form-control mt-2" placeholder="Please choose an item first.">
-                                        </td>
-                                        <td>
-                                            <input type="number" class="form-control" placeholder="Quantity: 0" min="0">
-                                            <input type="number" class="form-control mt-2" placeholder="Amount: 0" min="0" disabled>
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-danger remove-item">Remove</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="dateReceived" class="form-label">Date Received</label>
+                            <input name="date_received" id="date_received" type="date" class="form-control" placeholder="Date received" aria-label="Date received" required />
                         </div>
-                        <button type="button" class="btn btn-primary mt-3" id="addItemButton">Add Item</button>
-                    </form>
+                        <div class="col-md-6">
+                            <label for="location" class="form-label">Location</label>
+                            <select name="location_id" class="form-control location_select" required>
+                                <option value="">Select Location</option>
+                                <?php foreach ($active_locations as $location) : ?>
+                                    <option value="<?php echo $location->location_id; ?>"><?php echo $location->location_name; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="attachment" class="form-label">Attachment</label>
+                            <input type="file" name="attachment" class="form-control" id="attachment">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="itemsTable">
+                            <thead>
+                                <tr>
+                                    <th>Item details</th>
+                                    <th>Quantity & Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <select name="items[0][item_id]" class="form-control item_select" required>
+                                            <option value="">Select item</option>
+                                            <?php foreach ($active_items as $item) : ?>
+                                                <option value="<?php echo $item['item_id']; ?>"><?php echo $item['item_name']; ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <input type="text" class="form-control mt-2" placeholder="Please choose an item first." disabled>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="items[0][quantity]" class="form-control" placeholder="Quantity: 0" min="0" required>
+                                        <input type="number" name="items[0][amount]" class="form-control mt-2" placeholder="Amount: 0" min="0" required>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger remove-item">Remove</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-primary mt-3" id="addItemButton">Add Item</button>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-success">Save</button>
+                    <button type="submit" class="btn btn-success">Save</button>
                 </div>
+                <?php echo form_close(); ?>
             </div>
         </div>
     </div>
 </div>
 <script>
     $(document).ready(function() {
+
+        // for adding supplier
+        $(document).on('submit', 'form[id^="addNewStocksForm"]', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            $.ajax({
+                type: 'POST',
+                url: "<?php echo site_url(); ?>/inventory/stock/insert_stocks/",
+                data: form.serialize(),
+                success: function(response) {
+                    response = JSON.parse(response);
+                    // $('#supplier_table').DataTable().ajax.reload(null, false);
+                    form.closest('.modal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "success",
+                        title: response.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                },
+                error: function(xhr, status, error, response) {
+                    response = JSON.parse(response);
+                    form.closest('.modal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "error",
+                        title: response.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    console.error('AJAX ERROR: ' + xhr.responseText);
+                    console.error('ADD STOCKS ERROR: ' + error);
+                }
+            });
+
+        });
+
+        $('.location_select').select2({
+            dropdownParent: '#addNewStocksModal .modal-content',
+            width: '100%',
+            theme: "classic",
+            placeholder: "Select location",
+        });
+
+        $('.item_select').select2({
+            dropdownParent: '#addNewStocksModal .modal-content',
+            width: '100%',
+            theme: "classic",
+            placeholder: "Select item",
+        });
+
+        $('.supplier_select').select2({
+            dropdownParent: '#addNewStocksModal .modal-content',
+            width: '100%',
+            theme: "classic",
+            placeholder: "Select supplier",
+        });
+
+        // initialize flatpickr for task task due date and time,
+        flatpickr("#date_received", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            minDate: "today",
+        });
+
+        var itemIndex = 0;
+
         $('#addItemButton').click(function() {
-            var newRow = `
-                    <tr>
-                        <td>
-                            <select class="form-select">
-                                <option selected>Item</option>
-                                <!-- Add item options here -->
-                            </select>
-                            <input type="text" class="form-control mt-2" placeholder="Please choose an item first.">
-                        </td>
-                        <td>
-                            <input type="number" class="form-control" placeholder="Quantity 0">
-                            <input type="number" class="form-control mt-2" placeholder="Amount 0">
-                        </td>
-                        <td>
-                            <button type="button" class="btn btn-danger remove-item">Remove</button>
-                        </td>
-                    </tr>
-                `;
-            $('#itemsTable tbody').append(newRow);
+            addItemRow();
         });
 
         $(document).on('click', '.remove-item', function() {
             $(this).closest('tr').remove();
+            reindexItemRows();
         });
+
+        function addItemRow() {
+            var newRow = `
+                            <tr>
+                                <td>
+                                    <select name="items[` + itemIndex + `][item_id]" class="form-control item_select" required>
+                                        <option value="">Select item</option>
+                                        <?php foreach ($active_items as $item) : ?>
+                                            <option value="<?php echo $item['item_id']; ?>"><?php echo $item['item_name']; ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <input type="text" class="form-control mt-2" placeholder="Please choose an item first." disabled>
+                                </td>
+                                <td>
+                                    <input type="number" name="items[` + itemIndex + `][quantity]" class="form-control" placeholder="Quantity: 0" min="0" required>
+                                    <input type="number" name="items[` + itemIndex + `][amount]" class="form-control mt-2" placeholder="Amount: 0" min="0" required>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger remove-item">Remove</button>
+                                </td>
+                            </tr>
+                        `;
+            $('#itemsTable tbody').append(newRow);
+            initializeSelect2();
+            reindexItemRows();
+        }
+
+        function reindexItemRows() {
+            itemIndex = 0;
+            $('#itemsTable tbody tr').each(function() {
+                $(this).find('select[name^="items["]').attr('name', 'items[' + itemIndex + '][item_id]');
+                $(this).find('input[name^="items["][name$="[quantity]"]').attr('name', 'items[' + itemIndex + '][quantity]');
+                $(this).find('input[name^="items["][name$="[amount]"]').attr('name', 'items[' + itemIndex + '][amount]');
+                itemIndex++;
+            });
+        }
 
         function checkRemoveButtons() {
             if ($('#itemsTable tbody tr').length == 1) {
@@ -667,7 +763,16 @@
             }
         }
 
-        // Initial check to disable the remove button if there's only one row
+        function initializeSelect2() {
+            $('.item_select').select2({
+                dropdownParent: '#addNewStocksModal .modal-content',
+                width: '100%',
+                theme: 'classic',
+                placeholder: 'Select item',
+            });
+        }
+
         checkRemoveButtons();
+        initializeSelect2();
     });
 </script>
