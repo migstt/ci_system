@@ -24,8 +24,13 @@ class User extends MY_Controller
 
     function users()
     {
+
+        $data['active_locations']   = $this->location->get_active_locations();
+        $data['active_teams']       = $this->team->get_active_teams();
+        $data['active_user_types']  = $this->user->get_active_user_types();
+
         if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
-            $view = $this->load->view('inventory/users', '', true);
+            $view = $this->load->view('inventory/users', $data, true);
             $this->template($view);
         } else {
             redirect('forbidden');
@@ -73,7 +78,7 @@ class User extends MY_Controller
             );
 
             if ($this->user->insert_user($user_form_data)) {
-                $response = array('status' => 'success', 'message' => 'User added successfully.');
+                $response = array('status' => 'success', 'message' => 'Successfully added user.');
                 echo json_encode($response);
             } else {
                 $response = array('status' => 'error', 'message' => 'Failed to add user. Please try again.');

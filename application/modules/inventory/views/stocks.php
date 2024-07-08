@@ -539,84 +539,135 @@
         Add stocks
     </button>
 
-
     <!-- Add New Stocks Modal -->
-    <div class="modal fade" id="addNewStocksModal" tabindex="-1" aria-labelledby="addNewStocksModal" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade" id="addNewStocksModal" tabindex="-1" aria-labelledby="addNewStocksModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="modalLabek">Create Task</h1>
+                    <h5 class="modal-title" id="addNewStocksModalLabel">Add stocks</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <?php echo validation_errors(); ?>
-                    <?php echo form_open('task/insert_task', array('id' => 'addNewTaskForm')); ?>
-                    <div class="col">
-                        <p><strong>Task title</strong></p>
-                    </div>
-                    <div class="col">
-                        <input name="title" value="<?php echo set_value('title'); ?>" type="text" class="form-control" placeholder="Task title" aria-label="Task title" required />
-                    </div>
-                    <div class="col mt-3">
-                        <p><strong>Task description</strong></p>
-                    </div>
-                    <div class="col mt-3 mb-3">
-                        <textarea name="description" class="form-control" placeholder="Task description" aria-label="Task description" required rows="5"><?php echo set_value('description'); ?></textarea>
-                    </div>
-                    <div class="col">
-                        <p><strong>Assign to</strong></p>
-                    </div>
-                    <div class="col assign-error-message">
-                        <p style="color: red;"></p>
-                    </div>
-                    <div class="col mt-3 select_user_dropdown">
-                        <?php if (!empty($user_options)) : ?>
-                            <select name="user_selected" class="form-select" aria-label="User selected" id="user_selected">
-                                <?php foreach ($user_options as $option_value => $option_label) : ?>
-                                    <option value="<?php echo $option_value; ?>"><?php echo $option_label; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        <?php else : ?>
-                            <p>No users to assign with found.</p>
-                        <?php endif; ?>
-                    </div>
-                    <div class="col mt-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="team" name="assign_to_team" id="assign_to_team">
-                            <label class="form-check-label" for="assign_to_team">
-                                Assign to a team
-                            </label>
+                    <form>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="batchCode" class="form-label">Batch Code</label>
+                                <input type="text" class="form-control" id="batchCode" placeholder="0000371" disabled>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="totalCost" class="form-label">Total Cost</label>
+                                <input type="text" class="form-control" id="totalCost" placeholder="₱ 0" disabled>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col mt-3 select_team_dropdown">
-                        <?php if (!empty($team_options)) : ?>
-                            <select name="team_selected" class="form-select" aria-label="Team selected" id="team_selected" disabled>
-                                <?php foreach ($team_options as $option_value => $option_label) : ?>
-                                    <option value="<?php echo $option_value; ?>"><?php echo $option_label; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        <?php else : ?>
-                            <p>No team to assign with found.</p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div class="col mt-3">
-                        <p><strong>Due date</strong></p>
-                    </div>
-                    <div class="col date-error-message">
-                        <p style="color: red;"></p>
-                    </div>
-                    <div class="col">
-                        <input name="due_date" id="due_date" type="date" class="form-control" placeholder="Due date" aria-label="Due date" required />
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Create</button>
-                    </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="supplier" class="form-label">Supplier</label>
+                                <select class="form-select" id="supplier">
+                                    <option selected>Choose Supplier</option>
+                                    <!-- Add supplier options here -->
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="remarks" class="form-label">Remarks</label>
+                                <textarea type="text" class="form-control" id="remarks" placeholder="Enter remarks here..."></textarea>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="dateReceived" class="form-label">Date Received</label>
+                                <input type="date" class="form-control" id="dateReceived">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="location" class="form-label">Location</label>
+                                <select class="form-select" id="location">
+                                    <option selected>Choose Location</option>
+                                    <!-- Add location options here -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="attachment" class="form-label">Attachment</label>
+                                <input type="file" class="form-control" id="attachment">
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="itemsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Item details</th>
+                                        <th>Amount</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <select class="form-select">
+                                                <option selected>Item</option>
+                                                <!-- Add item options here -->
+                                            </select>
+                                            <input type="text" class="form-control mt-2" placeholder="Please choose an item first.">
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control" placeholder="Quantity: 0" min="0">
+                                            <input type="number" class="form-control mt-2" placeholder="Amount: 0" min="0" disabled>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger remove-item">Remove</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn btn-primary mt-3" id="addItemButton">Add Item</button>
                     </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success">Save</button>
                 </div>
             </div>
         </div>
     </div>
-
 </div>
+<script>
+    $(document).ready(function() {
+        $('#addItemButton').click(function() {
+            var newRow = `
+                    <tr>
+                        <td>
+                            <select class="form-select">
+                                <option selected>Item</option>
+                                <!-- Add item options here -->
+                            </select>
+                            <input type="text" class="form-control mt-2" placeholder="Please choose an item first.">
+                        </td>
+                        <td>
+                            <input type="number" class="form-control" placeholder="Quantity 0">
+                            <input type="number" class="form-control mt-2" placeholder="Amount 0">
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger remove-item">Remove</button>
+                        </td>
+                    </tr>
+                `;
+            $('#itemsTable tbody').append(newRow);
+        });
+
+        $(document).on('click', '.remove-item', function() {
+            $(this).closest('tr').remove();
+        });
+
+        function checkRemoveButtons() {
+            if ($('#itemsTable tbody tr').length == 1) {
+                $('.remove-item').prop('disabled', true);
+            } else {
+                $('.remove-item').prop('disabled', false);
+            }
+        }
+
+        // Initial check to disable the remove button if there's only one row
+        checkRemoveButtons();
+    });
+</script>

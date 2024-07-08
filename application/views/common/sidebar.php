@@ -74,8 +74,6 @@
                     <?php endif; ?>
                 </ul>
             </li>
-        </ul>
-        <ul class="nav-links logout-link">
             <li>
                 <a href="<?php echo site_url('user/logout'); ?>">
                     <i class='bx bx-log-out'></i>

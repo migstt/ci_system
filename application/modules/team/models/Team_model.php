@@ -16,7 +16,7 @@ class Team_model extends MY_Model
 
     public function get_active_teams()
     {
-        return $this->getRows('*', 'team', array('team_status' => 0), 'team_name ASC');
+        return $this->getRows('*', 'team');
     }
 
     public function get_team_row_by_id($team_id)

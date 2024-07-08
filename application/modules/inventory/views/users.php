@@ -1,10 +1,38 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/css/select2.min.css" rel="stylesheet" />
+
 
 <!-- Custom scripts -->
 <script>
     $(document).ready(function() {
+
+        $('.location_select').select2({
+            dropdownParent: '#addNewUserModal .modal-content',
+            width: '100%',
+            theme: "classic",
+            placeholder: "Select location",
+            allowClear: true
+        });
+
+        $('.team_select').select2({
+            dropdownParent: '#addNewUserModal .modal-content',
+            width: '100%',
+            theme: "classic",
+            placeholder: "Select team",
+            allowClear: true
+        });
+
+        $('.user_type_select').select2({
+            dropdownParent: '#addNewUserModal .modal-content',
+            width: '100%',
+            theme: "classic",
+            placeholder: "Select user type",
+            allowClear: true
+        });
+
         // client side users datatable
         $('#users_table').DataTable({
             responsive: true,
@@ -136,7 +164,7 @@
                                                                 <label><strong>User Type</strong></label>
                                                                 <select name="user_type_id" class="form-control" required>
                                                                     <option value="${data.type_id}">${data.type}</option>
-                                                                    <?php foreach ($user_types as $type) : ?>
+                                                                    <?php foreach ($active_user_types as $type) : ?>
                                                                         <option value="<?php echo $type['user_type_id']; ?>" ${data.user_type_id == "<?php echo $type['user_type_id']; ?>" ? 'selected' : ''}>
                                                                             <?php echo $type['user_type_name']; ?>
                                                                         </option>
@@ -326,9 +354,6 @@
             });
         });
 
-        $('.team_select').select2();
-        $('.location_select').select2();
-        $('.user_type_select').select2();
     });
 
     // for updating user status
@@ -435,8 +460,8 @@
                     <div class="mb-3">
                         <p class="location_error" style="color:red;"></p>
                         <p><strong>Location</strong></p>
-                        <select name="location_id" class="form-control" required>
-                            <option value="">Select Location</option>
+                        <select name="location_id" class="form-control location_select" required>
+                            <option value="" >Select Location</option>
                             <?php foreach ($active_locations as $location) : ?>
                                 <option value="<?php echo $location->location_id; ?>"><?php echo $location->location_name; ?></option>
                             <?php endforeach; ?>
@@ -446,7 +471,7 @@
                     <div class="mb-3">
                         <p><strong>Team</strong></p>
                         <p class="team_error" style="color:red;"></p>
-                        <select name="team_id" class="form-control" required>
+                        <select name="team_id" class="form-control team_select" required>
                             <option value="">Select Team</option>
                             <?php foreach ($active_teams as $team) : ?>
                                 <option value="<?php echo $team['team_id']; ?>"><?php echo $team['team_name']; ?></option>
@@ -457,9 +482,9 @@
                     <div class="mb-3">
                         <p class="type_error" style="color:red;"></p>
                         <p><strong>User Type</strong></p>
-                        <select name="user_type_id" class="form-control" required>
+                        <select name="user_type_id" class="form-control user_type_select" required>
                             <option value="">Select User Type</option>
-                            <?php foreach ($user_types as $type) : ?>
+                            <?php foreach ($active_user_types as $type) : ?>
                                 <option value="<?php echo $type['user_type_id']; ?>"><?php echo $type['user_type_name']; ?></option>
                             <?php endforeach; ?>
                         </select>

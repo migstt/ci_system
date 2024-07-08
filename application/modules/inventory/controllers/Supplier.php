@@ -152,19 +152,19 @@ class Supplier extends MY_Controller
         $data = array();
         foreach ($suppliers as $supplier) {
 
-            $supplier_added_by = $this->user->get_user_row_by_id($supplier->supplier_added_by);
+            $supplier_added_by = $this->user->get_user_row_by_id($supplier['supplier_added_by']);
 
             $data[] = array(
-                'supplier_id'       => $supplier->supplier_id,
-                'name'              => $supplier->supplier_name,
+                'supplier_id'       => $supplier['supplier_id'],
+                'name'              => $supplier['supplier_name'],
                 'contact_details'   => $supplier,
                 'bank_details'      => $supplier,
-                'contact_person'    => $supplier->supplier_contact_person,
-                'contact_no'        => $supplier->supplier_contact_no,
-                'bank_name'         => $supplier->supplier_bank_name,
-                'account_name'      => $supplier->supplier_account_name,
-                'account_no'        => $supplier->supplier_account_no,
-                'status'            => $supplier->supplier_status == 0 ? 'Active' : 'Inactive',
+                'contact_person'    => $supplier['supplier_contact_person'],
+                'contact_no'        => $supplier['supplier_contact_no'],
+                'bank_name'         => $supplier['supplier_bank_name'],
+                'account_name'      => $supplier['supplier_account_name'],
+                'account_no'        => $supplier['supplier_account_no'],
+                'status'            => $supplier['supplier_status'] == 0 ? 'Active' : 'Inactive',
                 'added_by'          => $supplier_added_by['user_first_name'] . ' ' . $supplier_added_by['user_last_name'],
             );
         }

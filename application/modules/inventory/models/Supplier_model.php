@@ -8,7 +8,7 @@ class Supplier_model extends MY_Model
     {
         parent::__construct();
     }
-    
+
     function insert_supplier($table, $supplier_form_data)
     {
         if ($this->db->insert($table, $supplier_form_data)) {
@@ -31,11 +31,18 @@ class Supplier_model extends MY_Model
 
     function get_all_suppliers()
     {
-        $this->db->select('*');
-        $this->db->from('suppliers');
-        // $this->db->where('location_status', 0);
-        $this->db->order_by('supplier_name', 'ASC');
-        return $this->db->get()->result();
+        $table      = 'suppliers';
+        $orderby    = 'supplier_name ASC';
+        $where      = '';
+        return $this->getRows('*', $table, $where, $orderby);
+    }
+
+    function get_active_suppliers()
+    {
+        $table      = 'suppliers';
+        $where      = 'supplier_status=0';
+        $orderby    = 'supplier_name ASC';
+        return $this->getRows('*', $table, $where, $orderby);
     }
 
     function get_supplier_row_by_id($supplier_id)

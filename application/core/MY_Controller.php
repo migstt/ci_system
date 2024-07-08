@@ -15,6 +15,7 @@ class MY_Controller extends MX_Controller
         $this->load->view('template/template_main', $data);
     }
 
+    
     function template($view)
     {
         $current_user_row   = $this->user->get_user_row_by_id($_SESSION['user_id']);
