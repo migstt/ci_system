@@ -134,7 +134,53 @@ class Stock extends MY_Controller
         }
     }
 
+    public function get_stocks()
+    {
+        if (!$this->input->is_ajax_request()) {
+            exit('No direct script access allowed');
+        }
 
+        if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
+            redirect('login');
+        }
+
+        $stocks = $this->stock->get_stocks();
+
+        if ($stocks === false || empty($stocks)) {
+            $stocks = array();
+        }
+
+        $data = array();
+        foreach ($stocks as $stock) {
+
+            $stock_added_by = $this->user->get_user_row_by_id($stock['inv_trk_added_by']);
+            $stock_location = $this->location->get_location_row_by_id($stock['inv_trk_location_id']);
+            $stock_supplier = $this->supplier->get_supplier_row_by_id($stock['inv_trk_supplier_id']);
+
+            $data[] = array(
+                'batch_id'          => $stock['inv_trk_id'],
+                'batch_code'        => $stock['inv_trk_batch_num'],
+                'supplier'          => $stock_supplier['supplier_name'],
+                'total_cost'        => $stock['inv_trk_total_cost'],
+                'location'          => $stock_location['location_name'],
+                'date_received'     => $stock['inv_trk_date_delivered'],
+                'added_by'          => $stock_added_by['user_first_name'] . ' ' . $stock_added_by['user_last_name'],
+
+                'remarks'           => $stock['inv_trk_notes'],
+                'attachment'        => $stock['inv_trk_attachment'],
+                'status'            => $stock['inv_trk_status'] == 0 ? 'Received' : 'Issued',
+            );
+        }
+
+        $output = array(
+            "draw"              => intval($this->input->get("draw")),
+            "recordsTotal"      => count($data),
+            "recordsFiltered"   => count($data),
+            "data"              => $data
+        );
+
+        echo json_encode($output);
+    }
 
     private function generate_batch_code()
     {

@@ -31,6 +31,11 @@ class Inventory extends MY_Controller
         }
     }
 
+    function all_items()
+    {
+        redirect('inventory/items/all_items');
+    }
+
     function stocks()
     {
         redirect('inventory/stock/stocks');

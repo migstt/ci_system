@@ -63,6 +63,7 @@
                 <ul class="sub-menu mt-1">
                     <li><a class="link_name" href="<?php echo site_url('inventory'); ?>">Inventory</a></li>
                     <li><a href="<?php echo site_url('inventory'); ?>">Dashboard</a></li>
+                    <li><a href="<?php echo site_url('inventory/all-items'); ?>">Inventory</a></li>
                     <li><a href="<?php echo site_url('inventory/stocks'); ?>">Stocks</a></li>
                     <li><a href="<?php echo site_url('inventory/location'); ?>">Location</a></li>
                     <li><a href="<?php echo site_url('inventory/category'); ?>">Category</a></li>

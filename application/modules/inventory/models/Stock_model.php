@@ -9,6 +9,13 @@ class Stock_model extends MY_Model
         parent::__construct();
     }
 
+    public function get_stocks()
+    {
+        $table      = 'inventory_tracking';
+        $orderby    = 'inv_trk_id DESC';
+        $where      = '';
+        return $this->getRows('*', $table, $where, $orderby);
+    }
 
     function insert_stock($stock_form_data)
     {

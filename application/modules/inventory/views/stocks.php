@@ -163,13 +163,13 @@
             focus: false
         });
 
-        // client side other's tasks datatable
-        $('#others_tasks').DataTable({
+        // client side stocks datatable
+        $('#stocks_table').DataTable({
             responsive: true,
             searching: true,
             processing: true,
             ajax: {
-                url: '<?php echo site_url(); ?>/task/get_others_tasks',
+                url: '<?php echo site_url(); ?>/inventory/stock/get_stocks',
                 // dataSrc: 'data',
                 dataSrc: function(json) {
                     window.editUserOptions = json.edit_user_options;
@@ -187,126 +187,37 @@
                     }
                 },
                 {
-                    "data": "title",
+                    "data": "batch_code",
                     "className": "text-start align-middle"
                 },
                 {
-                    "data": "description",
+                    "data": "supplier",
                     "className": "text-start align-middle"
                 },
                 {
-                    "data": "assigned_to",
+                    "data": "total_cost",
                     "className": "text-start align-middle",
                 },
                 {
-                    "data": "due_date",
+                    "data": "location",
                     "className": "text-start align-middle",
                 },
                 {
-                    "data": "status",
+                    "data": "date_received",
                     "className": "text-start align-middle",
-                    "render": function(data) {
-                        data = data.replace(/_/g, ' ');
-                        data = data.charAt(0).toUpperCase() + data.slice(1);
-                        return data;
-                    }
                 },
-                // for the tasks actions (edit, delete) row
+                {
+                    "data": "added_by",
+                    "className": "text-start align-middle",
+                },
+                // action button for viewing other stock details like remarks, attachments, etc..
                 {
                     "data": null,
                     "sortable": false,
                     "className": "align-middle",
-                    "render": function(data, type, row) {
-                        let options = window.editUserOptions;
-                        let optionsHTML = '';
-                        for (let key in options) {
-                            optionsHTML += `<option value="${key}" ${options[key] == data.assigned_to ? 'selected' : ''}>${options[key]}</option>`;
-                        }
+                    render: function(data, type, row) {
                         return `
-                            <div class="d-flex justify-content-end">
-                                <div class="btn-group btn-group-sm" role="group" aria-label="">
-                            
-                                    <!-- Update/Edit Task Modal -->
-                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editTaskModal${data.task_id}">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-
-                                    <div class="modal fade" id="editTaskModal${data.task_id}" tabindex="-1" aria-labelledby="editTaskModal" aria-hidden="true">
-                                        <?php echo validation_errors(); ?>
-                                        <?php echo form_open('task/update_others_task', array('id' => 'editTaskForm${data.task_id}')); ?>
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="modalLabel">Edit Task</h1>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="col mb-3">
-                                                        <p class="text-start"><strong>Task title</strong></p>
-                                                    </div>
-                                                    <div class="col">
-                                                        <input name="title" value="${data.title}" type="text" class="form-control" placeholder="Task title" aria-label="Task title" required />
-                                                    </div>
-                                                    <div class="col mt-3 mb-3">
-                                                        <p class="text-start"><strong>Task description</strong></p>
-                                                    </div>
-                                                    <div class="col mt-3 mb-3">
-                                                        <textarea name="description" class="form-control" placeholder="Task description" aria-label="Task description" required rows="4">${data.description}</textarea>
-                                                    </div>
-                                                    <div class="col mt-3 mb-3">
-                                                        <p class="text-start"><strong>Task is assigned to: </strong></p>
-                                                    </div>
-                                                    <div class="col">
-                                                        <select name="user_selected" class="form-select" aria-label="User selected">
-                                                            ${optionsHTML}
-                                                        </select>
-                                                    </div> 
-                                                    <div class="col mt-3 text-start">
-                                                        <p><strong>Task due date</strong></p>
-                                                    </div>
-                                                    <div class="col">
-                                                        <input name="due_date" id="due_date" type="text" class="form-control" placeholder="Due date" aria-label="Due date" required value="${data.due_date}" />
-                                                    </div>
-                                                    <div class="col">
-                                                        <input type="hidden" name="task_id" value="${data.task_id}" type="text" class="form-control" placeholder="task_id" aria-label="task_id" required />
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                        <button type="submit" class="btn btn-primary">Update</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        </form>
-                                    </div>
-
-
-                                    <!-- Delete Confirmation Modal -->
-                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal${data.task_id}">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-
-                                    <div class="modal fade" id="confirmDeleteModal${data.task_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
-                                    <?php echo form_open('task/delete_task', array('id' => 'deleteTaskForm${data.task_id}')); ?>
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmation</h1>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <input type="hidden" name="task_id" value="${data.task_id}" />
-                                                    <p class="text-start">Are you sure you want to delete this task?</p>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="submit" class="btn btn-danger">Yes</button>
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nope</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    </div>
-                                </div>
-                            </div>
+                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#viewStockDetailsModal">View Details</button>
                         `;
                     }
                 }
@@ -379,181 +290,6 @@
             }
         });
 
-        // for adding task
-        $(document).on('submit', 'form[id^="addNewTaskForm"]', function(e) {
-            e.preventDefault();
-
-            var form = $(this);
-
-            var userSelected = form.find('select[name="user_selected"]').val();
-            var teamSelected = form.find('select[name="team_selected"]').val();
-            var dueDate = form.find('input[name="due_date"]').val();
-
-            const assignErrorMessageElement = document.querySelector('.assign-error-message p');
-            const dateErrorMessageElement = document.querySelector('.date-error-message p');
-
-            let hasError = false;
-
-            if (userSelected === "Default" && teamSelected === "Default") {
-                assignErrorMessageElement.textContent = "Please select a user or team to assign this task to.";
-                hasError = true;
-            } else {
-                assignErrorMessageElement.textContent = "";
-            }
-
-            if (dueDate === "") {
-                dateErrorMessageElement.textContent = "Please select a due date for this task.";
-                hasError = true;
-            } else {
-                dateErrorMessageElement.textContent = "";
-            }
-
-            if (hasError) {
-                event.preventDefault();
-            } else {
-                $.ajax({
-                    type: 'POST',
-                    url: "<?php echo site_url(); ?>/task/insert_task/",
-                    data: form.serialize({
-                        user_selected: userSelected,
-                        team_selected: teamSelected,
-                        due_date: dueDate
-                    }),
-                    success: function(response) {
-                        response = JSON.parse(response);
-                        $('#others_tasks').DataTable().ajax.reload(null, false);
-                        $('#my_tasks').DataTable().ajax.reload(null, false);
-                        form.closest('.modal').modal('hide');
-                        $('body').removeClass('modal-open');
-                        $('.modal-backdrop').remove();
-                        Swal.fire({
-                            position: "top-end",
-                            icon: "success",
-                            title: response.message,
-                            showConfirmButton: false,
-                            timer: 2000
-                        });
-                    },
-                    error: function(xhr, status, error, response) {
-                        response = JSON.parse(response);
-                        $('#others_tasks').DataTable().ajax.reload(null, false);
-                        $('#my_tasks').DataTable().ajax.reload(null, false);
-                        form.closest('.modal').modal('hide');
-                        $('body').removeClass('modal-open');
-                        $('.modal-backdrop').remove();
-                        Swal.fire({
-                            position: "top-end",
-                            icon: "error",
-                            title: response.message,
-                            showConfirmButton: false,
-                            timer: 2000
-                        });
-                        console.error('AJAX ERROR: ' + xhr.responseText);
-                        console.error('ADD TASK ERROR: ' + error);
-                    }
-                });
-            }
-        });
-
-        // for updating  tasks
-        $(document).on('submit', 'form[id^="editTaskForm"]', function(e) {
-            e.preventDefault();
-            var form = $(this);
-            var id = form.find('input[name="task_id"]').val();
-
-            var has_changes = false;
-
-            form.find('input, textarea').each(function() {
-                if ($(this).val() !== $(this).attr('value')) {
-                    has_changes = true;
-                    return false;
-                }
-            });
-
-            if (!has_changes) {
-                Swal.fire({
-                    position: "top-end",
-                    icon: "warning",
-                    title: 'No changes made.',
-                    showConfirmButton: false,
-                    timer: 1200
-                });
-                return;
-            }
-
-            $.ajax({
-                type: 'POST',
-                url: "<?php echo site_url(); ?>/task/update_others_task/" + id,
-                data: form.serialize(),
-                success: function(response) {
-                    response = JSON.parse(response);
-                    $('#others_tasks').DataTable().ajax.reload(null, false);
-                    $('#my_tasks').DataTable().ajax.reload(null, false);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "success",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 1200
-                    });
-                },
-                error: function(xhr, status, error) {
-                    var response = JSON.parse(xhr.responseText);
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "error",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 1200
-                    });
-                    console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('EDIT TASK ERROR: ' + error);
-                }
-            });
-        });
-
-        // for deleting  tasks
-        $(document).on('submit', 'form[id^="deleteTaskForm"]', function(e) {
-            e.preventDefault();
-            var form = $(this);
-            var id = form.find('input[name="task_id"]').val();
-            $.ajax({
-                type: 'POST',
-                url: "<?php echo site_url(); ?>/task/delete_task/" + id,
-                data: form.serialize(),
-                success: function(response) {
-                    response = JSON.parse(response);
-                    $('#others_tasks').DataTable().ajax.reload(null, false);
-                    $('#my_tasks').DataTable().ajax.reload(null, false);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "success",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                },
-                error: function(xhr, status, error, response) {
-                    response = JSON.parse(response);
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "error",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                    console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('DELETE TASK ERROR: ' + error);
-                }
-            });
-        });
-
         // event listener for changes in quantity field
         $(document).on('input', '.quantity', function() {
             var $row = $(this).closest('tr');
@@ -564,7 +300,7 @@
                 var serialInitial = serialCode.substring(0, 3);
                 var serialNum = parseInt(serialCode.substring(3), 10);
 
-                if (quantity === 1) {
+                if (quantity === 1 || quantity === 0) {
                     $row.find('.serial_code').val(serialCode);
                 } else {
                     var endSerialNum = serialNum + quantity - 1;
@@ -599,7 +335,7 @@
                             </td>
                             <td>
                                 <label class="mt-2 mb-2">Quantity:</label>
-                                <input type="number" name="items[` + itemIndex + `][quantity]" class="form-control quantity" placeholder="Quantity: 0" min="0" required>
+                                <input type="number" name="items[` + itemIndex + `][quantity]" class="form-control quantity" placeholder="Quantity: 0" min="1" required>
                                 <input type="number" name="items[` + itemIndex + `][amount]" class="form-control mt-2 amount" placeholder="Amount: 0" value="0" min="0" required hidden>
                                 <label class="mt-2">Amount:</label>
                                 <input type="number" name="items[` + itemIndex + `][amount]" class="form-control mt-2 amount_display" placeholder="Amount: 0" min="0" disabled>
@@ -683,6 +419,24 @@
         Add stocks
     </button>
 
+    <!-- Stocks Table -->
+    <div class="supplier-table-container">
+        <table class="table table-sm table-striped" class="display" id="stocks_table">
+            <thead>
+                <tr>
+                    <th class="text-center"></th>
+                    <th class="text-start"><strong>Batch code</strong></th>
+                    <th class="text-start"><strong>supplier</strong></th>
+                    <th class="text-start"><strong>Total cost</strong></th>
+                    <th class="text-start"><strong>Location</strong></th>
+                    <th class="text-start"><strong>Date received</strong></th>
+                    <th class="text-start"><strong>Added by</strong></th>
+                    <th class="text-center"><strong>Details</strong></th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
     <!-- Add New Stocks Modal -->
     <div class="modal fade" id="addNewStocksModal" tabindex="-1" aria-labelledby="addNewStocksModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -691,6 +445,7 @@
                     <h5 class="modal-title" id="addNewStocksModalLabel">Add stocks</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+
                 <?php echo form_open_multipart('inventory/stock/insert_stocks', array('id' => 'addNewStocksForm')); ?>
                 <div class="modal-body">
                     <div class="row mb-3">
@@ -767,7 +522,7 @@
                                     </td>
                                     <td>
                                         <label class="mt-2 mb-2">Quantity:</label>
-                                        <input type="number" name="items[0][quantity]" class="form-control quantity" placeholder="Quantity: 0" min="0" required disabled>
+                                        <input type="number" name="items[0][quantity]" class="form-control quantity" placeholder="Quantity: 0" min="1" required disabled>
                                         <input type="number" name="items[0][amount]" class="form-control mt-2 amount" placeholder="Amount: 0" min="0" value="0" required hidden>
                                         <label class="mt-2">Amount:</label>
                                         <input type="number" name="items[0][amount]" class="form-control mt-2 amount_display" placeholder="Amount: 0" min="0" disabled>

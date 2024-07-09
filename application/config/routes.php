@@ -71,6 +71,7 @@ $route['inventory/stocks'] = 'inventory/stock/stocks';
 $route['inventory/suppliers'] = 'inventory/supplier/suppliers';
 $route['inventory/reports'] = 'inventory/report/reports';
 $route['inventory/category'] = 'inventory/category/categories';
+$route['inventory/all-items'] = 'inventory/items/all_items';
 $route['inventory/items'] = 'inventory/item/items';
 $route['inventory/users'] = 'inventory/user/users';
 
