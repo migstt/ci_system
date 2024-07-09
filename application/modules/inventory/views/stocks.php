@@ -550,12 +550,15 @@
                 <div class="modal-body">
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="batchCode" class="form-label">Batch Code</label>
-                            <input type="text" class="form-control" name="batch_code" id="batchCode" value="<?php echo $batch_code; ?>" readonly>
+                            <label for="batchCodeDisplay" class="form-label">Batch Code</label>
+                            <input type="text" class="form-control" name="batch_code" id="batchCode" value="" hidden>
+                            <input type="text" class="form-control" name="batch_code_display" id="batchCodeDisplay" value="" disabled>
                         </div>
+
                         <div class="col-md-6">
                             <label for="totalCost" class="form-label">Total Cost</label>
-                            <input type="text" class="form-control" name="total_cost" id="totalCost" placeholder="₱ 0" disabled>
+                            <input type="text" class="form-control" id="total_cost_display" placeholder="₱ 0" disabled>
+                            <input type="hidden" name="total_cost" id="total_cost" value="0">
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -612,11 +615,14 @@
                                                 <option value="<?php echo $item['item_id']; ?>"><?php echo $item['item_name']; ?></option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <input type="text" class="form-control mt-2" placeholder="Please choose an item first." disabled>
+                                        <input type="text" class="form-control mt-2 unit_cost" name="items[0][unit_cost]" placeholder="Please select an item first." disabled>
+                                        <input type="text" class="form-control mt-2 brand" name="items[0][brand]" placeholder="Please select an item first." disabled>
+                                        <input type="text" class="form-control mt-2 serial_code" name="items[0][serial_code]" placeholder="Please select an item first." disabled>
                                     </td>
                                     <td>
-                                        <input type="number" name="items[0][quantity]" class="form-control" placeholder="Quantity: 0" min="0" required>
-                                        <input type="number" name="items[0][amount]" class="form-control mt-2" placeholder="Amount: 0" min="0" required>
+                                        <input type="number" name="items[0][quantity]" class="form-control quantity" placeholder="Quantity: 0" min="0" required>
+                                        <input type="number" name="items[0][amount]" class="form-control mt-2 amount" placeholder="Amount: 0" min="0" value="0" required hidden>
+                                        <input type="number" name="items[0][amount]" class="form-control mt-2 amount_display" placeholder="Amount: 0" min="0" disabled>
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-danger remove-item">Remove</button>
@@ -648,6 +654,7 @@
                 url: "<?php echo site_url(); ?>/inventory/stock/insert_stocks/",
                 data: form.serialize(),
                 success: function(response) {
+                    generateBatchCode();
                     response = JSON.parse(response);
                     // $('#supplier_table').DataTable().ajax.reload(null, false);
                     form.closest('.modal').modal('hide');
@@ -719,6 +726,40 @@
             reindexItemRows();
         });
 
+        // Enable/disable fields based on item selection
+        $(document).on('change', '.item_select', function() {
+            var selectedValue = $(this).val();
+            if (selectedValue) {
+                $(this).siblings('.unit_cost').prop('disabled', false).attr('placeholder', 'Unit cost');
+                $(this).siblings('.brand').prop('disabled', false).attr('placeholder', 'Brand');
+                $(this).siblings('.serial_code').prop('disabled', false).attr('placeholder', 'Serial code');
+            } else {
+                $(this).siblings('.unit_cost, .brand, .serial_code').prop('disabled', true).attr('placeholder', 'Please choose an item first.');
+            }
+        });
+
+        // Calculate amount when unit cost or quantity changes
+        $(document).on('input', '.unit_cost, .quantity', function() {
+            var $row = $(this).closest('tr');
+            var unitCost = parseFloat($row.find('.unit_cost').val()) || 0;
+            var quantity = parseFloat($row.find('.quantity').val()) || 0;
+            var amount = unitCost * quantity;
+            $row.find('.amount').val(amount.toFixed(2));
+            $row.find('.amount_display').val(amount.toFixed(2));
+            calculateTotalCost();
+        });
+
+        // Function to calculate the total cost
+        function calculateTotalCost() {
+            var totalCost = 0;
+            $('.amount').each(function() {
+                totalCost += parseFloat($(this).val()) || 0;
+            });
+            $('#total_cost_display').val('₱ ' + totalCost.toFixed(2));
+            $('#total_cost').val(totalCost.toFixed(2));
+        }
+
+        // Function to add a new item row
         function addItemRow() {
             var newRow = `
                             <tr>
@@ -729,11 +770,14 @@
                                             <option value="<?php echo $item['item_id']; ?>"><?php echo $item['item_name']; ?></option>
                                         <?php endforeach; ?>
                                     </select>
-                                    <input type="text" class="form-control mt-2" placeholder="Please choose an item first." disabled>
+                                    <input type="text" name="items[` + itemIndex + `][unit_cost]" class="form-control mt-2 unit_cost" placeholder="Please choose an item first." disabled>
+                                    <input type="text" name="items[` + itemIndex + `][brand]" class="form-control mt-2 brand" placeholder="Please choose an item first." disabled>
+                                    <input type="text" name="items[` + itemIndex + `][serial_code]" class="form-control mt-2 serial_code" placeholder="Please choose an item first." disabled>
                                 </td>
                                 <td>
-                                    <input type="number" name="items[` + itemIndex + `][quantity]" class="form-control" placeholder="Quantity: 0" min="0" required>
-                                    <input type="number" name="items[` + itemIndex + `][amount]" class="form-control mt-2" placeholder="Amount: 0" min="0" required>
+                                    <input type="number" name="items[` + itemIndex + `][quantity]" class="form-control quantity" placeholder="Quantity: 0" min="0" required>
+                                    <input type="number" name="items[` + itemIndex + `][amount]" class="form-control mt-2 amount" placeholder="Amount: 0" value="0" min="0" required hidden>
+                                    <input type="number" name="items[` + itemIndex + `][amount]" class="form-control mt-2 amount_display" placeholder="Amount: 0" min="0" required disabled>
                                 </td>
                                 <td>
                                     <button type="button" class="btn btn-danger remove-item">Remove</button>
@@ -743,7 +787,9 @@
             $('#itemsTable tbody').append(newRow);
             initializeSelect2();
             reindexItemRows();
+            itemIndex++;
         }
+
 
         function reindexItemRows() {
             itemIndex = 0;
@@ -774,5 +820,27 @@
 
         checkRemoveButtons();
         initializeSelect2();
+
+        function generateBatchCode() {
+            $.ajax({
+                url: '<?php echo site_url(); ?>/inventory/stock/get_batch_code/',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    console.log('Batch code response:', response);
+                    if (response.batch_code) {
+                        $('#batchCode').val(response.batch_code);
+                        $('#batchCodeDisplay').val(response.batch_code);
+                    } else {
+                        console.error('Failed to generate batch code.');
+                    }
+                },
+                error: function() {
+                    console.error('An error occurred while generating the batch code.');
+                }
+            });
+        }
+
+        generateBatchCode();
     });
 </script>

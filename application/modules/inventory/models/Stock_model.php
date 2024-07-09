@@ -22,12 +22,11 @@ class Stock_model extends MY_Model
 
     function insert_items()
     {
-
     }
 
     function get_last_inserted_batch_number()
     {
-        $query = 'SELECT LAST_INSERT_ID(inv_trk_id) from inventory_tracking';
+        $query = 'SELECT inv_trk_batch_num FROM inventory_tracking ORDER BY inv_trk_id DESC LIMIT 1';
         return $this->getRowBySQL($query, 'row');
     }
 }

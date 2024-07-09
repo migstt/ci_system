@@ -68,12 +68,12 @@ class Stock extends MY_Controller
                 'inv_trk_status'            => 0,
                 'inv_trk_added_by'          => $added_by,
                 'inv_trk_added_at'          => date('Y-m-d H:i:s'),
-                // 'inv_trk_attachment'        => $attachment,
                 'inv_trk_updated_at'        => NULL
             );
 
 
             if ($this->stock->insert_stock($tracking_data)) {
+
                 // $items = $this->input->post('items');
                 // foreach ($items as $item) {
                 //     $item_data = array(
@@ -102,10 +102,12 @@ class Stock extends MY_Controller
             }
         }
     }
+    
 
     private function generate_batch_code()
     {
         $last_inserted_batch_number = $this->stock->get_last_inserted_batch_number();
+
         if (!$last_inserted_batch_number) {
             return 'B00000001';
         } else {
@@ -116,8 +118,9 @@ class Stock extends MY_Controller
         }
     }
 
-    private function generate_serial_code()
+    public function get_batch_code()
     {
-        return 'S00000001';
+        echo json_encode(['batch_code' => $this->generate_batch_code()]);
     }
+
 }
