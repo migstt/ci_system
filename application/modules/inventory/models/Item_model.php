@@ -44,4 +44,14 @@ class Item_model extends MY_Model
         $orderby    = 'item_name ASC';
         return $this->getRows('*', $table, $where, $orderby);
     }
+
+    function get_item($item_id)
+    {
+        $field = '*';
+        $table = 'items';
+        $where = 'item_id=' . $item_id;
+        $order_by = '';
+        return $this->getRow($field, $table, $where, $order_by);
+    }
+
 }

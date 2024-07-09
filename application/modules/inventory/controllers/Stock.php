@@ -55,54 +55,77 @@ class Stock extends MY_Controller
             $remarks        = $this->input->post('remarks');
             $date_received  = $this->input->post('date_received');
             $location_id    = $this->input->post('location_id');
-            $attachment     = $this->input->post('attachment');
             $added_by       = $_SESSION['user_id'];
 
-            $tracking_data = array(
-                'inv_trk_batch_num'         => $batch_code,
-                'inv_trk_location_id'       => $location_id,
-                'inv_trk_total_cost'        => $total_cost,
-                'inv_trk_notes'             => $remarks,
-                'inv_trk_supplier_id'       => $supplier_id,
-                'inv_trk_date_delivered'    => $date_received,
-                'inv_trk_status'            => 0,
-                'inv_trk_added_by'          => $added_by,
-                'inv_trk_added_at'          => date('Y-m-d H:i:s'),
-                'inv_trk_updated_at'        => NULL
-            );
+            $config['upload_path']   = './uploads/';
+            $config['allowed_types'] = 'pdf|jpg|jpeg|png';
+            $config['max_size']      = 2048;
+            $config['max_width']     = 0;
+            $config['max_height']    = 0;
 
+            $this->load->library('upload', $config);
 
-            if ($this->stock->insert_stock($tracking_data)) {
-
-                // $items = $this->input->post('items');
-                // foreach ($items as $item) {
-                //     $item_data = array(
-                //         'tracking_id'   => $batch_code,
-                //         'item_id'       => $item['item_id'],
-                //         'unit_cost'     => $this->input->post('unit_cost'),
-                //         'quantity'      => 1,
-                //         'brand'         => $this->input->post('brand'),
-                //         'serial'        => $this->input->post('serial'),
-                //         'attachment'    => $attachment,
-                //         'assigned_to'   => $location_id,
-                //         'status'        => 1,
-                //         'added_by'      => $added_by,
-                //         'date_added'    => date('Y-m-d H:i:s'),
-                //         'date_updated'  => NULL
-                //     );
-
-                //     $this->inventory->insert_items($item_data);
-                // }
-
-                $response = array('status' => 'success', 'message' => 'Stocks added successfully.');
+            if (!$this->upload->do_upload('attachment')) {
+                $error      = array('error' => $this->upload->display_errors());
+                $response   = array('status' => 'error_attachment', 'message' => $error['error']);
                 echo json_encode($response);
+                exit();
             } else {
-                $response = array('status' => 'error_item_insert', 'message' => 'Database error. Please try again.');
-                echo json_encode($response);
+                $data           = $this->upload->data();
+                $attachment     = $data['file_name'];
+                $tracking_data  = array(
+                    'inv_trk_batch_num'         => $batch_code,
+                    'inv_trk_location_id'       => $location_id,
+                    'inv_trk_total_cost'        => $total_cost,
+                    'inv_trk_notes'             => $remarks,
+                    'inv_trk_supplier_id'       => $supplier_id,
+                    'inv_trk_date_delivered'    => $date_received,
+                    'inv_trk_attachment'        => $attachment,
+                    'inv_trk_status'            => 0,
+                    'inv_trk_added_by'          => $added_by,
+                    'inv_trk_added_at'          => date('Y-m-d H:i:s'),
+                    'inv_trk_updated_at'        => NULL
+                );
+
+                if ($this->stock->insert_stock($tracking_data)) {
+                    $items = $this->input->post('items');
+                    foreach ($items as $item) {
+                        $quantity = $item['quantity'];
+                        for ($i = 0; $i < $quantity; $i++) {
+                            $item_data = array(
+                                'inv_tracking_id'   => $batch_code,
+                                'inv_item_id'       => $item['item_id'],
+                                'inv_unit_cost'     => $item['unit_cost'],
+                                'inv_brand'         => $item['brand'],
+                                'inv_serial'        => $item['serial_code'],
+                                'inv_assigned_to'   => $location_id,
+                                'inv_status'        => 0,
+                                'inv_added_by'      => $added_by,
+                                'inv_added_at'      => date('Y-m-d H:i:s'),
+                                'inv_updated_at'    => NULL
+                            );
+                            if ($this->inventory->insert_items($item_data)) {
+                                $response = array('status' => 'success', 'message' => 'Stocks added successfully.');
+                            } else {
+                                $response = array('status' => 'error_item_insert', 'message' => 'Database error. Please try again.');
+                                echo json_encode($response);
+                                return;
+                            }
+                        }
+                    }
+                    echo json_encode($response);
+                } else {
+                    $response = array('status' => 'error_stock_insert', 'message' => 'Database error. Please try again.');
+                    echo json_encode($response);
+                }
             }
+        } else {
+            $response = array('status' => 'validation_error', 'message' => validation_errors());
+            echo json_encode($response);
         }
     }
-    
+
+
 
     private function generate_batch_code()
     {
@@ -123,4 +146,32 @@ class Stock extends MY_Controller
         echo json_encode(['batch_code' => $this->generate_batch_code()]);
     }
 
+    public function get_last_inserted_serial_number_of_a_specific_item()
+    {
+        $item_id    = $this->input->post('item_id');
+        $last_item  = $this->inventory->get_last_inserted_serial_number($item_id);
+        $item       = $this->item->get_item($item_id);
+
+        if (!$item) {
+            echo json_encode(['status' => 'error', 'message' => 'Item not found.']);
+            return;
+        }
+
+        $item_name_cap = strtoupper(substr($item['item_name'], 0, 3));
+
+        if (!$last_item) {
+            $new_serial = $item_name_cap . '00000001';
+        } else {
+            $last_inserted_serial = $last_item['inv_serial'];
+            if (strpos($last_inserted_serial, $item_name_cap) === 0) {
+                $last_serial_number = substr($last_inserted_serial, 3);
+                $new_serial_number  = str_pad((int)$last_serial_number + 1, 8, '0', STR_PAD_LEFT);
+                $new_serial         = $item_name_cap . $new_serial_number;
+            } else {
+                $new_serial = $item_name_cap . '00000001';
+            }
+        }
+
+        echo json_encode(['status' => 'success', 'serial' => $new_serial]);
+    }
 }

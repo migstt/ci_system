@@ -4,7 +4,151 @@
 <!-- Custom scripts -->
 <script>
     $(document).ready(function() {
-        // initialize flatpickr for task task due date and time,
+
+        checkRemoveButtons();
+        initializeSelect2();
+        generateBatchCode();
+
+        // ajax for adding stocks
+        $(document).on('submit', 'form[id^="addNewStocksForm"]', function(e) {
+            e.preventDefault();
+
+            var attachmentField = $('#attachment');
+            if (attachmentField.get(0).files.length === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please select a file to upload!',
+                });
+                return;
+            }
+
+            var form = $(this);
+            $.ajax({
+                type: 'POST',
+                url: "<?php echo site_url(); ?>/inventory/stock/insert_stocks/",
+                data: new FormData(this),
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: function(response) {
+                    generateBatchCode();
+                    response = JSON.parse(response);
+                    form.closest('.modal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "success",
+                        title: response.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                },
+                error: function(xhr, status, error, response) {
+                    response = JSON.parse(response);
+                    form.closest('.modal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "error",
+                        title: response.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    console.error('AJAX ERROR: ' + xhr.responseText);
+                    console.error('ADD STOCKS ERROR: ' + error);
+                }
+            });
+        });
+
+        $('.location_select').select2({
+            dropdownParent: '#addNewStocksModal .modal-content',
+            width: '100%',
+            theme: "classic",
+            placeholder: "Select location",
+        });
+
+        $('.item_select').select2({
+            dropdownParent: '#addNewStocksModal .modal-content',
+            width: '100%',
+            theme: "classic",
+            placeholder: "Select item",
+        });
+
+        $('.supplier_select').select2({
+            dropdownParent: '#addNewStocksModal .modal-content',
+            width: '100%',
+            theme: "classic",
+            placeholder: "Select supplier",
+        });
+
+        flatpickr("#date_received", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            minDate: "today",
+        });
+
+        $('#addItemButton').click(function() {
+            addItemRow();
+        });
+
+        $(document).on('click', '.remove-item', function() {
+            $(this).closest('tr').remove();
+            reindexItemRows();
+        });
+
+        // enable/disable fields based on item selection
+        $(document).on('change', '.item_select', function() {
+            var selectedValue = $(this).val();
+            var $unitCost = $(this).siblings('.unit_cost');
+            var $brand = $(this).siblings('.brand');
+            var $serialCode = $(this).siblings('.serial_code');
+
+            if (selectedValue) {
+                $unitCost.prop('disabled', false).attr('placeholder', 'Unit cost');
+                $brand.prop('disabled', false).attr('placeholder', 'Brand');
+                $serialCode.prop('disabled', false).attr('placeholder', 'Serial code');
+                $serialCode.prop('readonly', true);
+
+                $.ajax({
+                    type: 'POST',
+                    url: '<?php echo site_url(); ?>/inventory/stock/get_last_inserted_serial_number_of_a_specific_item',
+                    data: {
+                        item_id: selectedValue
+                    },
+                    success: function(response) {
+                        response = JSON.parse(response);
+                        if (response.status === 'success') {
+                            $serialCode.val(response.serial);
+                        } else {
+                            console.error('Error: ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX ERROR: ' + xhr.responseText);
+                        console.error('GET ITEM DETAILS ERROR: ' + error);
+                    }
+                });
+            } else {
+                $unitCost.prop('disabled', true).attr('placeholder', 'Please choose an item first.');
+                $brand.prop('disabled', true).attr('placeholder', 'Please choose an item first.');
+                $serialCode.prop('disabled', true).attr('placeholder', 'Please choose an item first.');
+            }
+        });
+
+        // calculate amount when unit cost or quantity changes
+        $(document).on('input', '.unit_cost, .quantity', function() {
+            var $row = $(this).closest('tr');
+            var unitCost = parseFloat($row.find('.unit_cost').val()) || 0;
+            var quantity = parseFloat($row.find('.quantity').val()) || 0;
+            var amount = unitCost * quantity;
+            $row.find('.amount').val(amount.toFixed(2));
+            $row.find('.amount_display').val(amount.toFixed(2));
+            calculateTotalCost();
+        });
+
         flatpickr("#due_date", {
             enableTime: true,
             dateFormat: "Y-m-d H:i",
@@ -164,88 +308,6 @@
                         `;
                     }
                 }
-            ],
-        });
-
-        // client side my tasks datatable
-        $('#my_tasks').DataTable({
-            responsive: true,
-            searching: true,
-            processing: true,
-            ajax: {
-                url: '<?php echo site_url(); ?>/task/get_my_tasks',
-                dataSrc: 'data',
-                type: 'POST',
-            },
-            columns: [{
-                    "sortable": false,
-                    "data": null,
-                    "className": "text-center align-middle",
-                    "render": function(data, type, row, meta) {
-                        return meta.row + 1;
-                    }
-                },
-                {
-                    "data": "title",
-                    "className": "text-start align-middle"
-                },
-                {
-                    "data": "description",
-                    "className": "text-start align-middle"
-                },
-                {
-                    "data": "assigned_by",
-                    "className": "text-start align-middle",
-                },
-                {
-                    "data": "due_date",
-                    "className": "text-start align-middle",
-                },
-                {
-                    "data": "status",
-                    "sortable": false,
-                    "className": "text-start align-middle",
-                    "render": function(data, type, row) {
-                        let dropdownItems = '';
-
-                        if (data === 'in_progress') {
-                            dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'done')">Done</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'pending')">Pending</a></li>
-                            `;
-                        } else if (data === 'done') {
-                            dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'in_progress')">In Progress</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'pending')">Pending</a></li>
-                            `;
-                        } else if (data === 'pending') {
-                            dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'in_progress')">In Progress</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'done')">Done</a></li>
-                            `;
-                        }
-
-                        let buttonClass = 'btn-secondary';
-                        if (data === 'in_progress') {
-                            buttonClass = 'btn-primary';
-                        } else if (data === 'done') {
-                            buttonClass = 'btn-success';
-                        } else if (data === 'pending') {
-                            buttonClass = 'btn-danger';
-                        }
-
-                        return `
-                            <div class="dropdown">
-                                <button class="btn btn-fixed-width ${buttonClass} dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    ${data.replace(/_/g, ' ').charAt(0).toUpperCase() + data.replace(/_/g, ' ').slice(1)}
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="statusDropdown">
-                                    ${dropdownItems}
-                                </ul>
-                            </div>
-                        `;
-                    }
-                },
             ],
         });
 
@@ -492,36 +554,91 @@
 
     });
 
-    // for updating task status
-    function updateStatus(taskId, newStatus) {
+    var itemIndex = 1;
+
+    function addItemRow() {
+        var newRow = `
+                        <tr>
+                            <td>
+                                <select name="items[` + itemIndex + `][item_id]" class="form-control item_select" required>
+                                    <option value="">Select item</option>
+                                    <?php foreach ($active_items as $item) : ?>
+                                        <option value="<?php echo $item['item_id']; ?>"><?php echo $item['item_name']; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <input type="text" name="items[` + itemIndex + `][unit_cost]" class="form-control mt-2 unit_cost" placeholder="Please choose an item first." disabled>
+                                <input type="text" name="items[` + itemIndex + `][brand]" class="form-control mt-2 brand" placeholder="Please choose an item first." disabled>
+                                <label class="mt-2">Serial Number:</label>
+                                <input type="text" id="serial_code[` + itemIndex + `]" name="items[` + itemIndex + `][serial_code]" class="form-control mt-2 serial_code" placeholder="Please choose an item first." disabled>
+                            </td>
+                            <td>
+                                <input type="number" name="items[` + itemIndex + `][quantity]" class="form-control quantity" placeholder="Quantity: 0" min="0" required>
+                                <input type="number" name="items[` + itemIndex + `][amount]" class="form-control mt-2 amount" placeholder="Amount: 0" value="0" min="0" required hidden>
+                                <input type="number" name="items[` + itemIndex + `][amount]" class="form-control mt-2 amount_display" placeholder="Amount: 0" min="0" required disabled>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger remove-item">Remove</button>
+                            </td>
+                        </tr>
+                    `;
+        $('#itemsTable tbody').append(newRow);
+        initializeSelect2();
+        reindexItemRows();
+        itemIndex++;
+    }
+
+    function reindexItemRows() {
+        itemIndex = 0;
+        $('#itemsTable tbody tr').each(function() {
+            $(this).find('select[name^="items["]').attr('name', 'items[' + itemIndex + '][item_id]');
+            $(this).find('input[name^="items["][name$="[quantity]"]').attr('name', 'items[' + itemIndex + '][quantity]');
+            $(this).find('input[name^="items["][name$="[amount]"]').attr('name', 'items[' + itemIndex + '][amount]');
+            itemIndex++;
+        });
+    }
+
+    function checkRemoveButtons() {
+        if ($('#itemsTable tbody tr').length == 1) {
+            $('.remove-item').prop('disabled', true);
+        } else {
+            $('.remove-item').prop('disabled', false);
+        }
+    }
+
+    function initializeSelect2() {
+        $('.item_select').select2({
+            dropdownParent: '#addNewStocksModal .modal-content',
+            width: '100%',
+            theme: 'classic',
+            placeholder: 'Select item',
+        });
+    }
+
+    function calculateTotalCost() {
+        var totalCost = 0;
+        $('.amount').each(function() {
+            totalCost += parseFloat($(this).val()) || 0;
+        });
+        $('#total_cost_display').val('₱ ' + totalCost.toFixed(2));
+        $('#total_cost').val(totalCost.toFixed(2));
+    }
+
+    function generateBatchCode() {
         $.ajax({
-            type: 'POST',
-            url: "<?php echo site_url(); ?>/task/update_task_status/" + taskId,
-            data: {
-                task_id: taskId,
-                status: newStatus
-            },
+            url: '<?php echo site_url(); ?>/inventory/stock/get_batch_code/',
+            type: 'GET',
+            dataType: 'json',
             success: function(response) {
-                response = JSON.parse(response);
-                $('#my_tasks').DataTable().ajax.reload(null, false);
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: response.message,
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+                // console.log('Batch code response:', response);
+                if (response.batch_code) {
+                    $('#batchCode').val(response.batch_code);
+                    $('#batchCodeDisplay').val(response.batch_code);
+                } else {
+                    console.error('Failed to generate batch code.');
+                }
             },
-            error: function(xhr, status, error) {
-                Swal.fire({
-                    position: "top-end",
-                    icon: "error",
-                    title: response.message,
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-                console.error('AJAX ERROR: ' + xhr.responseText);
-                console.error('UPDATE STATUS ERROR: ' + error);
+            error: function() {
+                console.error('An error occurred while generating the batch code.');
             }
         });
     }
@@ -546,7 +663,7 @@
                     <h5 class="modal-title" id="addNewStocksModalLabel">Add stocks</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <?php echo form_open('inventory/stock/insert_stocks', array('id' => 'addNewStocksForm')); ?>
+                <?php echo form_open_multipart('inventory/stock/insert_stocks', array('id' => 'addNewStocksForm')); ?>
                 <div class="modal-body">
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -617,6 +734,7 @@
                                         </select>
                                         <input type="text" class="form-control mt-2 unit_cost" name="items[0][unit_cost]" placeholder="Please select an item first." disabled>
                                         <input type="text" class="form-control mt-2 brand" name="items[0][brand]" placeholder="Please select an item first." disabled>
+                                        <label class="mt-2">Serial Number:</label>
                                         <input type="text" class="form-control mt-2 serial_code" name="items[0][serial_code]" placeholder="Please select an item first." disabled>
                                     </td>
                                     <td>
@@ -642,205 +760,3 @@
         </div>
     </div>
 </div>
-<script>
-    $(document).ready(function() {
-
-        // for adding supplier
-        $(document).on('submit', 'form[id^="addNewStocksForm"]', function(e) {
-            e.preventDefault();
-            var form = $(this);
-            $.ajax({
-                type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/stock/insert_stocks/",
-                data: form.serialize(),
-                success: function(response) {
-                    generateBatchCode();
-                    response = JSON.parse(response);
-                    // $('#supplier_table').DataTable().ajax.reload(null, false);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "success",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 2000
-                    });
-                },
-                error: function(xhr, status, error, response) {
-                    response = JSON.parse(response);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "error",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 2000
-                    });
-                    console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('ADD STOCKS ERROR: ' + error);
-                }
-            });
-
-        });
-
-        $('.location_select').select2({
-            dropdownParent: '#addNewStocksModal .modal-content',
-            width: '100%',
-            theme: "classic",
-            placeholder: "Select location",
-        });
-
-        $('.item_select').select2({
-            dropdownParent: '#addNewStocksModal .modal-content',
-            width: '100%',
-            theme: "classic",
-            placeholder: "Select item",
-        });
-
-        $('.supplier_select').select2({
-            dropdownParent: '#addNewStocksModal .modal-content',
-            width: '100%',
-            theme: "classic",
-            placeholder: "Select supplier",
-        });
-
-        // initialize flatpickr for task task due date and time,
-        flatpickr("#date_received", {
-            enableTime: true,
-            dateFormat: "Y-m-d H:i",
-            minDate: "today",
-        });
-
-        var itemIndex = 0;
-
-        $('#addItemButton').click(function() {
-            addItemRow();
-        });
-
-        $(document).on('click', '.remove-item', function() {
-            $(this).closest('tr').remove();
-            reindexItemRows();
-        });
-
-        // Enable/disable fields based on item selection
-        $(document).on('change', '.item_select', function() {
-            var selectedValue = $(this).val();
-            if (selectedValue) {
-                $(this).siblings('.unit_cost').prop('disabled', false).attr('placeholder', 'Unit cost');
-                $(this).siblings('.brand').prop('disabled', false).attr('placeholder', 'Brand');
-                $(this).siblings('.serial_code').prop('disabled', false).attr('placeholder', 'Serial code');
-            } else {
-                $(this).siblings('.unit_cost, .brand, .serial_code').prop('disabled', true).attr('placeholder', 'Please choose an item first.');
-            }
-        });
-
-        // Calculate amount when unit cost or quantity changes
-        $(document).on('input', '.unit_cost, .quantity', function() {
-            var $row = $(this).closest('tr');
-            var unitCost = parseFloat($row.find('.unit_cost').val()) || 0;
-            var quantity = parseFloat($row.find('.quantity').val()) || 0;
-            var amount = unitCost * quantity;
-            $row.find('.amount').val(amount.toFixed(2));
-            $row.find('.amount_display').val(amount.toFixed(2));
-            calculateTotalCost();
-        });
-
-        // Function to calculate the total cost
-        function calculateTotalCost() {
-            var totalCost = 0;
-            $('.amount').each(function() {
-                totalCost += parseFloat($(this).val()) || 0;
-            });
-            $('#total_cost_display').val('₱ ' + totalCost.toFixed(2));
-            $('#total_cost').val(totalCost.toFixed(2));
-        }
-
-        // Function to add a new item row
-        function addItemRow() {
-            var newRow = `
-                            <tr>
-                                <td>
-                                    <select name="items[` + itemIndex + `][item_id]" class="form-control item_select" required>
-                                        <option value="">Select item</option>
-                                        <?php foreach ($active_items as $item) : ?>
-                                            <option value="<?php echo $item['item_id']; ?>"><?php echo $item['item_name']; ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <input type="text" name="items[` + itemIndex + `][unit_cost]" class="form-control mt-2 unit_cost" placeholder="Please choose an item first." disabled>
-                                    <input type="text" name="items[` + itemIndex + `][brand]" class="form-control mt-2 brand" placeholder="Please choose an item first." disabled>
-                                    <input type="text" name="items[` + itemIndex + `][serial_code]" class="form-control mt-2 serial_code" placeholder="Please choose an item first." disabled>
-                                </td>
-                                <td>
-                                    <input type="number" name="items[` + itemIndex + `][quantity]" class="form-control quantity" placeholder="Quantity: 0" min="0" required>
-                                    <input type="number" name="items[` + itemIndex + `][amount]" class="form-control mt-2 amount" placeholder="Amount: 0" value="0" min="0" required hidden>
-                                    <input type="number" name="items[` + itemIndex + `][amount]" class="form-control mt-2 amount_display" placeholder="Amount: 0" min="0" required disabled>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-danger remove-item">Remove</button>
-                                </td>
-                            </tr>
-                        `;
-            $('#itemsTable tbody').append(newRow);
-            initializeSelect2();
-            reindexItemRows();
-            itemIndex++;
-        }
-
-
-        function reindexItemRows() {
-            itemIndex = 0;
-            $('#itemsTable tbody tr').each(function() {
-                $(this).find('select[name^="items["]').attr('name', 'items[' + itemIndex + '][item_id]');
-                $(this).find('input[name^="items["][name$="[quantity]"]').attr('name', 'items[' + itemIndex + '][quantity]');
-                $(this).find('input[name^="items["][name$="[amount]"]').attr('name', 'items[' + itemIndex + '][amount]');
-                itemIndex++;
-            });
-        }
-
-        function checkRemoveButtons() {
-            if ($('#itemsTable tbody tr').length == 1) {
-                $('.remove-item').prop('disabled', true);
-            } else {
-                $('.remove-item').prop('disabled', false);
-            }
-        }
-
-        function initializeSelect2() {
-            $('.item_select').select2({
-                dropdownParent: '#addNewStocksModal .modal-content',
-                width: '100%',
-                theme: 'classic',
-                placeholder: 'Select item',
-            });
-        }
-
-        checkRemoveButtons();
-        initializeSelect2();
-
-        function generateBatchCode() {
-            $.ajax({
-                url: '<?php echo site_url(); ?>/inventory/stock/get_batch_code/',
-                type: 'GET',
-                dataType: 'json',
-                success: function(response) {
-                    console.log('Batch code response:', response);
-                    if (response.batch_code) {
-                        $('#batchCode').val(response.batch_code);
-                        $('#batchCodeDisplay').val(response.batch_code);
-                    } else {
-                        console.error('Failed to generate batch code.');
-                    }
-                },
-                error: function() {
-                    console.error('An error occurred while generating the batch code.');
-                }
-            });
-        }
-
-        generateBatchCode();
-    });
-</script>

@@ -20,8 +20,14 @@ class Stock_model extends MY_Model
         return false;
     }
 
-    function insert_items()
+    function insert_items($item_form_data)
     {
+        $table = 'inventory';
+
+        if ($this->insert($table, $item_form_data, false)) {
+            return true;
+        }
+        return false;
     }
 
     function get_last_inserted_batch_number()
