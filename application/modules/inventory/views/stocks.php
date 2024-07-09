@@ -105,11 +105,13 @@
             var $unitCost = $(this).siblings('.unit_cost');
             var $brand = $(this).siblings('.brand');
             var $serialCode = $(this).siblings('.serial_code');
+            var $quantity = $(this).closest('tr').find('.quantity');
 
             if (selectedValue) {
                 $unitCost.prop('disabled', false).attr('placeholder', 'Unit cost');
                 $brand.prop('disabled', false).attr('placeholder', 'Brand');
                 $serialCode.prop('disabled', false).attr('placeholder', 'Serial code');
+                $quantity.prop('disabled', false).attr('placeholder', 'Quantity: ');
                 $serialCode.prop('readonly', true);
 
                 $.ajax({
@@ -552,7 +554,31 @@
             });
         });
 
+        // event listener for changes in quantity field
+        $(document).on('input', '.quantity', function() {
+            var $row = $(this).closest('tr');
+            var quantity = parseInt($(this).val(), 10);
+            var serialCode = $row.find('.serial_code').val().trim();
+
+            if (serialCode && quantity > 0) {
+                var serialInitial = serialCode.substring(0, 3);
+                var serialNum = parseInt(serialCode.substring(3), 10);
+
+                if (quantity === 1) {
+                    $row.find('.serial_code').val(serialCode);
+                } else {
+                    var endSerialNum = serialNum + quantity - 1;
+                    var endSerialCode = serialInitial + endSerialNum.toString().padStart(8, '0');
+                    var serialRange = serialInitial + serialNum.toString().padStart(8, '0') + ' - to - ' + endSerialCode;
+                    $row.find('.serial_code').val(serialRange);
+                }
+            }
+        });
+
+
     });
+
+
 
     var itemIndex = 1;
 
@@ -572,9 +598,11 @@
                                 <input type="text" id="serial_code[` + itemIndex + `]" name="items[` + itemIndex + `][serial_code]" class="form-control mt-2 serial_code" placeholder="Please choose an item first." disabled>
                             </td>
                             <td>
+                                <label class="mt-2 mb-2">Quantity:</label>
                                 <input type="number" name="items[` + itemIndex + `][quantity]" class="form-control quantity" placeholder="Quantity: 0" min="0" required>
                                 <input type="number" name="items[` + itemIndex + `][amount]" class="form-control mt-2 amount" placeholder="Amount: 0" value="0" min="0" required hidden>
-                                <input type="number" name="items[` + itemIndex + `][amount]" class="form-control mt-2 amount_display" placeholder="Amount: 0" min="0" required disabled>
+                                <label class="mt-2">Amount:</label>
+                                <input type="number" name="items[` + itemIndex + `][amount]" class="form-control mt-2 amount_display" placeholder="Amount: 0" min="0" disabled>
                             </td>
                             <td>
                                 <button type="button" class="btn btn-danger remove-item">Remove</button>
@@ -738,8 +766,10 @@
                                         <input type="text" class="form-control mt-2 serial_code" name="items[0][serial_code]" placeholder="Please select an item first." disabled>
                                     </td>
                                     <td>
-                                        <input type="number" name="items[0][quantity]" class="form-control quantity" placeholder="Quantity: 0" min="0" required>
+                                        <label class="mt-2 mb-2">Quantity:</label>
+                                        <input type="number" name="items[0][quantity]" class="form-control quantity" placeholder="Quantity: 0" min="0" required disabled>
                                         <input type="number" name="items[0][amount]" class="form-control mt-2 amount" placeholder="Amount: 0" min="0" value="0" required hidden>
+                                        <label class="mt-2">Amount:</label>
                                         <input type="number" name="items[0][amount]" class="form-control mt-2 amount_display" placeholder="Amount: 0" min="0" disabled>
                                     </td>
                                     <td>

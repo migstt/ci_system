@@ -90,14 +90,22 @@ class Stock extends MY_Controller
                 if ($this->stock->insert_stock($tracking_data)) {
                     $items = $this->input->post('items');
                     foreach ($items as $item) {
-                        $quantity = $item['quantity'];
+
+                        $quantity               = $item['quantity'];
+                        $item_serial_initial    = substr($item['serial_code'], 0, 3);
+                        $item_serial_num        = (int) substr($item['serial_code'], 3);
+
                         for ($i = 0; $i < $quantity; $i++) {
+
+                            $new_serial_number = str_pad($item_serial_num, 8, '0', STR_PAD_LEFT);
+                            $new_serial = $item_serial_initial . $new_serial_number;
+
                             $item_data = array(
                                 'inv_tracking_id'   => $batch_code,
                                 'inv_item_id'       => $item['item_id'],
                                 'inv_unit_cost'     => $item['unit_cost'],
                                 'inv_brand'         => $item['brand'],
-                                'inv_serial'        => $item['serial_code'],
+                                'inv_serial'        => $new_serial,
                                 'inv_assigned_to'   => $location_id,
                                 'inv_status'        => 0,
                                 'inv_added_by'      => $added_by,
@@ -106,6 +114,7 @@ class Stock extends MY_Controller
                             );
                             if ($this->inventory->insert_items($item_data)) {
                                 $response = array('status' => 'success', 'message' => 'Stocks added successfully.');
+                                $item_serial_num++;
                             } else {
                                 $response = array('status' => 'error_item_insert', 'message' => 'Database error. Please try again.');
                                 echo json_encode($response);
