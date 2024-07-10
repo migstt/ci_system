@@ -454,18 +454,20 @@
         </button>
 
         <!-- Contacts Table -->
-        <table class="table table-sm table-striped" class="display" id="my_contacts_table">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Name</th>
-                    <th>Company</th>
-                    <th>Phone</th>
-                    <th>Email</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-            </thead>
-        </table>
+        <div class="contacts-table-container">
+            <table class="table table-sm table-striped" class="display" id="my_contacts_table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Company</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
 
         <!-- SSP Contacts Table -->
         <!-- Currently hidden -->

@@ -344,12 +344,19 @@
             }
         }
 
-        .supplier-table-container {
+        .supplier-table-container,
+        .my-tasks-table-container,
+        .contacts-table-container,
+        .others-tasks-table-container,
+        .category-table-container,
+        .location-table-container,
+        .all-items-table-container,
+        .item-table-container,
+        .user-table-container {
             background-color: white;
             padding: 1%;
             border-radius: 5px;
         }
-
 
         .btn-fixed-width {
             width: 120px;

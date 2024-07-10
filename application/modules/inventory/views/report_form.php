@@ -1,11 +1,10 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-
 <!-- Custom scripts -->
 <script>
     $(document).ready(function() {
-        // client side locations datatable
+        // client side my reported items datatable
         $('#location_table').DataTable({
             responsive: true,
             searching: true,
@@ -136,85 +135,27 @@
             ],
         });
 
-        // for adding location
-        $(document).on('submit', 'form[id^="addNewLocationForm"]', function(e) {
+        // for submitting item report
+        $(document).on('submit', 'form[id^="addItemReportForm"]', function(e) {
             e.preventDefault();
-            var form = $(this);
+
+            var form = $(this)[0]; // Get the form element
+            var formData = new FormData(form); // Create a FormData object
+
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/location/insert_location/",
-                data: form.serialize(),
+                url: "<?php echo site_url(); ?>/inventory/report/report_form_submit/",
+                data: formData,
+                contentType: false,
+                processData: false,
                 success: function(response) {
                     response = JSON.parse(response);
-                    $('#location_table').DataTable().ajax.reload(null, false);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
                     Swal.fire({
                         position: "top-end",
                         icon: "success",
                         title: response.message,
                         showConfirmButton: false,
                         timer: 2000
-                    });
-                },
-                error: function(xhr, status, error, response) {
-                    response = JSON.parse(response);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "error",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 2000
-                    });
-                    console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('ADD LOCATION ERROR: ' + error);
-                }
-            });
-
-        });
-
-        // for updating  location
-        $(document).on('submit', 'form[id^="editLocationForm"]', function(e) {
-            e.preventDefault();
-            var form = $(this);
-            var id = form.find('input[name="location_id"]').val();
-            var has_changes = false;
-            form.find('input').each(function() {
-                if ($(this).val() !== $(this).attr('value')) {
-                    has_changes = true;
-                    return false;
-                }
-            });
-            if (!has_changes) {
-                Swal.fire({
-                    position: "top-end",
-                    icon: "warning",
-                    title: 'No changes made.',
-                    showConfirmButton: false,
-                    timer: 1200
-                });
-                return;
-            }
-            $.ajax({
-                type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/location/update_location/" + id,
-                data: form.serialize(),
-                success: function(response) {
-                    response = JSON.parse(response);
-                    $('#location_table').DataTable().ajax.reload(null, false);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "success",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 1200
                     });
                 },
                 error: function(xhr, status, error) {
@@ -224,92 +165,92 @@
                         icon: "error",
                         title: response.message,
                         showConfirmButton: false,
-                        timer: 1200
+                        timer: 2000
                     });
                     console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('EDIT LOCATION ERROR: ' + error);
+                    console.error('SUBMIT REPORT LOG ERROR: ' + error);
                 }
             });
         });
 
-        // for deleting  location
-        $(document).on('submit', 'form[id^="deleteLocationForm"]', function(e) {
-            e.preventDefault();
-            var form = $(this);
-            var id = form.find('input[name="location_id"]').val();
-            $.ajax({
-                type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/location/delete_location/" + id,
-                data: form.serialize(),
-                success: function(response) {
-                    response = JSON.parse(response);
-                    $('#location_table').DataTable().ajax.reload(null, false);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "success",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                },
-                error: function(xhr, status, error, response) {
-                    response = JSON.parse(response);
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "error",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                    console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('DELETE LOCATION ERROR: ' + error);
-                }
-            });
-        });
+
 
     });
-
-    // for updating location status
-    function updateStatus(taskId, newStatus) {
-        $.ajax({
-            type: 'POST',
-            url: "<?php echo site_url(); ?>/task/update_task_status/" + taskId,
-            data: {
-                task_id: taskId,
-                status: newStatus
-            },
-            success: function(response) {
-                response = JSON.parse(response);
-                $('#my_tasks').DataTable().ajax.reload(null, false);
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: response.message,
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            },
-            error: function(xhr, status, error) {
-                Swal.fire({
-                    position: "top-end",
-                    icon: "error",
-                    title: response.message,
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-                console.error('AJAX ERROR: ' + xhr.responseText);
-                console.error('UPDATE STATUS ERROR: ' + error);
-            }
-        });
-    }
 </script>
 
 <i class='bx bx-menu' style='margin-top: .7%;'></i>
-<div class="container-sm">
-    <div class="d-flex justify-content-between align-items-center">
-        <h5 class="mt-2">Report Item Form</h5>
+<div class="container-sm mt-2">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-container p-4 rounded shadow-sm bg-light">
+                <div class="d-flex justify-content-between align-items-center form-header mb-4">
+                    <h5>Report Item Form</h5>
+                </div>
+                <?php echo form_open_multipart('inventory/report/report_form_submit', array('id' => 'addItemReportForm')); ?>
+                <div class="form-group">
+                    <label for="itemSerialCode" class="font-weight-bold">Item Serial Code</label>
+                    <input name="serial" type="text" class="form-control mt-2" id="itemSerialCode" placeholder="Enter item serial code" required>
+                </div>
+                <div class="form-group mt-4">
+                    <label for="remarks" class="font-weight-bold">Remarks</label>
+                    <textarea name="remarks" class="form-control mt-2" id="remarks" rows="3" placeholder="Enter remarks" required></textarea>
+                </div>
+                <div class="form-group mt-4">
+                    <label for="attachment" class="font-weight-bold">Attachment</label>
+                    <input type="file" name="attachment" class="form-control mt-2" id="attachment" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block mt-4">Submit</button>
+                <?php echo form_close(); ?>
+
+            </div>
+
+        </div>
+        <div class="col-md-6">
+            <div class="table-container p-4 rounded shadow-sm bg-light">
+                <h5 class="mb-4 text-primary">My reported items</h5>
+                <table class="table table-striped" id="my_reports">
+                    <thead>
+                        <tr>
+                            <th scope="col"></th>
+                            <th scope="col">Item name</th>
+                            <th scope="col">Item serial code</th>
+                            <th scope="col">Remarks</th>
+                            <!-- <th scope="col">Attachment</th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+    .form-container,
+    .table-container {
+        background-color: #f8f9fa;
+        padding: 2%;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-header h5,
+    .table-container h5 {
+        color: #007bff;
+    }
+
+    .form-group label {
+        font-weight: bold;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+</style>

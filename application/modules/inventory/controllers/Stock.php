@@ -59,13 +59,11 @@ class Stock extends MY_Controller
             $location_id    = $this->input->post('location_id');
             $added_by       = $_SESSION['user_id'];
 
-            // Ensure the uploads directory exists
             $upload_path = './uploads/' . $batch_code . '/';
             if (!is_dir($upload_path)) {
                 mkdir($upload_path, 0755, true);
             }
 
-            // Set upload configuration
             $config['upload_path']   = $upload_path;
             $config['allowed_types'] = 'pdf|jpg|jpeg|png';
             $config['max_size']      = 2048;

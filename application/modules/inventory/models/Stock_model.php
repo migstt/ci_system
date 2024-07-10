@@ -42,4 +42,13 @@ class Stock_model extends MY_Model
         $query = 'SELECT inv_trk_batch_num FROM inventory_tracking ORDER BY inv_trk_id DESC LIMIT 1';
         return $this->getRowBySQL($query, 'row');
     }
+
+    function get_item_by_serial($serial)
+    {
+        $field = '*';
+        $table = 'inventory';
+        $where = 'inv_serial = ' . $serial;
+        $orderby = '';
+        return $this->getRow($field, $table, $where, $orderby);
+    }
 }

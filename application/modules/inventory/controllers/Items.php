@@ -54,11 +54,13 @@ class Items extends MY_Controller
         foreach ($items as $item) {
 
             $item_row           = $this->item->get_item($item->inv_item_id);
+            $item_location      = $this->location->get_location_row_by_id($item->inv_assigned_to);
 
             $data[] = array(
                 'id'                => $item->inv_id,
                 'name'              => $item_row['item_name'],
                 'brand'             => $item->inv_brand,
+                'location'          => $item_location['location_name'],
                 'unit_cost'         => $item->inv_unit_cost,
                 'tracking_no'       => $item->inv_tracking_id,
                 'serial_no'         => $item->inv_serial,

@@ -43,6 +43,10 @@
                     "data": "serial_no",
                     "className": "text-start align-middle"
                 },
+                {
+                    "data": "location",
+                    "className": "text-start align-middle"
+                },
                 // for the viewing item action details
                 {
                     "data": null,
@@ -236,7 +240,7 @@
     </div>
 
     <!-- Supplier Table -->
-    <div class="supplier-table-container">
+    <div class="all-items-table-container">
         <table class="table table-sm table-striped" class="display" id="all_items_table">
             <thead>
                 <tr>
@@ -246,6 +250,7 @@
                     <th class="text-start"><strong>Unit cost</strong></th>
                     <th class="text-start"><strong>Tracking no.</strong></th>
                     <th class="text-start"><strong>Serial no.</strong></th>
+                    <th class="text-start"><strong>Assigned to</strong></th>
                     <th class="text-center"><strong>Details</strong></th>
                 </tr>
             </thead>

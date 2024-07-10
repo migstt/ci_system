@@ -313,7 +313,7 @@
         <h5 class="mt-2">Report Log</h5>
     </div>
 
-    <!-- Add New Location Button -->
+    <!-- Add New Report Button -->
     <!-- <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addNewLocationModal">
         Add Location
     </button> -->
