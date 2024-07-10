@@ -194,11 +194,6 @@
             ajax: {
                 url: '<?php echo site_url(); ?>/inventory/stock/get_stocks',
                 // dataSrc: 'data',
-                dataSrc: function(json) {
-                    window.editUserOptions = json.edit_user_options;
-                    window.editTeamOptions = json.edit_team_options;
-                    return json.data;
-                },
                 type: 'POST',
             },
             columns: [{
@@ -237,6 +232,20 @@
                     "data": "added_by",
                     "className": "text-start align-middle",
                 },
+                {
+                    "sortable": false,
+                    "data": "status",
+                    "className": "text-start align-left align-middle text-center",
+                    "render": function(data, type, row) {
+                        if (data === "Delivered") {
+                            return '<div style="background-color: lightgreen; padding: 8px; border-radius: 5px;">' + data + '</div>';
+                        } else if (data === "Issued") {
+                            return '<div style="background-color: lightcoral; padding: 8px; border-radius: 5px;">' + data + '</div>';
+                        } else {
+                            return '<div style="padding: 8px; border-radius: 5px;">' + data + '</div>';
+                        }
+                    }
+                },
                 // action button for viewing other stock details like remarks, attachments, etc..
                 {
                     "data": null,
@@ -244,10 +253,25 @@
                     "className": "align-middle",
                     render: function(data, type, row) {
                         return `
-                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#viewStockDetailsModal">View Details</button>
-                        `;
+                                    <button class="btn btn-primary btn-sm view-stock-details" 
+                                            data-id="${row.batch_id}" 
+                                            data-batch-code="${row.batch_code}" 
+                                            data-supplier="${row.supplier}" 
+                                            data-warehouse="${row.warehouse}" 
+                                            data-total-cost="${row.total_cost}" 
+                                            data-location="${row.location}" 
+                                            data-date-received="${row.date_received}" 
+                                            data-added-by="${row.added_by}" 
+                                            data-remarks="${row.remarks}" 
+                                            data-attachment="${row.attachment}" 
+                                            data-status="${row.status}" 
+                                            data-toggle="modal" 
+                                            data-target="#viewStockDetailsModal">View
+                                    </button>
+                                `;
                     }
                 }
+
             ],
         });
 
@@ -268,41 +292,6 @@
                     minDate: "today"
                 });
             }
-        });
-
-        // server side contacts datatable, currently hidden
-        $('#ssp_contacts_table').DataTable({
-            searching: true,
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: '<?php echo site_url(); ?>/contact/get_contacts_ssp',
-                type: 'GET',
-            },
-            columns: [{
-                    "data": null,
-                    "render": function(data, type, row, meta) {
-                        return meta.row + 1;
-                    }
-                },
-                {
-                    data: 'full_name'
-                },
-                {
-                    data: 'company'
-                },
-                {
-                    data: 'phone'
-                },
-                {
-                    data: 'email'
-                },
-                // for the contact actions (edit, share, delete) row
-                {
-                    data: 'actions',
-                    sortable: false,
-                },
-            ],
         });
 
         $('#assign_to_team').change(function() {
@@ -376,11 +365,48 @@
             }
         });
 
+        $(document).on('click', '.view-stock-details', function() {
+            const button = $(this);
 
+            $('#modalBatchCode').text(button.data('batch-code'));
+            $('#modalSupplier').text(button.data('supplier'));
+            $('#modalWarehouse').text(button.data('warehouse'));
+            $('#modalTotalCost').text(button.data('total-cost'));
+            $('#modalLocation').text(button.data('location'));
+            $('#modalDateReceived').text(button.data('date-received'));
+            $('#modalAddedBy').text(button.data('added-by'));
+            $('#modalRemarks').text(button.data('remarks'));
+            $('#modalStatus').text(button.data('status'));
+
+            const attachment = button.data('attachment');
+            const attachmentContainer = $('#modalAttachmentContainer');
+            const downloadButton = $('#downloadAttachment');
+            attachmentContainer.empty();
+
+            if (attachment) {
+                const uploadsBaseUrl = '<?php echo base_url(); ?>uploads/';
+                const fullAttachmentUrl = uploadsBaseUrl + attachment.split('/uploads/')[1];
+
+                downloadButton.attr('href', fullAttachmentUrl).show();
+
+                const extension = fullAttachmentUrl.split('.').pop().toLowerCase();
+                if (extension === 'pdf') {
+                    attachmentContainer.append(`<iframe src="${fullAttachmentUrl}" width="100%" height="500px"></iframe>`);
+                } else if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+                    attachmentContainer.append(`<img src="${fullAttachmentUrl}" class="img-fluid" alt="Attachment Image">`);
+                } else {
+                    attachmentContainer.append(`<p>No attachment available.`);
+                    downloadButton.hide();
+                }
+            } else {
+                attachmentContainer.append('<p>No attachment available.</p>');
+                downloadButton.hide();
+            }
+
+            $('#viewStockDetailsModal').modal('show');
+        });
 
     });
-
-
 
     var itemIndex = 1;
 
@@ -498,6 +524,7 @@
                     <th class="text-start"><strong>Location</strong></th>
                     <th class="text-start"><strong>Date received</strong></th>
                     <th class="text-start"><strong>Added by</strong></th>
+                    <th class="text-start"><strong>Status</strong></th>
                     <th class="text-center"><strong>Details</strong></th>
                 </tr>
             </thead>
@@ -538,7 +565,7 @@
                                 <?php endforeach; ?>
                             </select>
 
-                            <label for="warehouse" class="form-label mt-3" style="margin-bottom: -2px;">Warehouse</label>
+                            <label for="warehouse" class="form-label mt-3 mb-2" style="margin-bottom: -2px;">Warehouse</label>
                             <p style="color: red; display: inline;" class="select_supplier_warn">Please select a supplier first.</p>
                             <select name="warehouse_id" class="form-control warehouse_select" required disabled>
                                 <option value="">Please select supplier first</option>
@@ -617,4 +644,47 @@
             </div>
         </div>
     </div>
+
+    <!-- Stock Detail Modal -->
+    <div class="modal fade" id="viewStockDetailsModal" tabindex="-1" aria-labelledby="viewStockDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewStockDetailsModalLabel">Stock Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Batch Code:</strong> <span id="modalBatchCode"></span></p>
+                            <p><strong>Supplier:</strong> <span id="modalSupplier"></span></p>
+                            <p><strong>Warehouse:</strong> <span id="modalWarehouse"></span></p>
+                            <p><strong>Total Cost:</strong> <span id="modalTotalCost"></span></p>
+                            <p><strong>Location:</strong> <span id="modalLocation"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Date and Time Received:</strong> <span id="modalDateReceived"></span></p>
+                            <p><strong>Added By:</strong> <span id="modalAddedBy"></span></p>
+                            <p><strong>Remarks:</strong> <span id="modalRemarks"></span></p>
+                            <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <p><strong>Attachment:</strong></p>
+                            <div id="modalAttachmentContainer" class="text-center"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="downloadAttachment" class="btn btn-primary" href="#" download>Download Attachment</a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
 </div>

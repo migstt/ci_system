@@ -59,11 +59,17 @@ class Stock extends MY_Controller
             $location_id    = $this->input->post('location_id');
             $added_by       = $_SESSION['user_id'];
 
-            $config['upload_path']   = './uploads/';
+            // Ensure the uploads directory exists
+            $upload_path = './uploads/' . $batch_code . '/';
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0755, true);
+            }
+
+            // Set upload configuration
+            $config['upload_path']   = $upload_path;
             $config['allowed_types'] = 'pdf|jpg|jpeg|png';
             $config['max_size']      = 2048;
-            $config['max_width']     = 0;
-            $config['max_height']    = 0;
+            $config['file_name']     = $batch_code . '-' . date('YmdHis');
 
             $this->load->library('upload', $config);
 
@@ -73,8 +79,10 @@ class Stock extends MY_Controller
                 echo json_encode($response);
                 exit();
             } else {
+
                 $data           = $this->upload->data();
-                $attachment     = $data['file_name'];
+                $attachment     = $upload_path . $data['file_name'];
+
                 $tracking_data  = array(
                     'inv_trk_batch_num'         => $batch_code,
                     'inv_trk_location_id'       => $location_id,
@@ -138,6 +146,8 @@ class Stock extends MY_Controller
         }
     }
 
+
+
     public function get_stocks()
     {
         if (!$this->input->is_ajax_request()) {
@@ -173,7 +183,7 @@ class Stock extends MY_Controller
                 'added_by'          => $stock_added_by['user_first_name'] . ' ' . $stock_added_by['user_last_name'],
                 'remarks'           => $stock['inv_trk_notes'],
                 'attachment'        => $stock['inv_trk_attachment'],
-                'status'            => $stock['inv_trk_status'] == 0 ? 'Received' : 'Issued',
+                'status'            => $stock['inv_trk_status'] == 0 ? 'Delivered' : 'Issued',
             );
         }
 

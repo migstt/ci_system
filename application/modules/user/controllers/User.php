@@ -36,10 +36,11 @@ class User extends MY_Controller
                     if (password_verify($password, $existing_user['user_password'])) {
                         $user_session_data = array(
                             'user_id'       => $existing_user['user_id'],
-                            'user_email'    => $existing_user['user_email']
+                            'user_email'    => $existing_user['user_email'],
+                            'user_type_id'  => $existing_user['user_type_id'],
                         );
                         $this->session->set_userdata($user_session_data);
-                        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
+                        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email']) && isset($_SESSION['user_type_id'])) {
                             $response = array('status' => 'success', 'message' => 'Sign in successful. Redirecting.');
                             echo json_encode($response);
                         } else {
@@ -129,7 +130,8 @@ class User extends MY_Controller
     {
         unset(
             $_SESSION['user_email'],
-            $_SESSION['user_id']
+            $_SESSION['user_id'],
+            $_SESSION['user_type_id']
         );
         $this->session->sess_destroy();
         if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
