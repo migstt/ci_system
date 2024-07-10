@@ -246,7 +246,7 @@
                     <th class="text-start"><strong>Unit cost</strong></th>
                     <th class="text-start"><strong>Tracking no.</strong></th>
                     <th class="text-start"><strong>Serial no.</strong></th>
-                    <th class="text-end"><strong>Details</strong></th>
+                    <th class="text-center"><strong>Details</strong></th>
                 </tr>
             </thead>
         </table>

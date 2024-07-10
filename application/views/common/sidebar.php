@@ -55,7 +55,7 @@
             <li>
                 <div class="iocn-link">
                     <a href="<?php echo site_url('inventory'); ?>">
-                        <i class='bx bx-task'></i>
+                        <i class='bx bx-package'></i>
                         <span class="link_name">Inventory</span>
                     </a>
                     <i class='bx bxs-chevron-down arrow'></i>
@@ -74,6 +74,12 @@
                         <li><a href="<?php echo site_url('inventory/users'); ?>">Users</a></li>
                     <?php endif; ?>
                 </ul>
+            </li>
+            <li>
+                <a href="<?php echo site_url('inventory/report'); ?>">
+                    <i class='bx bx-file'></i>
+                    <span class="link_name">Report Item</span>
+                </a>
             </li>
             <li>
                 <a href="<?php echo site_url('user/logout'); ?>">

@@ -13,6 +13,7 @@ class Stock extends MY_Controller
         $this->load->model('inventory/supplier_model', 'supplier');
         $this->load->model('inventory/location_model', 'location');
         $this->load->model('inventory/item_model', 'item');
+        $this->load->model('inventory/warehouse_model', 'warehouse');
         $this->load->library('parser');
         $this->load->helper(array('form', 'url'));
         $this->load->library('form_validation');
@@ -52,6 +53,7 @@ class Stock extends MY_Controller
             $batch_code     = $this->input->post('batch_code');
             $total_cost     = $this->input->post('total_cost');
             $supplier_id    = $this->input->post('supplier_id');
+            $warehouse_id   = $this->input->post('warehouse_id');
             $remarks        = $this->input->post('remarks');
             $date_received  = $this->input->post('date_received');
             $location_id    = $this->input->post('location_id');
@@ -79,6 +81,7 @@ class Stock extends MY_Controller
                     'inv_trk_total_cost'        => $total_cost,
                     'inv_trk_notes'             => $remarks,
                     'inv_trk_supplier_id'       => $supplier_id,
+                    'inv_trk_warehouse_id'      => $warehouse_id,
                     'inv_trk_date_delivered'    => $date_received,
                     'inv_trk_attachment'        => $attachment,
                     'inv_trk_status'            => 0,
@@ -106,6 +109,7 @@ class Stock extends MY_Controller
                                 'inv_unit_cost'     => $item['unit_cost'],
                                 'inv_brand'         => $item['brand'],
                                 'inv_serial'        => $new_serial,
+                                'inv_warehouse_id'  => $warehouse_id,
                                 'inv_assigned_to'   => $location_id,
                                 'inv_status'        => 0,
                                 'inv_added_by'      => $added_by,
@@ -156,16 +160,17 @@ class Stock extends MY_Controller
             $stock_added_by = $this->user->get_user_row_by_id($stock['inv_trk_added_by']);
             $stock_location = $this->location->get_location_row_by_id($stock['inv_trk_location_id']);
             $stock_supplier = $this->supplier->get_supplier_row_by_id($stock['inv_trk_supplier_id']);
+            $stock_warehouse = $this->warehouse->get_warehouse_row_by_id($stock['inv_trk_warehouse_id']);
 
             $data[] = array(
                 'batch_id'          => $stock['inv_trk_id'],
                 'batch_code'        => $stock['inv_trk_batch_num'],
                 'supplier'          => $stock_supplier['supplier_name'],
+                'warehouse'         => $stock_warehouse['wh_name'],
                 'total_cost'        => $stock['inv_trk_total_cost'],
                 'location'          => $stock_location['location_name'],
                 'date_received'     => $stock['inv_trk_date_delivered'],
                 'added_by'          => $stock_added_by['user_first_name'] . ' ' . $stock_added_by['user_last_name'],
-
                 'remarks'           => $stock['inv_trk_notes'],
                 'attachment'        => $stock['inv_trk_attachment'],
                 'status'            => $stock['inv_trk_status'] == 0 ? 'Received' : 'Issued',
@@ -228,5 +233,18 @@ class Stock extends MY_Controller
         }
 
         echo json_encode(['status' => 'success', 'serial' => $new_serial]);
+    }
+
+    public function get_supplier_specific_warehouses()
+    {
+        $supplier_id = $this->input->post('supplier_id');
+        $warehouses = $this->warehouse->get_supplier_specific_warehouses($supplier_id);
+
+        if (!$warehouses) {
+            echo json_encode(['status' => 'error', 'message' => 'No warehouse found for this supplier.']);
+            return;
+        }
+
+        echo json_encode(['status' => 'success', 'warehouses' => $warehouses]);
     }
 }

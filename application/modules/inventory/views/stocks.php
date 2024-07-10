@@ -24,6 +24,18 @@
             }
 
             var form = $(this);
+
+            // loading indicator
+            Swal.fire({
+                title: 'Loading...',
+                text: 'Please wait while stocks are being added.',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                onOpen: () => {
+                    swal.showLoading();
+                }
+            });
+
             $.ajax({
                 type: 'POST',
                 url: "<?php echo site_url(); ?>/inventory/stock/insert_stocks/",
@@ -32,11 +44,14 @@
                 cache: false,
                 processData: false,
                 success: function(response) {
+                    $('#stocks_table').DataTable().ajax.reload(null, false);
                     generateBatchCode();
                     response = JSON.parse(response);
                     form.closest('.modal').modal('hide');
                     $('body').removeClass('modal-open');
                     $('.modal-backdrop').remove();
+
+                    Swal.close();
                     Swal.fire({
                         position: "top-end",
                         icon: "success",
@@ -50,6 +65,8 @@
                     form.closest('.modal').modal('hide');
                     $('body').removeClass('modal-open');
                     $('.modal-backdrop').remove();
+
+                    Swal.close();
                     Swal.fire({
                         position: "top-end",
                         icon: "error",
@@ -62,7 +79,6 @@
                 }
             });
         });
-
         $('.location_select').select2({
             dropdownParent: '#addNewStocksModal .modal-content',
             width: '100%',
@@ -82,6 +98,13 @@
             width: '100%',
             theme: "classic",
             placeholder: "Select supplier",
+        });
+
+        $('.warehouse_select').select2({
+            dropdownParent: '#addNewStocksModal .modal-content',
+            width: '100%',
+            theme: "classic",
+            placeholder: "Select warehouse",
         });
 
         flatpickr("#date_received", {
@@ -192,6 +215,10 @@
                 },
                 {
                     "data": "supplier",
+                    "className": "text-start align-middle"
+                },
+                {
+                    "data": "warehouse",
                     "className": "text-start align-middle"
                 },
                 {
@@ -311,6 +338,45 @@
             }
         });
 
+        $('.supplier_select').on('change', function() {
+            var supplierId = $(this).val();
+            var warehouseSelect = $('.warehouse_select');
+            var selectSupplierWarn = $('.select_supplier_warn');
+
+            if (supplierId) {
+                // Remove the warning message
+                selectSupplierWarn.hide();
+
+                $.ajax({
+                    url: "<?php echo site_url(); ?>/inventory/stock/get_supplier_specific_warehouses/",
+                    type: 'POST',
+                    data: {
+                        supplier_id: supplierId
+                    },
+                    success: function(response) {
+                        var data = JSON.parse(response);
+                        if (data.status === 'success') {
+                            warehouseSelect.empty().append('<option value="">Select warehouse</option>');
+                            $.each(data.warehouses, function(index, warehouse) {
+                                warehouseSelect.append('<option value="' + warehouse.wh_id + '">' + warehouse.wh_name + '</option>');
+                            });
+                            warehouseSelect.prop('disabled', false);
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while fetching warehouses.');
+                    }
+                });
+            } else {
+                // Show the warning message again if no supplier is selected
+                selectSupplierWarn.show();
+                warehouseSelect.prop('disabled', true).empty().append('<option value="">Please select supplier first</option>');
+            }
+        });
+
+
 
     });
 
@@ -426,7 +492,8 @@
                 <tr>
                     <th class="text-center"></th>
                     <th class="text-start"><strong>Batch code</strong></th>
-                    <th class="text-start"><strong>supplier</strong></th>
+                    <th class="text-start"><strong>Supplier</strong></th>
+                    <th class="text-start"><strong>Warehouse</strong></th>
                     <th class="text-start"><strong>Total cost</strong></th>
                     <th class="text-start"><strong>Location</strong></th>
                     <th class="text-start"><strong>Date received</strong></th>
@@ -469,6 +536,12 @@
                                 <?php foreach ($active_suppliers as $supplier) : ?>
                                     <option value="<?php echo $supplier['supplier_id']; ?>"><?php echo $supplier['supplier_name']; ?></option>
                                 <?php endforeach; ?>
+                            </select>
+
+                            <label for="warehouse" class="form-label mt-3" style="margin-bottom: -2px;">Warehouse</label>
+                            <p style="color: red; display: inline;" class="select_supplier_warn">Please select a supplier first.</p>
+                            <select name="warehouse_id" class="form-control warehouse_select" required disabled>
+                                <option value="">Please select supplier first</option>
                             </select>
                         </div>
                         <div class="col-md-6">

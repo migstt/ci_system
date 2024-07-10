@@ -30,4 +30,14 @@ class Report extends MY_Controller
             redirect('forbidden');
         }
     }
+
+    function form()
+    {
+        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
+            $view = $this->load->view('inventory/report_form', '', true);
+            $this->template($view);
+        } else {
+            redirect('forbidden');
+        }
+    }
 }
