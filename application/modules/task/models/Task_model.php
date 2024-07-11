@@ -63,8 +63,6 @@ class Task_model extends MY_Model
         return $this->db->get()->result();
     }
 
-
-
     public function get_tasks_assigned_to_others($task_assigned_by, $limit = 0, $offset = 0)
     {
         $this->db->select('*');

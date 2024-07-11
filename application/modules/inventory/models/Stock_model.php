@@ -51,4 +51,11 @@ class Stock_model extends MY_Model
         $orderby = '';
         return $this->getRow($field, $table, $where, $orderby);
     }
+
+    function get_item_by_serial_by_sql($serial)
+    {
+        $query = "SELECT * FROM inventory WHERE inv_serial = '$serial'";
+        return $this->getRowBySQL($query, 'row');
+    }
+
 }
