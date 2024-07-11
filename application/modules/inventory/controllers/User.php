@@ -195,9 +195,4 @@ class User extends MY_Controller
 
         echo json_encode($output);
     }
-    // USER MANAGEMENT
-
-
-
-
 }

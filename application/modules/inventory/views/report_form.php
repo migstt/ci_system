@@ -161,7 +161,7 @@
                             <th scope="col"></th>
                             <th scope="col"><strong>Name</strong></th>
                             <th scope="col"><strong>Serial</strong></th>
-                            <th scope="col"><strong>Status</strong></th>
+                            <th scope="col" class="text-center"><strong>Status</strong></th>
                             <th scope="col"><strong>Date reported</strong></th>
                         </tr>
                     </thead>

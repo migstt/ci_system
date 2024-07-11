@@ -43,7 +43,7 @@ class Report_model extends MY_Model
     {
         $this->db->select('*');
         $this->db->from('report_logs');
-        $this->db->order_by('rlog_added_at', 'ASC');
+        $this->db->order_by('rlog_added_at', 'DESC');
         return $this->db->get()->result();
     }
 }

@@ -69,7 +69,9 @@
                     <li><a href="<?php echo site_url('inventory/category'); ?>">Category</a></li>
                     <li><a href="<?php echo site_url('inventory/suppliers'); ?>">Suppliers</a></li>
                     <li><a href="<?php echo site_url('inventory/items'); ?>">Items</a></li>
-                    <li><a href="<?php echo site_url('inventory/reports'); ?>">Report Log</a></li>
+                    <?php if ($current_user_type == 'Admin') : ?>
+                        <li><a href="<?php echo site_url('inventory/reports'); ?>">Report Log</a></li>
+                    <?php endif; ?>
                     <?php if ($current_user_type == 'Admin') : ?>
                         <li><a href="<?php echo site_url('inventory/users'); ?>">Users</a></li>
                     <?php endif; ?>

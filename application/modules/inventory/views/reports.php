@@ -50,84 +50,115 @@
                     "className": "text-start align-middle",
                     "render": function(data, type, row) {
                         let dropdownItems = '';
-
-                        if (data === 'Pending') {
-                            dropdownItems = `
-                                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Reviewed')">Reviewed</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Disposed')">Disposed</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Replaced')">Replaced</a></li>
-                                            `;
-                        } else if (data === 'Reviewed') {
-                            dropdownItems = `
-                                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Pending')">Pending</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Disposed')">Disposed</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Replaced')">Replaced</a></li>
-                                            `;
-                        } else if (data === 'Disposed') {
-                            dropdownItems = `
-                                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Pending')">Pending</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Reviewed')">Reviewed</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Replaced')">Replaced</a></li>
-                                            `;
-                        } else if (data === 'Replaced') {
-                            dropdownItems = `
-                                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Pending')">Pending</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Reviewed')">Reviewed</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Disposed')">Disposed</a></li>
-                                            `;
-                        }
-
                         let buttonClass = 'btn-secondary';
+                        let dropdownHtml = '';
+
                         if (data === 'Pending') {
+                            dropdownItems = `
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Reviewed')">Reviewed</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Disposed')">Disposed</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Replaced')">Replaced</a></li>
+                            `;
                             buttonClass = 'btn-warning';
                         } else if (data === 'Reviewed') {
+                            dropdownItems = `
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Disposed')">Disposed</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Replaced')">Replaced</a></li>
+                            `;
                             buttonClass = 'btn-info';
                         } else if (data === 'Disposed') {
+                            dropdownItems = `
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Replaced')">Replaced</a></li>
+                            `;
                             buttonClass = 'btn-danger';
                         } else if (data === 'Replaced') {
                             buttonClass = 'btn-success';
                         }
 
-                        return `
-                                    <div class="dropdown">
-                                        <button class="btn btn-fixed-width ${buttonClass} dropdown-toggle" type="button" id="statusDropdown${row.report_id}" data-bs-toggle="dropdown" aria-expanded="false">
-                                            ${data}
-                                        </button>
-                                        <ul class="dropdown-menu" aria-labelledby="statusDropdown${row.report_id}">
-                                            ${dropdownItems}
-                                        </ul>
-                                    </div>
-                                `;
+                        if (data !== 'Replaced') {
+                            dropdownHtml = `
+                                <div class="dropdown">
+                                    <button class="btn btn-fixed-width ${buttonClass} dropdown-toggle text-white" type="button" id="statusDropdown${row.report_id}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        ${data}
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="statusDropdown${row.report_id}">
+                                        ${dropdownItems}
+                                    </ul>
+                                </div>
+                            `;
+                        } else {
+                            dropdownHtml = `
+                                <button class="btn btn-fixed-width ${buttonClass} text-white" type="button" disabled>
+                                    ${data}
+                                </button>
+                            `;
+                        }
+                        return dropdownHtml;
                     }
                 },
-
                 // for the report log details with attachment
                 {
                     "data": null,
                     "sortable": false,
                     "className": "align-middle",
-                    render: function(data, type, row) {
+                    "render": function(data, type, row) {
                         return `
-                                    <button class="btn btn-primary btn-sm view-stock-details" 
-                                            data-id="${row.batch_id}" 
-                                            data-batch-code="${row.batch_code}" 
-                                            data-supplier="${row.supplier}" 
-                                            data-warehouse="${row.warehouse}" 
-                                            data-total-cost="${row.total_cost}" 
-                                            data-location="${row.location}" 
-                                            data-date-received="${row.date_received}" 
-                                            data-added-by="${row.added_by}" 
-                                            data-remarks="${row.remarks}" 
-                                            data-attachment="${row.attachment}" 
-                                            data-status="${row.status}" 
-                                            data-toggle="modal" 
-                                            data-target="#viewStockDetailsModal">View
-                                    </button>
-                                `;
+                                <button class="btn btn-primary btn-sm view-report-details" 
+                                        data-id="${row.report_id}" 
+                                        data-item-name="${row.item_name}" 
+                                        data-serial="${row.serial}" 
+                                        data-reporter="${row.reporter}" 
+                                        data-date-reported="${row.date_reported}" 
+                                        data-remarks="${row.remarks}" 
+                                        data-attachment="${row.attachment}" 
+                                        data-status="${row.status}" 
+                                        data-toggle="modal" 
+                                        data-target="#viewReportDetailsModal">View
+                                </button>
+                            `;
                     }
                 }
             ],
         });
+
+        $(document).on('click', '.view-report-details', function() {
+            const button = $(this);
+
+            $('#modalItemName').text(button.data('item-name'));
+            $('#modalSerial').text(button.data('serial'));
+            $('#modalReporter').text(button.data('reporter'));
+            $('#modalDateReported').text(button.data('date-reported'));
+            $('#modalRemarks').text(button.data('remarks'));
+            $('#modalStatus').text(button.data('status'));
+
+            const attachment = button.data('attachment');
+            const attachmentContainer = $('#modalAttachmentContainer');
+            const downloadButton = $('#downloadAttachment');
+            attachmentContainer.empty();
+
+            if (attachment) {
+                const uploadsBaseUrl = '<?php echo base_url(); ?>uploads_reports/';
+                const fullAttachmentUrl = uploadsBaseUrl + attachment.split('/uploads_reports/')[1];
+
+                downloadButton.attr('href', fullAttachmentUrl).show();
+
+                const extension = fullAttachmentUrl.split('.').pop().toLowerCase();
+                if (extension === 'pdf') {
+                    attachmentContainer.append(`<iframe src="${fullAttachmentUrl}" width="100%" height="500px"></iframe>`);
+                } else if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+                    attachmentContainer.append(`<img src="${fullAttachmentUrl}" class="img-fluid" alt="Attachment Image">`);
+                } else {
+                    attachmentContainer.append(`<p>No attachment available.`);
+                    downloadButton.hide();
+                }
+            } else {
+                attachmentContainer.append('<p>No attachment available.</p>');
+                downloadButton.hide();
+            }
+
+            $('#viewReportDetailsModal').modal('show');
+        });
+
     });
 
     // for updating report log status
@@ -188,6 +219,43 @@
             </thead>
         </table>
     </div>
+
+    <!-- Report Detail Modal -->
+    <div class="modal fade" id="viewReportDetailsModal" tabindex="-1" aria-labelledby="viewReportDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewReportDetailsModalLabel">Report Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Item Name:</strong> <span id="modalItemName"></span></p>
+                            <p><strong>Serial:</strong> <span id="modalSerial"></span></p>
+                            <p><strong>Reporter:</strong> <span id="modalReporter"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Date Reported:</strong> <span id="modalDateReported"></span></p>
+                            <p><strong>Remarks:</strong> <span id="modalRemarks"></span></p>
+                            <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <p><strong>Attachment:</strong></p>
+                            <div id="modalAttachmentContainer" class="text-center"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="downloadAttachment" class="btn btn-primary" href="#" download>Download Attachment</a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 </div>
 
