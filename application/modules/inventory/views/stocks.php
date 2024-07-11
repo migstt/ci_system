@@ -79,6 +79,7 @@
                 }
             });
         });
+
         $('.location_select').select2({
             dropdownParent: '#addNewStocksModal .modal-content',
             width: '100%',
@@ -187,7 +188,8 @@
         });
 
         // client side stocks datatable
-        $('#stocks_table').DataTable({
+        // $('#stocks_table').DataTable({
+        new DataTable('#stocks_table', {
             responsive: true,
             searching: true,
             processing: true,
@@ -265,13 +267,13 @@
                                             data-remarks="${row.remarks}" 
                                             data-attachment="${row.attachment}" 
                                             data-status="${row.status}" 
+                                            data-items-info='${JSON.stringify(row.items_info)}'
                                             data-toggle="modal" 
                                             data-target="#viewStockDetailsModal">View
                                     </button>
                                 `;
                     }
                 }
-
             ],
         });
 
@@ -291,18 +293,6 @@
                     dateFormat: "Y-m-d H:i",
                     minDate: "today"
                 });
-            }
-        });
-
-        $('#assign_to_team').change(function() {
-            if (this.checked) {
-                $('#team_selected').prop('disabled', false);
-                $('#user_selected').prop('disabled', true);
-                $('#user_selected').val('Default');
-            } else {
-                $('#team_selected').prop('disabled', true);
-                $('#user_selected').prop('disabled', false);
-                $('#team_selected').val('Default');
             }
         });
 
@@ -395,13 +385,50 @@
                 } else if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
                     attachmentContainer.append(`<img src="${fullAttachmentUrl}" class="img-fluid" alt="Attachment Image">`);
                 } else {
-                    attachmentContainer.append(`<p>No attachment available.`);
+                    attachmentContainer.append('<p>No attachment available.</p>');
                     downloadButton.hide();
                 }
             } else {
                 attachmentContainer.append('<p>No attachment available.</p>');
                 downloadButton.hide();
             }
+
+            // Display items_info in the modal as a table
+            const itemsInfo = button.data('items-info');
+            let totalCost = 0;
+            let itemsHtml = `
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Brand</th>
+                            <th>Unit cost</th>
+                            <th>Quantity</th>
+                            <th>Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            itemsInfo.forEach(item => {
+                itemsHtml += `
+                    <tr>
+                        <td>${item.item_name}</td>
+                        <td>${item.brand}</td>
+                        <td>${item.cost}</td>
+                        <td>${item.quantity_ordered}</td>
+                        <td>&#8369; ${item.total_cost_per_item}</td>
+                    </tr>`;
+                totalCost += parseFloat(item.total_cost_per_item);
+            });
+            itemsHtml += `
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4"><strong>Total Cost:</strong></td>
+                            <td><strong>&#8369; ${totalCost.toFixed(2)}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>`;
+            $('#modalItemsInfo').html(itemsHtml);
 
             $('#viewStockDetailsModal').modal('show');
         });
@@ -656,22 +683,29 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>Batch Code:</strong> <span id="modalBatchCode"></span></p>
+                            <p><strong>Batch code:</strong> <span id="modalBatchCode"></span></p>
                             <p><strong>Supplier:</strong> <span id="modalSupplier"></span></p>
                             <p><strong>Warehouse:</strong> <span id="modalWarehouse"></span></p>
-                            <p><strong>Total Cost:</strong> <span id="modalTotalCost"></span></p>
+                            <p><strong>Total cost:</strong> &#8369; <span id="modalTotalCost"></span></p>
                             <p><strong>Location:</strong> <span id="modalLocation"></span></p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>Date and Time Received:</strong> <span id="modalDateReceived"></span></p>
-                            <p><strong>Added By:</strong> <span id="modalAddedBy"></span></p>
+                            <p><strong>Date and time received:</strong> <span id="modalDateReceived"></span></p>
+                            <p><strong>Added by:</strong> <span id="modalAddedBy"></span></p>
                             <p><strong>Remarks:</strong> <span id="modalRemarks"></span></p>
                             <p><strong>Status:</strong> <span id="modalStatus"></span></p>
                         </div>
                     </div>
+                    <hr>
                     <div class="row mt-4">
                         <div class="col-md-12">
-                            <p><strong>Attachment:</strong></p>
+                            <h6><strong>Inventory additions:</strong></h6>
+                            <div id="modalItemsInfo" class="item-info-list"></div>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h6><strong>Attachment:</strong></h6>
                             <div id="modalAttachmentContainer" class="text-center"></div>
                         </div>
                     </div>
@@ -684,4 +718,37 @@
         </div>
     </div>
 
+
+
 </div>
+
+<style>
+    #viewStockDetailsModal .modal-body p {
+        margin-bottom: 0.5rem;
+    }
+
+    #viewStockDetailsModal .modal-body .row {
+        margin-bottom: 1rem;
+    }
+
+    #viewStockDetailsModal .item-info-list table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    #viewStockDetailsModal .item-info-list th,
+    #viewStockDetailsModal .item-info-list td {
+        padding: 8px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    #viewStockDetailsModal .item-info-list th {
+        background-color: #f2f2f2;
+    }
+
+    #viewStockDetailsModal .item-info-list tfoot {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+</style>

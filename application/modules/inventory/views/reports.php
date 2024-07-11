@@ -12,7 +12,6 @@
             processing: true,
             ajax: {
                 url: '<?php echo site_url(); ?>/inventory/report/get_all_reports',
-                // dataSrc: 'data',
                 type: 'POST',
             },
             columns: [{
@@ -47,7 +46,7 @@
                 },
                 {
                     "data": "status",
-                    "className": "text-start align-middle",
+                    "className": "text-center align-middle",
                     "render": function(data, type, row) {
                         let dropdownItems = '';
                         let buttonClass = 'btn-secondary';
@@ -55,21 +54,21 @@
 
                         if (data === 'Pending') {
                             dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Reviewed')">Reviewed</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Disposed')">Disposed</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Replaced')">Replaced</a></li>
-                            `;
+                        <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Reviewed')">Reviewed</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Disposed')">Disposed</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Replaced')">Replaced</a></li>
+                    `;
                             buttonClass = 'btn-warning';
                         } else if (data === 'Reviewed') {
                             dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Disposed')">Disposed</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Replaced')">Replaced</a></li>
-                            `;
+                        <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Disposed')">Disposed</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Replaced')">Replaced</a></li>
+                    `;
                             buttonClass = 'btn-info';
                         } else if (data === 'Disposed') {
                             dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Replaced')">Replaced</a></li>
-                            `;
+                        <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.report_id}', 'Replaced')">Replaced</a></li>
+                    `;
                             buttonClass = 'btn-danger';
                         } else if (data === 'Replaced') {
                             buttonClass = 'btn-success';
@@ -77,49 +76,49 @@
 
                         if (data !== 'Replaced') {
                             dropdownHtml = `
-                                <div class="dropdown">
-                                    <button class="btn btn-fixed-width ${buttonClass} dropdown-toggle text-white" type="button" id="statusDropdown${row.report_id}" data-bs-toggle="dropdown" aria-expanded="false">
-                                        ${data}
-                                    </button>
-                                    <ul class="dropdown-menu" aria-labelledby="statusDropdown${row.report_id}">
-                                        ${dropdownItems}
-                                    </ul>
-                                </div>
-                            `;
+                        <div class="dropdown">
+                            <button class="btn btn-fixed-width ${buttonClass} dropdown-toggle text-white" type="button" id="statusDropdown${row.report_id}" data-bs-toggle="dropdown" aria-expanded="false">
+                                ${data}
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="statusDropdown${row.report_id}">
+                                ${dropdownItems}
+                            </ul>
+                        </div>
+                    `;
                         } else {
                             dropdownHtml = `
-                                <button class="btn btn-fixed-width ${buttonClass} text-white" type="button" disabled>
-                                    ${data}
-                                </button>
-                            `;
+                        <button class="btn btn-fixed-width ${buttonClass} text-white" type="button" disabled>
+                            ${data}
+                        </button>
+                    `;
                         }
                         return dropdownHtml;
                     }
                 },
-                // for the report log details with attachment
                 {
                     "data": null,
                     "sortable": false,
-                    "className": "align-middle",
+                    "className": "text-center align-middle",
                     "render": function(data, type, row) {
                         return `
-                                <button class="btn btn-primary btn-sm view-report-details" 
-                                        data-id="${row.report_id}" 
-                                        data-item-name="${row.item_name}" 
-                                        data-serial="${row.serial}" 
-                                        data-reporter="${row.reporter}" 
-                                        data-date-reported="${row.date_reported}" 
-                                        data-remarks="${row.remarks}" 
-                                        data-attachment="${row.attachment}" 
-                                        data-status="${row.status}" 
-                                        data-toggle="modal" 
-                                        data-target="#viewReportDetailsModal">View
-                                </button>
-                            `;
+                        <button class="btn btn-primary btn-sm view-report-details" 
+                                data-id="${row.report_id}" 
+                                data-item-name="${row.item_name}" 
+                                data-serial="${row.serial}" 
+                                data-reporter="${row.reporter}" 
+                                data-date-reported="${row.date_reported}" 
+                                data-remarks="${row.remarks}" 
+                                data-attachment="${row.attachment}" 
+                                data-status="${row.status}" 
+                                data-toggle="modal" 
+                                data-target="#viewReportDetailsModal">View
+                        </button>
+                    `;
                     }
                 }
             ],
         });
+
 
         $(document).on('click', '.view-report-details', function() {
             const button = $(this);
@@ -263,4 +262,5 @@
     .dropdown-toggle {
         color: white !important;
     }
+
 </style>

@@ -36,7 +36,6 @@ class Report extends MY_Controller
 
         $view = $this->load->view('inventory/reports', '', true);
         $this->template($view);
-
     }
 
     function form()
@@ -79,7 +78,7 @@ class Report extends MY_Controller
                 'serial'        => $report->rlog_serial,
                 'status'        => $report->rlog_status,
                 'remarks'       => $report->rlog_remarks,
-                'status'        => $report->rlog_status, // Pending, Reviewed, Disposed, Replaced
+                'status'        => $report->rlog_status,
                 'attachment'    => $report->rlog_attachment,
                 'reporter'      => $reporter['user_first_name'] . ' ' . $reporter['user_last_name'],
                 'date_reported' => date('M d, Y', strtotime($report->rlog_added_at)),

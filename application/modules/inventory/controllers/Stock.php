@@ -60,6 +60,7 @@ class Stock extends MY_Controller
             $added_by       = $_SESSION['user_id'];
 
             $upload_path = './uploads/' . $batch_code . '/';
+
             if (!is_dir($upload_path)) {
                 mkdir($upload_path, 0755, true);
             }
@@ -165,10 +166,11 @@ class Stock extends MY_Controller
         $data = array();
         foreach ($stocks as $stock) {
 
-            $stock_added_by = $this->user->get_user_row_by_id($stock['inv_trk_added_by']);
-            $stock_location = $this->location->get_location_row_by_id($stock['inv_trk_location_id']);
-            $stock_supplier = $this->supplier->get_supplier_row_by_id($stock['inv_trk_supplier_id']);
-            $stock_warehouse = $this->warehouse->get_warehouse_row_by_id($stock['inv_trk_warehouse_id']);
+            $stock_added_by     = $this->user->get_user_row_by_id($stock['inv_trk_added_by']);
+            $stock_location     = $this->location->get_location_row_by_id($stock['inv_trk_location_id']);
+            $stock_supplier     = $this->supplier->get_supplier_row_by_id($stock['inv_trk_supplier_id']);
+            $stock_warehouse    = $this->warehouse->get_warehouse_row_by_id($stock['inv_trk_warehouse_id']);
+            $items_by_batch     = $this->inventory->get_items_ordered_by_batch($stock['inv_trk_batch_num']);
 
             $data[] = array(
                 'batch_id'          => $stock['inv_trk_id'],
@@ -176,6 +178,7 @@ class Stock extends MY_Controller
                 'supplier'          => $stock_supplier['supplier_name'],
                 'warehouse'         => $stock_warehouse['wh_name'],
                 'total_cost'        => $stock['inv_trk_total_cost'],
+                'items_info'        => $items_by_batch,
                 'location'          => $stock_location['location_name'],
                 'date_received'     => $stock['inv_trk_date_delivered'],
                 'added_by'          => $stock_added_by['user_first_name'] . ' ' . $stock_added_by['user_last_name'],
