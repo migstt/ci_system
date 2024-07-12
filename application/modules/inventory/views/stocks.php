@@ -361,7 +361,7 @@
             $('#modalBatchCode').text(button.data('batch-code'));
             $('#modalSupplier').text(button.data('supplier'));
             $('#modalWarehouse').text(button.data('warehouse'));
-            $('#modalTotalCost').text(button.data('total-cost'));
+            $('#modalTotalCost').text(formatCost(button.data('total-cost')));
             $('#modalLocation').text(button.data('location'));
             $('#modalDateReceived').text(button.data('date-received'));
             $('#modalAddedBy').text(button.data('added-by'));
@@ -413,9 +413,9 @@
                     <tr>
                         <td>${item.item_name}</td>
                         <td>${item.brand}</td>
-                        <td>${item.cost}</td>
+                        <td>&#8369; ${formatCost(item.cost)}</td>
                         <td>${item.quantity_ordered}</td>
-                        <td>&#8369; ${item.total_cost_per_item}</td>
+                        <td>&#8369; ${formatCost(item.total_cost_per_item)}</td>
                     </tr>`;
                 totalCost += parseFloat(item.total_cost_per_item);
             });
@@ -423,8 +423,8 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="4"><strong>Total Cost:</strong></td>
-                            <td><strong>&#8369; ${totalCost.toFixed(2)}</strong></td>
+                            <td colspan="4"><strong>Total cost:</strong></td>
+                            <td><strong>&#8369; ${totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></td>
                         </tr>
                     </tfoot>
                 </table>`;
@@ -523,6 +523,13 @@
             error: function() {
                 console.error('An error occurred while generating the batch code.');
             }
+        });
+    }
+
+    function formatCost(cost) {
+        return parseFloat(cost).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         });
     }
 </script>

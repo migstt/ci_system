@@ -25,12 +25,14 @@
                 },
                 {
                     "data": "name",
-                    "className": "text-start align-middle"
+                    "className": "text-start align-middle",
+                    "width": "15%",
                 },
                 {
                     "sortable": false,
                     "data": "contact_details",
                     "className": "text-start align-middle",
+                    "width": "20%",
                     "render": function(data, type, row) {
                         if (Array.isArray(data)) {
                             return data.map(function(detail) {
@@ -57,6 +59,7 @@
                     "sortable": false,
                     "data": "bank_details",
                     "className": "text-start align-middle",
+                    "width": "25%",
                     "render": function(data, type, row) {
                         if (Array.isArray(data)) {
                             return data.map(function(detail) {
@@ -84,6 +87,7 @@
                 {
                     "sortable": false,
                     "data": "status",
+                    "width": "10%",
                     "className": "text-center align-middle",
                     "createdCell": function(td, cellData, rowData, row, col) {
                         if (cellData === 'Active') {
