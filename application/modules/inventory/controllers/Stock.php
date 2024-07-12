@@ -8,6 +8,7 @@ class Stock extends MY_Controller
         parent::__construct();
         $this->load->model('user/user_model', 'user');
         $this->load->model('team/team_model', 'team');
+        $this->load->model('task/task_model', 'task');
         $this->load->model('inventory_model', 'inventory');
         $this->load->model('inventory/stock_model', 'stock');
         $this->load->model('inventory/supplier_model', 'supplier');
@@ -32,6 +33,7 @@ class Stock extends MY_Controller
         $data['active_locations']   = $this->location->get_active_locations();
         $data['active_items']       = $this->item->get_active_items();
         $data['batch_code']         = $this->generate_batch_code();
+        $data['active_couriers']    = $this->user->get_users_by_type(3);
 
         if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             $view = $this->load->view('inventory/stocks', $data, true);
@@ -45,7 +47,6 @@ class Stock extends MY_Controller
     {
         $this->form_validation->set_rules('supplier_id', 'Supplier', 'required');
         $this->form_validation->set_rules('remarks', 'Remarks', 'required');
-        $this->form_validation->set_rules('date_received', 'Date Received', 'required');
         $this->form_validation->set_rules('location_id', 'Location', 'required');
 
         if ($this->form_validation->run() == TRUE) {
@@ -57,6 +58,7 @@ class Stock extends MY_Controller
             $remarks        = $this->input->post('remarks');
             $date_received  = $this->input->post('date_received');
             $location_id    = $this->input->post('location_id');
+            $courier_id     = $this->input->post('courier_id');
             $added_by       = $_SESSION['user_id'];
 
             $upload_path = './uploads/' . $batch_code . '/';
@@ -82,6 +84,27 @@ class Stock extends MY_Controller
                 $data           = $this->upload->data();
                 $attachment     = $upload_path . $data['file_name'];
 
+                if ($date_received == '') {
+                    $inv_trk_status = 1;
+                } else {
+                    $inv_trk_status = 0;
+                }
+
+                $task_formdata = array(
+                    'task_assigned_by'          => $_SESSION['user_id'],
+                    'task_title'                => 'Stocks Approval',
+                    'task_description'          => 'Stock batch number ' . $batch_code . ' is pending for approval.',
+                    'task_assigned_to_user'     => 30,
+                    'task_status'               => 'pending',
+                    'task_created_at'           => date('Y-m-d H:i:s'),
+                    'task_updated_at'           => null,
+                    'task_completed_at'         => null,
+                    'task_due_date'             => null,
+                    'task_is_deleted'           => 0,
+                );
+
+                $task_id = $this->task->insert_stock_task($task_formdata, 30);
+
                 $tracking_data  = array(
                     'inv_trk_batch_num'         => $batch_code,
                     'inv_trk_location_id'       => $location_id,
@@ -89,9 +112,11 @@ class Stock extends MY_Controller
                     'inv_trk_notes'             => $remarks,
                     'inv_trk_supplier_id'       => $supplier_id,
                     'inv_trk_warehouse_id'      => $warehouse_id,
+                    'inv_trk_courier'           => $courier_id,
+                    'inv_trk_task_id'           => $task_id,
                     'inv_trk_date_delivered'    => $date_received,
                     'inv_trk_attachment'        => $attachment,
-                    'inv_trk_status'            => 0,
+                    'inv_trk_status'            => $inv_trk_status, // 0 - Delivered, 1 - Issued, 2 - Approved by Warehouse Manager, 3 - On the Way
                     'inv_trk_added_by'          => $added_by,
                     'inv_trk_added_at'          => date('Y-m-d H:i:s'),
                     'inv_trk_updated_at'        => NULL
@@ -118,7 +143,7 @@ class Stock extends MY_Controller
                                 'inv_serial'        => $new_serial,
                                 'inv_warehouse_id'  => $warehouse_id,
                                 'inv_assigned_to'   => $location_id,
-                                'inv_status'        => 0,
+                                'inv_status'        => $inv_trk_status,  // 0 - Delivered, 1 - Issued, 2 - Approved by Warehouse Manager, 3 - On the Way
                                 'inv_added_by'      => $added_by,
                                 'inv_added_at'      => date('Y-m-d H:i:s'),
                                 'inv_updated_at'    => NULL
@@ -172,6 +197,20 @@ class Stock extends MY_Controller
             $stock_warehouse    = $this->warehouse->get_warehouse_row_by_id($stock['inv_trk_warehouse_id']);
             $items_by_batch     = $this->inventory->get_items_ordered_by_batch($stock['inv_trk_batch_num']);
 
+            $status = '';
+
+            if ($stock['inv_trk_status'] == 0) {
+                $status = 'Delivered';
+            } elseif ($stock['inv_trk_status'] == 1) {
+                $status = 'Issued';
+            } elseif ($stock['inv_trk_status'] == 2) {
+                $status = 'Approved by Warehouse Manager';
+            } elseif ($stock['inv_trk_status'] == 3) {
+                $status = 'On the Way';
+            } else {
+                $status = 'Unknown';
+            }
+
             $data[] = array(
                 'batch_id'          => $stock['inv_trk_id'],
                 'batch_code'        => $stock['inv_trk_batch_num'],
@@ -184,7 +223,7 @@ class Stock extends MY_Controller
                 'added_by'          => $stock_added_by['user_first_name'] . ' ' . $stock_added_by['user_last_name'],
                 'remarks'           => $stock['inv_trk_notes'],
                 'attachment'        => $stock['inv_trk_attachment'],
-                'status'            => $stock['inv_trk_status'] == 0 ? 'Delivered' : 'Issued',
+                'status'            => $status,
             );
         }
 

@@ -229,6 +229,13 @@
                 {
                     "data": "date_received",
                     "className": "text-start align-middle",
+                    "render": function(data, type, row) {
+                        if (data === '0000-00-00 00:00:00') {
+                            return "N/A";
+                        } else {
+                            return data;
+                        }
+                    }
                 },
                 {
                     "data": "added_by",
@@ -239,13 +246,23 @@
                     "data": "status",
                     "className": "text-start align-left align-middle text-center",
                     "render": function(data, type, row) {
-                        if (data === "Delivered") {
-                            return '<div style="background-color: lightgreen; padding: 8px; border-radius: 5px;">' + data + '</div>';
-                        } else if (data === "Issued") {
-                            return '<div style="background-color: lightcoral; padding: 8px; border-radius: 5px;">' + data + '</div>';
+                        let statusLabel = '';
+
+                        if (data === 'Delivered') {
+                            statusLabel = '<div class="status-label status-delivered">' + data + '</div>';
+                        } else if (data === 'Issued') {
+                            statusLabel = '<div class="status-label status-issued">' + data + '</div>';
+                        } else if (data === 'Approved by Warehouse Manager') {
+                            statusLabel = '<div class="status-label status-approved">' + data + '</div>';
+                        } else if (data === 'On the Way') {
+                            statusLabel = '<div class="status-label status-on-the-way">' + data + '</div>';
+                        } else if (data === 'done') {
+                            statusLabel = '<div class="status-label status-done">Done</div>';
                         } else {
-                            return '<div style="padding: 8px; border-radius: 5px;">' + data + '</div>';
+                            statusLabel = '<div class="status-label">' + data + '</div>';
                         }
+
+                        return statusLabel;
                     }
                 },
                 // action button for viewing other stock details like remarks, attachments, etc..
@@ -411,11 +428,11 @@
             itemsInfo.forEach(item => {
                 itemsHtml += `
                     <tr>
-                        <td>${item.item_name}</td>
-                        <td>${item.brand}</td>
-                        <td>&#8369; ${formatCost(item.cost)}</td>
-                        <td>${item.quantity_ordered}</td>
-                        <td>&#8369; ${formatCost(item.total_cost_per_item)}</td>
+                    <td>${item.item_name}</td>
+                <td>${item.brand}</td>
+                <td>&#8369; ${formatCost(item.cost)}</td>
+                <td>${item.quantity_ordered}</td>
+                <td>&#8369; ${formatCost(item.total_cost_per_item)}</td>
                     </tr>`;
                 totalCost += parseFloat(item.total_cost_per_item);
             });
@@ -431,6 +448,16 @@
             $('#modalItemsInfo').html(itemsHtml);
 
             $('#viewStockDetailsModal').modal('show');
+        });
+
+        $('#stocks_received').change(function() {
+            if ($(this).is(':checked')) {
+                $('#date_received_container').show();
+                $('#date_received').attr('required', true);
+            } else {
+                $('#date_received_container').hide();
+                $('#date_received').removeAttr('required');
+            }
         });
 
     });
@@ -612,9 +639,25 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="dateReceived" class="form-label">Date Received</label>
-                            <input name="date_received" id="date_received" type="date" class="form-control" placeholder="Date received" aria-label="Date received" required />
+                            <label for="courier" class="form-label">Courier</label>
+                            <select name="courier_id" class="form-control location_select" required>
+                                <option value="">Select courier</option>
+                                <?php foreach ($active_couriers as $courier) : ?>
+                                    <option value="<?php echo $courier['user_id']; ?>"><?php echo $courier['user_first_name'] . ' ' . $courier['user_last_name']; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+
+                            <div class="form-check mt-3">
+                                <input type="checkbox" id="stocks_received" name="stocks_received" class="form-check-input">
+                                <label for="stocks_received" class="form-check-label highlight-label">Stocks already received</label>
+                            </div>
+
+                            <div id="date_received_container" class="mt-3" style="display: none;">
+                                <label for="date_received" class="form-label">Date Received</label>
+                                <input name="date_received" id="date_received" type="date" class="form-control" placeholder="Date received" aria-label="Date received" />
+                            </div>
                         </div>
+
                         <div class="col-md-6">
                             <label for="location" class="form-label">Location</label>
                             <select name="location_id" class="form-control location_select" required>
@@ -757,5 +800,49 @@
     #viewStockDetailsModal .item-info-list tfoot {
         background-color: #f2f2f2;
         font-weight: bold;
+    }
+
+    .highlight-label {
+        color: #007bff;
+        /* Bootstrap primary color */
+        font-weight: bold;
+    }
+
+    .status-label {
+        display: block;
+        width: 100%;
+        padding: 8px;
+        font-size: 1rem;
+        font-weight: 400;
+        text-align: center;
+        white-space: nowrap;
+        border-radius: 5px;
+        color: #fff;
+        /* White text */
+    }
+
+    .status-delivered {
+        background-color: #28a745;
+        /* Green */
+    }
+
+    .status-issued {
+        background-color: #dc3545;
+        /* Red */
+    }
+
+    .status-approved {
+        background-color: #007bff;
+        /* Blue */
+    }
+
+    .status-on-the-way {
+        background-color: #ffc107;
+        /* Yellow */
+    }
+
+    .status-done {
+        background-color: #28a745;
+        /* Green, same as delivered */
     }
 </style>

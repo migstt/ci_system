@@ -27,6 +27,39 @@ class Stock_model extends MY_Model
         return false;
     }
 
+    function get_stock_by_task_id($task_id)
+    {
+        $field      = '*';
+        $table      = 'inventory_tracking';
+        $where      = 'inv_trk_task_id = ' . $task_id;
+        $orderby    = '';
+        return $this->getRow($field, $table, $where, $orderby);
+    }
+
+    function update_stock_by_task_id($task_id, $status, $date_delivered)
+    {
+        $table = 'inventory_tracking';
+        $where = 'inv_trk_task_id = ' . $task_id;
+
+        $stock_form_data = array(
+            'inv_trk_status' => $status,
+            'inv_trk_date_delivered' => $date_delivered
+        );
+
+        if ($this->update($table, $stock_form_data, $where)) {
+            return true;
+        }
+        return false;
+    }
+
+    function update_inventory_items_status($batch_number)
+    {
+        $table = 'inventory';
+        $where = "inv_tracking_id = '$batch_number'";
+        $data = array('inv_status' => 0);
+        $this->update($table, $data, $where);
+    }
+
     function insert_items($item_form_data)
     {
         $table = 'inventory';
@@ -57,5 +90,4 @@ class Stock_model extends MY_Model
         $query = "SELECT * FROM inventory WHERE inv_serial = '$serial'";
         return $this->getRowBySQL($query, 'row');
     }
-
 }

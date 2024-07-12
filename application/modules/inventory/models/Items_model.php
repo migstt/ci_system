@@ -13,6 +13,7 @@ class Items_model extends MY_Model
     {
         $this->db->select('*');
         $this->db->from('inventory');
+        $this->db->where('inv_status', 0);
         $this->db->order_by('inv_added_at', 'DESC');
         return $this->db->get()->result();
     }

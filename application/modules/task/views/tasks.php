@@ -55,6 +55,13 @@
                 {
                     "data": "due_date",
                     "className": "text-start align-middle",
+                    "render": function(data) {
+                        if (data === null) {
+                            return "N/A";
+                        } else {
+                            return data;
+                        }
+                    }
                 },
                 {
                     "data": "status",
@@ -207,30 +214,20 @@
                     "className": "text-start align-middle",
                     "render": function(data, type, row) {
                         let dropdownItems = '';
-
-                        if (data === 'in_progress') {
-                            dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'done')">Done</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'pending')">Pending</a></li>
-                            `;
-                        } else if (data === 'done') {
-                            dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'in_progress')">In Progress</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'pending')">Pending</a></li>
-                            `;
-                        } else if (data === 'pending') {
-                            dropdownItems = `
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'in_progress')">In Progress</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'done')">Done</a></li>
-                            `;
-                        }
-
                         let buttonClass = 'btn-secondary';
+
                         if (data === 'in_progress') {
+                            dropdownItems = `
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'done')">Done</a></li>
+                            `;
                             buttonClass = 'btn-primary';
                         } else if (data === 'done') {
-                            buttonClass = 'btn-success';
+                            return `<span class="status-label">Done</span>`;
                         } else if (data === 'pending') {
+                            dropdownItems = `
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'in_progress')">In Progress</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('${row.task_id}', 'done')">Done</a></li>
+                            `;
                             buttonClass = 'btn-danger';
                         }
 
@@ -245,7 +242,9 @@
                             </div>
                         `;
                     }
-                },
+                }
+
+
             ],
         });
 
@@ -657,3 +656,22 @@
     </div>
 
 </div>
+
+
+<style>
+    .status-label {
+        display: inline-block;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        border: 1px solid transparent;
+        border-radius: 0.25rem;
+        color: #fff;
+        background-color: #28a745;
+        width: 100%;
+    }
+</style>

@@ -8,6 +8,8 @@ class Task extends MY_Controller
         $this->load->model('task_model', 'task');
         $this->load->model('user/user_model', 'user');
         $this->load->model('team/team_model', 'team');
+        $this->load->model('inventory/stock_model', 'stock');
+        $this->load->model('inventory/location_model', 'location');
         $this->load->library('parser');
         $this->load->helper(array('form', 'url'));
         $this->load->library('form_validation');
@@ -97,12 +99,18 @@ class Task extends MY_Controller
 
                         $assigned_name  = $assigned_to['user_first_name'] . ' ' . $assigned_to['user_last_name'];
 
+                        $due_date = $task->task_due_date;
+
+                        if ($due_date == null) {
+                            $due_date = 'No due date set.';
+                        }
+
                         $data[] = array(
                             'task_id'       => $task->task_id,
                             'title'         => $task->task_title,
                             'description'   => $task->task_description,
                             'assigned_to'   => $assigned_name,
-                            'due_date'      => $task->task_due_date,
+                            'due_date'      => $due_date,
                             'status'        => $task->task_status,
                         );
 
@@ -168,12 +176,18 @@ class Task extends MY_Controller
 
                     $assigned_by_name  = $assigned_by['user_first_name'] . ' ' . $assigned_by['user_last_name'];
 
+                    $due_date = $task->task_due_date;
+
+                    if ($due_date == null) {
+                        $due_date = 'No due date set.';
+                    }
+
                     $data[] = array(
                         'task_id'       => $task->task_id,
                         'title'         => $task->task_title,
                         'description'   => $task->task_description,
                         'assigned_by'   => $assigned_by_name,
-                        'due_date'      => $task->task_due_date,
+                        'due_date'      => $due_date,
                         'status'        => $task->task_status,
                     );
 
@@ -301,29 +315,136 @@ class Task extends MY_Controller
     {
         $task_id    = $this->input->post('task_id');
         $status     = $this->input->post('status');
+        $stock_row  = $this->stock->get_stock_by_task_id($task_id);
 
-        if ($status == 'done') {
-            $updated_task_status_formdata = array(
-                'task_status'       => $status,
-                'task_updated_at'   => date('Y-m-d H:i:s'),
-                'task_completed_at' => date('Y-m-d H:i:s')
-            );
-        } else {
-            $updated_task_status_formdata = array(
-                'task_status'       => $status,
-                'task_updated_at'   => date('Y-m-d H:i:s'),
-                'task_completed_at' => null
-            );
+        // Determine stock status based on user type and task status
+        $stock_status   = null;
+        $date_delivered = null;
+
+        // user_type_id: 1 = Admin, 2 = Employee, 3 = Courier, 4 = Manager
+        // stock_status: 0 = Delivered, 1 = Issued, 2 = Approved by Warehouse Manager, 3 = On the Way
+        if ($_SESSION['user_type_id'] == 4) {
+            $stock_status = 2;
+        } elseif ($_SESSION['user_type_id'] == 3 && $status == 'done') {
+            $stock_status = 0;
+            $date_delivered = date('Y-m-d H:i:s');
+        } elseif ($_SESSION['user_type_id'] == 3 && $status == 'in_progress') {
+            $stock_status = 3;
         }
 
+        // Prepare task status update data
+        $updated_task_status_formdata = array(
+            'task_status'       => $status,
+            'task_updated_at'   => date('Y-m-d H:i:s'),
+            'task_completed_at' => ($status == 'done') ? date('Y-m-d H:i:s') : null
+        );
+
+        if ($status == 'done') {
+            $location = $this->location->get_location_row_by_id($stock_row['inv_trk_location_id']);
+            $courier_id = $stock_row['inv_trk_courier'];
+
+            if ($_SESSION['user_type_id'] == 4) {
+                // Update task for Manager
+                $updated_user_task_formdata = array(
+                    'task_assigned_to_user' => $courier_id
+                );
+                $this->task->update_user_task($task_id, $updated_user_task_formdata);
+
+                $updated_task_status_formdata['task_status']            = 'pending';
+                $updated_task_status_formdata['task_assigned_to_user']  = $courier_id;
+                $updated_task_status_formdata['task_completed_at']      = null;
+                $updated_task_status_formdata['task_title']             = 'Stock Delivery Task';
+                $updated_task_status_formdata['task_description']       = 'Deliver ' . $stock_row['inv_trk_batch_num'] . ' to ' . $location['location_name'] . '.';
+            }
+        }
+
+        // Update task and stock status
         if ($this->task->update_task($task_id, $updated_task_status_formdata)) {
             $response = array('status' => 'success', 'message' => 'Task status updated.');
-            echo json_encode($response);
+
+            if ($this->stock->update_stock_by_task_id($task_id, $stock_status, $date_delivered)) {
+                if ($stock_status == 0) {
+                    $this->stock->update_inventory_items_status($stock_row['inv_trk_batch_num']);
+                }
+                echo json_encode($response);
+            } else {
+                $response = array('status' => 'error', 'message' => 'Failed to update stock status. Please try again.');
+                echo json_encode($response);
+            }
         } else {
             $response = array('status' => 'error', 'message' => 'Failed to update task status. Please try again.');
             echo json_encode($response);
         }
     }
+
+
+    // function update_task_status()
+    // {
+    //     $task_id    = $this->input->post('task_id');
+    //     $status     = $this->input->post('status');
+    //     $stock_row  = $this->stock->get_stock_by_task_id($task_id);
+
+    //     // user_type_id >>> 1 = Admin, 2 = Employee, 3 = Courier, 4 = Manager
+    //     // stock_status >>> 0 = Delivered, 1 = Issued, 2 = Approved by Warehouse Manager, 3 = On the Way
+
+    //     if ($_SESSION['user_type_id'] == 4) {
+    //         $stock_status = 2;
+    //     } elseif ($_SESSION['user_type_id'] == 3 && $status == 'done') {
+    //         $stock_status = 0;
+    //         $date_delivered = date('Y-m-d H:i:s');
+    //     } elseif ($_SESSION['user_type_id'] == 3 && $status == 'in_progress') {
+    //         $stock_status = 3;
+    //     }
+
+    //     if ($status == 'done') {
+    //         $updated_task_status_formdata = array(
+    //             'task_status'       => $status,
+    //             'task_updated_at'   => date('Y-m-d H:i:s'),
+    //             'task_completed_at' => date('Y-m-d H:i:s')
+    //         );
+
+    //         $stock_row  = $this->stock->get_stock_by_task_id($task_id);
+    //         $location   = $this->location->get_location_row_by_id($stock_row['inv_trk_location_id']);
+    //         $courier_id = $stock_row['inv_trk_courier'];
+
+    //         if ($_SESSION['user_type_id'] == 4 && $status == 'done') {
+
+    //             $updated_user_task_formdata = array(
+    //                 'task_assigned_to_user'     => $courier_id,
+    //             );
+
+    //             $this->task->update_user_task($task_id, $updated_user_task_formdata);
+
+    //             $updated_task_status_formdata['task_status'] = 'pending';
+    //             $updated_task_status_formdata['task_assigned_to_user'] = $courier_id;
+    //             $updated_task_status_formdata['task_completed_at'] = null;
+    //             $updated_task_status_formdata['task_title'] = 'Stock Delivery Task';
+    //             $updated_task_status_formdata['task_description'] = 'Deliver ' . $stock_row['inv_trk_batch_num'] . ' to ' . $location['location_name'] . '.';
+    //         }
+    //     } else {
+    //         $updated_task_status_formdata = array(
+    //             'task_status'       => $status,
+    //             'task_updated_at'   => date('Y-m-d H:i:s'),
+    //             'task_completed_at' => null
+    //         );
+    //     }
+
+    //     if ($this->task->update_task($task_id, $updated_task_status_formdata)) {
+    //         $response = array('status' => 'success', 'message' => 'Task status updated.');
+    //         echo json_encode($response);
+    //         if ($this->stock->update_stock_by_task_id($task_id, $stock_status, $date_delivered)) {
+    //             if ($stock_status == 0) {
+    //                 $this->stock->update_inventory_items_status($stock_row['inv_trk_batch_num']);
+    //             }
+    //         } else {
+    //             $response = array('status' => 'error', 'message' => 'Failed to update task status. Please try again.');
+    //             echo json_encode($response);
+    //         }
+    //     } else {
+    //         $response = array('status' => 'error', 'message' => 'Failed to update task status. Please try again.');
+    //         echo json_encode($response);
+    //     }
+    // }
 
     function delete_task()
     {

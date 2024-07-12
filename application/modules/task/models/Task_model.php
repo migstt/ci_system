@@ -28,6 +28,24 @@ class Task_model extends MY_Model
         return false;
     }
 
+    public function insert_stock_task($task_formdata, $selected_user)
+    {
+        $inserted_task_id = $this->insert('tasks', $task_formdata, true);
+
+        if (isset($inserted_task_id)) {
+            $user_tasks_data = array(
+                'task_id'                   => $inserted_task_id,
+                'task_assigned_to_user'     => $selected_user,
+                'task_assigned_by'          => $_SESSION['user_id'],
+            );
+            if ($this->insert_to_user_tasks($user_tasks_data)) {
+                return $inserted_task_id;
+            }
+            return false;
+        }
+        return false;
+    }
+
     public function insert_task_by_team($task_formdata, $selected_team)
     {
         $inserted_task_id = $this->insert('tasks', $task_formdata, true);
@@ -70,7 +88,7 @@ class Task_model extends MY_Model
         $this->db->where('user_tasks.task_assigned_by', $task_assigned_by);
         $this->db->join('tasks', 'user_tasks.task_assigned_by = tasks.task_assigned_by');
         $this->db->where('tasks.task_is_deleted', 0);
-        $this->db->order_by('tasks.task_title', 'ASC');
+        $this->db->order_by('tasks.task_created_at', 'DESC');
         if ($limit > 0) {
             $this->db->limit($limit, $offset);
         }
@@ -104,6 +122,18 @@ class Task_model extends MY_Model
             return true;
         }
         return false;
+    }
+
+    public function update_user_task($task_id, $updated_user_task_formdata)
+    {
+        $this->db->where('task_id', $task_id);
+        $result_one = $this->db->update('user_tasks', $updated_user_task_formdata);
+
+        if ($result_one) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function get_tasks_row($field, $table, $task_assigned_to_user)

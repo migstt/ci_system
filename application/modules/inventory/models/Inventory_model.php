@@ -47,7 +47,13 @@ class Inventory_model extends MY_Model
         return $this->getRowBySQL($query, 'result');
     }
 
-
+    function update_items_by_batch($batch_number)
+    {
+        $table  = 'inventory';
+        $data   = array('inv_status' => 0);
+        $where  = array('inv_tracking_id' => $batch_number);
+        $this->update($table, $data, $where);
+    }
 
 
     function get_last_inserted_serial_number($item_id)

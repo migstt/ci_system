@@ -95,4 +95,13 @@ class User_model extends MY_Model
         }
         return false;
     }
+
+    function get_users_by_type($user_type_id)
+    {
+        $field = '*';
+        $table = 'users';
+        $where = 'user_type_id=' . $user_type_id;
+        $orderby = 'user_first_name ASC';
+        return $this->getRows($field, $table, $where, $orderby);
+    }
 }
