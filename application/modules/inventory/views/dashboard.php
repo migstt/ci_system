@@ -1,274 +1,10 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-
 <!-- Custom scripts -->
 <script>
     $(document).ready(function() {
-        // client side locations datatable
-        $('#location_table').DataTable({
-            responsive: true,
-            searching: true,
-            processing: true,
-            ajax: {
-                url: '<?php echo site_url(); ?>/inventory/location/get_locations',
-                // dataSrc: 'data',
-                type: 'POST',
-            },
-            columns: [{
-                    "sortable": false,
-                    "data": null,
-                    "className": "text-center align-middle",
-                    "render": function(data, type, row, meta) {
-                        return meta.row + 1;
-                    }
-                },
-                {
-                    "data": "name",
-                    "className": "text-start align-middle"
-                },
-                {
-                    "data": "address",
-                    "className": "text-start align-middle"
-                },
-                {
-                    "sortable": false,
-                    "data": "status",
-                    "className": "text-center align-middle",
-                    "createdCell": function(td, cellData, rowData, row, col) {
-                        if (cellData === 'Active') {
-                            $(td).css({
-                                'background-color': '#d4edda', // light green
-                                'color': '#155724' // dark green text for better contrast
-                            });
-                        } else if (cellData === 'Inactive') {
-                            $(td).css({
-                                'background-color': '#f8d7da', // light red
-                                'color': '#721c24' // dark red text for better contrast
-                            });
-                        }
-                    }
-                },
-                {
-                    "data": "added_by",
-                    "className": "text-start align-middle",
-                },
-                // for the location actions (edit, delete) row
-                {
-                    "data": null,
-                    "sortable": false,
-                    "className": "align-middle",
-                    "render": function(data, type, row) {
-                        return `
-                            <div class="d-flex justify-content-end">
-                                <div class="btn-group btn-group-sm" role="group" aria-label="">
-                            
-                                    <!-- Update/Edit Location Modal -->
-                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editLocationModal${data.location_id}">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
 
-                                    <div class="modal fade" id="editLocationModal${data.location_id}" tabindex="-1" aria-labelledby="editLocationModal" aria-hidden="true">
-                                        <?php echo validation_errors(); ?>
-                                        <?php echo form_open('inventory/update_location', array('id' => 'editLocationForm${data.location_id}')); ?>
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="modalLabel">Edit Location</h1>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="col mb-3">
-                                                        <p class="text-start"><strong>Location name</strong></p>
-                                                    </div>
-                                                    <div class="col mb-3">
-                                                        <input name="name" value="${data.name}" type="text" class="form-control" placeholder="Location name" aria-label="Location name" required />
-                                                    </div>
-                                                    <div class="col mb-3">
-                                                        <p class="text-start"><strong>Location address</strong></p>
-                                                    </div>
-                                                    <div class="col mb-3">
-                                                        <input name="address" value="${data.address}" type="text" class="form-control" placeholder="Location address" aria-label="Location address" required />
-                                                    </div>
-                                                    <div class="col">
-                                                        <input type="hidden" name="location_id" value="${data.location_id}" type="text" class="form-control" placeholder="location_id" aria-label="location_id" required />
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                        <button type="submit" class="btn btn-primary">Update</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        </form>
-                                    </div>
-
-
-                                    <!-- Delete Confirmation Modal -->
-                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal${data.location_id}">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-
-                                    <div class="modal fade" id="confirmDeleteModal${data.location_id}" tabindex="-1" aria-labelledby="confirmDeleteModal" aria-hidden="true">
-                                    <?php echo form_open('inventory/delete_location', array('id' => 'deleteLocationForm${data.location_id}')); ?>
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmation</h1>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <input type="hidden" name="location_id" value="${data.location_id}" />
-                                                    <p class="text-start">Are you sure you want to set this location to inactive?</p>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="submit" class="btn btn-danger">Yes</button>
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nope</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }
-                }
-            ],
-        });
-
-        // for adding location
-        $(document).on('submit', 'form[id^="addNewLocationForm"]', function(e) {
-            e.preventDefault();
-            var form = $(this);
-            $.ajax({
-                type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/location/insert_location/",
-                data: form.serialize(),
-                success: function(response) {
-                    response = JSON.parse(response);
-                    $('#location_table').DataTable().ajax.reload(null, false);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "success",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 2000
-                    });
-                },
-                error: function(xhr, status, error, response) {
-                    response = JSON.parse(response);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "error",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 2000
-                    });
-                    console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('ADD LOCATION ERROR: ' + error);
-                }
-            });
-
-        });
-
-        // for updating  location
-        $(document).on('submit', 'form[id^="editLocationForm"]', function(e) {
-            e.preventDefault();
-            var form = $(this);
-            var id = form.find('input[name="location_id"]').val();
-            var has_changes = false;
-            form.find('input').each(function() {
-                if ($(this).val() !== $(this).attr('value')) {
-                    has_changes = true;
-                    return false;
-                }
-            });
-            if (!has_changes) {
-                Swal.fire({
-                    position: "top-end",
-                    icon: "warning",
-                    title: 'No changes made.',
-                    showConfirmButton: false,
-                    timer: 1200
-                });
-                return;
-            }
-            $.ajax({
-                type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/location/update_location/" + id,
-                data: form.serialize(),
-                success: function(response) {
-                    response = JSON.parse(response);
-                    $('#location_table').DataTable().ajax.reload(null, false);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "success",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 1200
-                    });
-                },
-                error: function(xhr, status, error) {
-                    var response = JSON.parse(xhr.responseText);
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "error",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 1200
-                    });
-                    console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('EDIT LOCATION ERROR: ' + error);
-                }
-            });
-        });
-
-        // for deleting  location
-        $(document).on('submit', 'form[id^="deleteLocationForm"]', function(e) {
-            e.preventDefault();
-            var form = $(this);
-            var id = form.find('input[name="location_id"]').val();
-            $.ajax({
-                type: 'POST',
-                url: "<?php echo site_url(); ?>/inventory/location/delete_location/" + id,
-                data: form.serialize(),
-                success: function(response) {
-                    response = JSON.parse(response);
-                    $('#location_table').DataTable().ajax.reload(null, false);
-                    form.closest('.modal').modal('hide');
-                    $('body').removeClass('modal-open');
-                    $('.modal-backdrop').remove();
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "success",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                },
-                error: function(xhr, status, error, response) {
-                    response = JSON.parse(response);
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "error",
-                        title: response.message,
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                    console.error('AJAX ERROR: ' + xhr.responseText);
-                    console.error('DELETE LOCATION ERROR: ' + error);
-                }
-            });
-        });
     });
 
     google.charts.load("current", {
@@ -340,51 +76,165 @@
             }
         });
     }
-
-
-
-    // for updating location status
-    function updateStatus(taskId, newStatus) {
-        $.ajax({
-            type: 'POST',
-            url: "<?php echo site_url(); ?>/task/update_task_status/" + taskId,
-            data: {
-                task_id: taskId,
-                status: newStatus
-            },
-            success: function(response) {
-                response = JSON.parse(response);
-                $('#my_tasks').DataTable().ajax.reload(null, false);
-                Swal.fire({
-                    position: "top-end",
-                    icon: "success",
-                    title: response.message,
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            },
-            error: function(xhr, status, error) {
-                Swal.fire({
-                    position: "top-end",
-                    icon: "error",
-                    title: response.message,
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-                console.error('AJAX ERROR: ' + xhr.responseText);
-                console.error('UPDATE STATUS ERROR: ' + error);
-            }
-        });
-    }
 </script>
+
 
 <i class='bx bx-menu' style='margin-top: .7%;'></i>
 <div class="container-sm">
     <div class="d-flex justify-content-between align-items-center">
         <h5 class="mt-2">Inventory Dashboard</h5>
     </div>
-    <div style="display: flex;">
+    <div style="display: flex; gap: 0; border: 1px solid #dddddd; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); overflow: hidden;">
         <div id="piechart_item_count_by_category" style="width: 50%; height: 350px;"></div>
         <div id="piechart_suppliers" style="width: 50%; height: 350px;"></div>
     </div>
+    
+    <div class="dashboard-cards">
+        <div class="card">
+            <h6>Report Log Stats</h6>
+            <table>
+                <tr>
+                    <td>Total Reported Items:</td>
+                    <td>XX</td>
+                </tr>
+                <tr>
+                    <td>Pending:</td>
+                    <td>XX</td>
+                </tr>
+                <tr>
+                    <td>Review:</td>
+                    <td>XX</td>
+                </tr>
+                <tr>
+                    <td>Disposed:</td>
+                    <td>XX</td>
+                </tr>
+                <tr>
+                    <td>Replaced:</td>
+                    <td>XX</td>
+                </tr>
+            </table>
+        </div>
+        <div class="card">
+            <h6>Items Delivered Today</h6>
+            <p>Total: XX</p>
+        </div>
+        <div class="card">
+            <h6>Stock Tracking</h6>
+            <table>
+                <tr>
+                    <td>Total Batches Delivered:</td>
+                    <td>XX</td>
+                </tr>
+                <tr>
+                    <td>Issued Stocks:</td>
+                    <td>XX</td>
+                </tr>
+                <tr>
+                    <td>Approved by Manager:</td>
+                    <td>XX</td>
+                </tr>
+                <tr>
+                    <td>In Transit:</td>
+                    <td>XX</td>
+                </tr>
+            </table>
+        </div>
+        <div class="card">
+            <h6>Users</h6>
+            <table>
+                <tr>
+                    <td>Total Users:</td>
+                    <td>XX</td>
+                </tr>
+                <tr>
+                    <td>Admins:</td>
+                    <td>XX</td>
+                </tr>
+                <tr>
+                    <td>Employees:</td>
+                    <td>XX</td>
+                </tr>
+                <tr>
+                    <td>Warehouse Managers:</td>
+                    <td>XX</td>
+                </tr>
+                <tr>
+                    <td>Couriers:</td>
+                    <td>XX</td>
+                </tr>
+            </table>
+        </div>
+    </div>
 </div>
+
+
+<style>
+    .d-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .dashboard-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .card {
+        background-color: #ffffff;
+        border: 1px solid #dddddd;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        flex: 1;
+        min-width: 220px;
+        max-width: 300px;
+    }
+
+    .card h6 {
+        margin-bottom: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #333333;
+    }
+
+    .card table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .card table td {
+        padding: 5px 0;
+        color: #666666;
+    }
+
+    .card table td:first-child {
+        font-weight: bold;
+    }
+
+    .card p {
+        font-size: 14px;
+        color: #666666;
+    }
+
+    .chart-container {
+        display: flex;
+        gap: 0;
+        border: 1px solid #dddddd;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    #piechart_item_count_by_category,
+    #piechart_suppliers {
+        width: 50%;
+        height: 350px;
+        margin: 0;
+        padding: 0;
+    }
+</style>

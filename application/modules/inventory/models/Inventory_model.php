@@ -42,7 +42,8 @@ class Inventory_model extends MY_Model
                 items.item_name,
                 inventory.inv_brand
             ORDER BY
-                inventory.inv_item_id DESC';
+                inventory.inv_item_id DESC
+        ';
 
         return $this->getRowBySQL($query, 'result');
     }
