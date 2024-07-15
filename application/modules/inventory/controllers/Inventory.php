@@ -71,8 +71,14 @@ class Inventory extends MY_Controller
         redirect('inventory/report/reports');
     }
 
-    public function forbidden()
+    function forbidden()
     {
         $this->load->view('inventory/forbidden');
+    }
+
+    function count_items_supplied_by_each_supplier()
+    {
+        $data = $this->inventory->count_items_supplied_by_each_supplier();
+        echo json_encode($data);
     }
 }

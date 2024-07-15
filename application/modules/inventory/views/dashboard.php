@@ -269,8 +269,79 @@
                 }
             });
         });
-
     });
+
+    google.charts.load("current", {
+        packages: ["corechart"]
+    });
+    google.charts.setOnLoadCallback(drawCharts);
+
+    function drawCharts() {
+        fetchItemCountCategoryChartData();
+        fetchSupplierItemCountChartData();
+        setInterval(fetchItemCountCategoryChartData, 60000);
+        setInterval(fetchSupplierItemCountChartData, 60000);
+    }
+
+    function fetchItemCountCategoryChartData() {
+        $.ajax({
+            url: "<?php echo site_url(); ?>/inventory/category/count_items_each_category",
+            method: "GET",
+            dataType: "json",
+            success: function(response) {
+                var dataArray = [
+                    ['Category', 'Total Items']
+                ];
+                response.forEach(function(item) {
+                    dataArray.push([item.category_name, parseInt(item.total_items)]);
+                });
+
+                var data = google.visualization.arrayToDataTable(dataArray);
+
+                var options = {
+                    title: 'Items in each category',
+                    is3D: true,
+                };
+
+                var chart = new google.visualization.PieChart(document.getElementById('piechart_item_count_by_category'));
+                chart.draw(data, options);
+            },
+            error: function(error) {
+                console.log("Error fetching data", error);
+            }
+        });
+    }
+
+    function fetchSupplierItemCountChartData() {
+        $.ajax({
+            url: "<?php echo site_url(); ?>/inventory/inventory/count_items_supplied_by_each_supplier",
+            method: "GET",
+            dataType: "json",
+            success: function(response) {
+                var dataArray = [
+                    ['Supplier', 'Total Items Supplied']
+                ];
+                response.forEach(function(item) {
+                    dataArray.push([item.supplier_name, parseInt(item.total_items_supplied)]);
+                });
+
+                var data = google.visualization.arrayToDataTable(dataArray);
+
+                var options = {
+                    title: 'Items supplied by each supplier',
+                    is3D: true,
+                };
+
+                var chart = new google.visualization.PieChart(document.getElementById('piechart_suppliers'));
+                chart.draw(data, options);
+            },
+            error: function(error) {
+                console.log("Error fetching data", error);
+            }
+        });
+    }
+
+
 
     // for updating location status
     function updateStatus(taskId, newStatus) {
@@ -310,6 +381,10 @@
 <i class='bx bx-menu' style='margin-top: .7%;'></i>
 <div class="container-sm">
     <div class="d-flex justify-content-between align-items-center">
-        <h5 class="mt-2">Dashboard</h5>
+        <h5 class="mt-2">Inventory Dashboard</h5>
+    </div>
+    <div style="display: flex;">
+        <div id="piechart_item_count_by_category" style="width: 50%; height: 350px;"></div>
+        <div id="piechart_suppliers" style="width: 50%; height: 350px;"></div>
     </div>
 </div>

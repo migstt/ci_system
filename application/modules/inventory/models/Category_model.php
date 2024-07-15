@@ -52,4 +52,25 @@ class Category_model extends MY_Model
         $where = 'category_id=' . $category_id;
         return $this->getRow('*', 'categories', $where);
     }
+
+    public function count_items_each_category()
+    {
+        $query = "
+            SELECT 
+                c.category_name, 
+                COUNT(i.inv_item_id) AS total_items
+            FROM 
+                inventory i
+            JOIN 
+                items it ON i.inv_item_id = it.item_id
+            JOIN 
+                categories c ON it.item_category_id = c.category_id
+            GROUP BY 
+                c.category_name
+            ORDER BY 
+                c.category_name;
+        ";
+
+        return $this->getRowBySQL($query, 'result');
+    }
 }

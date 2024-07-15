@@ -58,7 +58,7 @@
                                 className = "";
                                 break;
                         }
-                        $(td).addClass('p-0 text-center'); // Add text-center to center align the cell content
+                        $(td).addClass('p-0 text-center');
                         $(td).html("<span class='" + className + "'>" + cellData + "</span>");
                     },
                     "render": function(data, type, row, meta) {

@@ -50,6 +50,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
+    <!-- Google Charts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+
     <!-- Custom Styles -->
     <style>
         /* Google Fonts Import Link */
@@ -60,6 +64,10 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
+        }
+
+        html {
+            overflow-x: initial !important;
         }
 
         .sidebar {

@@ -287,8 +287,8 @@ class Stock extends MY_Controller
 
     public function get_supplier_specific_warehouses()
     {
-        $supplier_id = $this->input->post('supplier_id');
-        $warehouses = $this->warehouse->get_supplier_specific_warehouses($supplier_id);
+        $supplier_id    = $this->input->post('supplier_id');
+        $warehouses     = $this->warehouse->get_supplier_specific_warehouses($supplier_id);
 
         if (!$warehouses) {
             echo json_encode(['status' => 'error', 'message' => 'No warehouse found for this supplier.']);

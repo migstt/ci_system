@@ -138,4 +138,10 @@ class Category extends MY_Controller
 
         echo json_encode($output);
     }
+
+    function count_items_each_category()
+    {
+        $data = $this->category->count_items_each_category();
+        echo json_encode($data);
+    }
 }

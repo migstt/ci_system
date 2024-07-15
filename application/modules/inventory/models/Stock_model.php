@@ -54,9 +54,10 @@ class Stock_model extends MY_Model
 
     function update_inventory_items_status($batch_number)
     {
-        $table = 'inventory';
-        $where = "inv_tracking_id = '$batch_number'";
-        $data = array('inv_status' => 0);
+        $table  = 'inventory';
+        $where  = "inv_tracking_id = '$batch_number'";
+        $data   = array('inv_status' => 0);
+        
         $this->update($table, $data, $where);
     }
 
