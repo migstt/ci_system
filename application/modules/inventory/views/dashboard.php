@@ -69,7 +69,7 @@
 
                         var dataset = {
                             label: category,
-                            backgroundColor: color + '33', // Adding transparency
+                            backgroundColor: color + '33',
                             borderColor: color,
                             pointBackgroundColor: color,
                             pointBorderColor: color,
@@ -167,49 +167,6 @@
                 console.error('Error fetching data:', error);
             }
         });
-
-        // Sample static chart for comparison
-        // var ctxLine = document.getElementById('line_chart').getContext('2d');
-        // var line_chart = new Chart(ctxLine, {
-        //     type: 'line',
-        //     data: {
-        //         labels: getMonthLabels(),
-        //         datasets: [{
-        //             label: 'Dataset 1',
-        //             backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        //             borderColor: 'rgba(255, 99, 132, 1)',
-        //             data: [0, 10, 5, 2, 20, 30, 45]
-        //         }, {
-        //             label: 'Dataset 2',
-        //             backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        //             borderColor: 'rgba(54, 162, 235, 1)',
-        //             data: [10, 15, 20, 25, 30, 35, 40]
-        //         }, {
-        //             label: 'Dataset 3',
-        //             backgroundColor: 'rgba(255, 206, 86, 0.2)',
-        //             borderColor: 'rgba(255, 206, 86, 1)',
-        //             data: [5, 10, 15, 20, 25, 30, 35]
-        //         }],
-        //     },
-        //     options: {
-        //         responsive: true,
-        //         maintainAspectRatio: false,
-        //         interaction: {
-        //             mode: 'index',
-        //             intersect: false
-        //         },
-        //         plugins: {
-        //             tooltip: {
-        //                 mode: 'index',
-        //                 intersect: false
-        //             },
-        //             title: {
-        //                 display: true,
-        //                 text: 'Monthly Stocks Count per Category'
-        //             }
-        //         }
-        //     }
-        // });
     });
 
 

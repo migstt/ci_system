@@ -30,7 +30,7 @@ class Inventory extends MY_Controller
         $data['stock_counts']       = $this->stock->get_stock_counts();
         $data['user_counts']        = $this->user->get_user_counts();
 
-        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
+        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email']) && isset($_SESSION['user_type_id'])) {
             $view = $this->load->view('inventory/dashboard', $data, true);
             $this->template($view);
         } else {

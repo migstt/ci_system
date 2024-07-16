@@ -137,8 +137,10 @@ class User extends MY_Controller
             $_SESSION['user_id'],
             $_SESSION['user_type_id']
         );
+        
         $this->session->sess_destroy();
-        if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
+
+        if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email']) && !isset($_SESSION['user_type_id'])) {
             redirect('login');
         } else {
             $response = array('status' => 'error', 'message' => 'Unable to log you out. Please try again.');
