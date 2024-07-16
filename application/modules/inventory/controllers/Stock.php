@@ -29,18 +29,22 @@ class Stock extends MY_Controller
 
     function stocks()
     {
+        if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
+            redirect('login');
+        }
+
+        if ($_SESSION['user_type_id'] != 1) {
+            redirect('forbidden');
+        }
+
         $data['active_suppliers']   = $this->supplier->get_active_suppliers();
         $data['active_locations']   = $this->location->get_active_locations();
         $data['active_items']       = $this->item->get_active_items();
         $data['batch_code']         = $this->generate_batch_code();
         $data['active_couriers']    = $this->user->get_users_by_type(3);
 
-        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
-            $view = $this->load->view('inventory/stocks', $data, true);
-            $this->template($view);
-        } else {
-            redirect('forbidden');
-        }
+        $view = $this->load->view('inventory/stocks', $data, true);
+        $this->template($view);
     }
 
     public function insert_stocks()
@@ -84,26 +88,27 @@ class Stock extends MY_Controller
                 $data           = $this->upload->data();
                 $attachment     = $upload_path . $data['file_name'];
 
-                if ($date_received == '') {
+                if ($date_received == '' || $date_received == null || $date_received == '0000-00-00 00:00:00') {
                     $inv_trk_status = 1;
+
+                    $task_formdata = array(
+                        'task_assigned_by'          => $_SESSION['user_id'],
+                        'task_title'                => 'Stocks Approval',
+                        'task_description'          => 'Stock batch number ' . $batch_code . ' is pending for approval.',
+                        'task_assigned_to_user'     => 30,
+                        'task_status'               => 'pending',
+                        'task_created_at'           => date('Y-m-d H:i:s'),
+                        'task_updated_at'           => null,
+                        'task_completed_at'         => null,
+                        'task_due_date'             => null,
+                        'task_is_deleted'           => 0,
+                    );
+
+                    $task_id = $this->task->insert_stock_task($task_formdata, 30);
                 } else {
                     $inv_trk_status = 0;
+                    $task_id = null;
                 }
-
-                $task_formdata = array(
-                    'task_assigned_by'          => $_SESSION['user_id'],
-                    'task_title'                => 'Stocks Approval',
-                    'task_description'          => 'Stock batch number ' . $batch_code . ' is pending for approval.',
-                    'task_assigned_to_user'     => 30,
-                    'task_status'               => 'pending',
-                    'task_created_at'           => date('Y-m-d H:i:s'),
-                    'task_updated_at'           => null,
-                    'task_completed_at'         => null,
-                    'task_due_date'             => null,
-                    'task_is_deleted'           => 0,
-                );
-
-                $task_id = $this->task->insert_stock_task($task_formdata, 30);
 
                 $tracking_data  = array(
                     'inv_trk_batch_num'         => $batch_code,
@@ -196,6 +201,7 @@ class Stock extends MY_Controller
             $stock_supplier     = $this->supplier->get_supplier_row_by_id($stock['inv_trk_supplier_id']);
             $stock_warehouse    = $this->warehouse->get_warehouse_row_by_id($stock['inv_trk_warehouse_id']);
             $items_by_batch     = $this->inventory->get_items_ordered_by_batch($stock['inv_trk_batch_num']);
+            $courier_row           = $this->user->get_user_row_by_id($stock['inv_trk_courier']);
 
             $status = '';
 
@@ -218,6 +224,7 @@ class Stock extends MY_Controller
                 'warehouse'         => $stock_warehouse['wh_name'],
                 'total_cost'        => $stock['inv_trk_total_cost'],
                 'items_info'        => $items_by_batch,
+                'courier'           => $courier_row['user_first_name'] . ' ' . $courier_row['user_last_name'],
                 'location'          => $stock_location['location_name'],
                 'date_received'     => $stock['inv_trk_date_delivered'],
                 'added_by'          => $stock_added_by['user_first_name'] . ' ' . $stock_added_by['user_last_name'],
@@ -296,5 +303,11 @@ class Stock extends MY_Controller
         }
 
         echo json_encode(['status' => 'success', 'warehouses' => $warehouses]);
+    }
+
+    public function get_mothly_stock_counts_per_category()
+    {
+        $data = $this->stock->get_mothly_stock_counts_per_category();
+        echo json_encode($data);
     }
 }

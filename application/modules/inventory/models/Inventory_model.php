@@ -75,6 +75,8 @@ class Inventory_model extends MY_Model
                 inventory_tracking it ON i.inv_tracking_id = it.inv_trk_batch_num
             JOIN 
                 suppliers s ON it.inv_trk_supplier_id = s.supplier_id
+            WHERE
+                i.inv_status = 0
             GROUP BY 
                 s.supplier_name
             ORDER BY 
@@ -83,4 +85,5 @@ class Inventory_model extends MY_Model
 
         return $this->getRowBySQL($query, 'result');
     }
+
 }

@@ -108,10 +108,17 @@
             placeholder: "Select warehouse",
         });
 
+        var today = new Date();
+        var formattedToday = today.getFullYear() + '-' +
+            ('0' + (today.getMonth() + 1)).slice(-2) + '-' +
+            ('0' + today.getDate()).slice(-2) + ' ' +
+            ('0' + today.getHours()).slice(-2) + ':' +
+            ('0' + today.getMinutes()).slice(-2);
+
         flatpickr("#date_received", {
             enableTime: true,
             dateFormat: "Y-m-d H:i",
-            minDate: "today",
+            maxDate: formattedToday,
         });
 
         $('#addItemButton').click(function() {
@@ -276,6 +283,7 @@
                                             data-id="${row.batch_id}" 
                                             data-batch-code="${row.batch_code}" 
                                             data-supplier="${row.supplier}" 
+                                            data-courier="${row.courier}" 
                                             data-warehouse="${row.warehouse}" 
                                             data-total-cost="${row.total_cost}" 
                                             data-location="${row.location}" 
@@ -376,6 +384,7 @@
             const button = $(this);
 
             $('#modalBatchCode').text(button.data('batch-code'));
+            $('#modalCourier').text(button.data('courier'));
             $('#modalSupplier').text(button.data('supplier'));
             $('#modalWarehouse').text(button.data('warehouse'));
             $('#modalTotalCost').text(formatCost(button.data('total-cost')));
@@ -740,10 +749,11 @@
                             <p><strong>Location:</strong> <span id="modalLocation"></span></p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>Date and time received:</strong> <span id="modalDateReceived"></span></p>
                             <p><strong>Added by:</strong> <span id="modalAddedBy"></span></p>
                             <p><strong>Remarks:</strong> <span id="modalRemarks"></span></p>
+                            <p><strong>Date and time received:</strong> <span id="modalDateReceived"></span></p>
                             <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+                            <p><strong>Courier:</strong> <span id="modalCourier"></span></p>
                         </div>
                     </div>
                     <hr>

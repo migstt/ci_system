@@ -104,4 +104,23 @@ class User_model extends MY_Model
         $orderby = 'user_first_name ASC';
         return $this->getRows($field, $table, $where, $orderby);
     }
+
+    function get_user_counts()
+    {
+        // 1 - Admin, 2 - Employee, 3 - Courier, 4 - Manager
+        $query = "
+            SELECT 
+                COUNT(*) AS total_users,
+                SUM(user_type_id = 1) AS admins,
+                SUM(user_type_id = 2) AS employees,
+                SUM(user_type_id = 3) AS couriers,
+                SUM(user_type_id = 4) AS managers
+            FROM
+                users
+            WHERE
+                user_status = 0;
+        ";
+
+        return $this->getRowBySQL($query, 'row');
+    }
 }

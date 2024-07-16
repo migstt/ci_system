@@ -24,10 +24,6 @@ class User extends MY_Controller
 
     function users()
     {
-        $data['active_locations']   = $this->location->get_active_locations();
-        $data['active_teams']       = $this->team->get_active_teams();
-        $data['active_user_types']  = $this->user->get_active_user_types();
-
         if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
             redirect('login');
         }
@@ -35,6 +31,10 @@ class User extends MY_Controller
         if ($_SESSION['user_type_id'] != 1) {
             redirect('forbidden');
         }
+
+        $data['active_locations']   = $this->location->get_active_locations();
+        $data['active_teams']       = $this->team->get_active_teams();
+        $data['active_user_types']  = $this->user->get_active_user_types();
 
         $view = $this->load->view('inventory/users', $data, true);
         $this->template($view);

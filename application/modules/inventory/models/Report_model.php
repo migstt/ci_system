@@ -46,4 +46,20 @@ class Report_model extends MY_Model
         $this->db->order_by('rlog_added_at', 'DESC');
         return $this->db->get()->result();
     }
+
+    function get_report_log_counts()
+    {
+        $query = "
+            SELECT 
+                COUNT(*) AS total_reported_items,
+                SUM(rlog_status = 'Pending') AS pending,
+                SUM(rlog_status = 'Reviewed') AS reviewed,
+                SUM(rlog_status = 'Disposed') AS disposed,
+                SUM(rlog_status = 'Replaced') AS replaced
+            FROM 
+                report_logs;
+        ";
+
+        return $this->getRowBySQL($query, 'row');
+    }
 }

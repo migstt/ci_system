@@ -23,8 +23,12 @@ class User extends MY_Controller
         $this->form_validation->set_rules('email', 'Email', 'required');
         $this->form_validation->set_rules('password', 'Password', 'required');
 
-        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
-            redirect('contacts');
+        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email']) && isset($_SESSION['user_type_id'])) {
+            if ($_SESSION['user_type_id'] == 1) {
+                redirect('inventory/dashboard');
+            } else {
+                redirect('tasks');
+            }
         } else {
             if ($this->form_validation->run() == TRUE) {
 
@@ -41,7 +45,7 @@ class User extends MY_Controller
                         );
                         $this->session->set_userdata($user_session_data);
                         if (isset($_SESSION['user_id']) && isset($_SESSION['user_email']) && isset($_SESSION['user_type_id'])) {
-                            $response = array('status' => 'success', 'message' => 'Sign in successful. Redirecting.');
+                            $response = array('status' => 'success', 'message' => 'Sign in successful. Redirecting.', 'user_type_id' => $existing_user['user_type_id']);
                             echo json_encode($response);
                         } else {
                             $response = array('status' => 'error', 'message' => 'Unable to sign you in this time. Please try again later.');

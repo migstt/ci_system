@@ -65,6 +65,8 @@ class Category_model extends MY_Model
                 items it ON i.inv_item_id = it.item_id
             JOIN 
                 categories c ON it.item_category_id = c.category_id
+            WHERE 
+                i.inv_status = 0
             GROUP BY 
                 c.category_name
             ORDER BY 

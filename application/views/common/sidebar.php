@@ -52,31 +52,29 @@
                     <li><a href="#">Completed</a></li>
                 </ul>
             </li>
-            <li>
-                <div class="iocn-link">
-                    <a href="<?php echo site_url('inventory'); ?>">
-                        <i class='bx bx-package'></i>
-                        <span class="link_name">Inventory</span>
-                    </a>
-                    <i class='bx bxs-chevron-down arrow'></i>
-                </div>
-                <ul class="sub-menu mt-1">
-                    <li><a class="link_name" href="<?php echo site_url('inventory'); ?>">Inventory</a></li>
-                    <li><a href="<?php echo site_url('inventory'); ?>">Dashboard</a></li>
-                    <li><a href="<?php echo site_url('inventory/all-items'); ?>">Inventory</a></li>
-                    <li><a href="<?php echo site_url('inventory/stocks'); ?>">Stocks</a></li>
-                    <li><a href="<?php echo site_url('inventory/location'); ?>">Location</a></li>
-                    <li><a href="<?php echo site_url('inventory/category'); ?>">Category</a></li>
-                    <li><a href="<?php echo site_url('inventory/suppliers'); ?>">Suppliers</a></li>
-                    <li><a href="<?php echo site_url('inventory/items'); ?>">Items</a></li>
-                    <?php if ($current_user_type == 'Admin') : ?>
+            <?php if ($current_user_type == 'Admin') : ?>
+                <li>
+                    <div class="iocn-link">
+                        <a href="<?php echo site_url('inventory'); ?>">
+                            <i class='bx bx-package'></i>
+                            <span class="link_name">Inventory</span>
+                        </a>
+                        <i class='bx bxs-chevron-down arrow'></i>
+                    </div>
+                    <ul class="sub-menu mt-1">
+                        <li><a class="link_name" href="<?php echo site_url('inventory'); ?>">Inventory</a></li>
+                        <li><a href="<?php echo site_url('inventory'); ?>">Dashboard</a></li>
+                        <li><a href="<?php echo site_url('inventory/all-items'); ?>">Inventory</a></li>
+                        <li><a href="<?php echo site_url('inventory/stocks'); ?>">Stocks</a></li>
+                        <li><a href="<?php echo site_url('inventory/location'); ?>">Location</a></li>
+                        <li><a href="<?php echo site_url('inventory/category'); ?>">Category</a></li>
+                        <li><a href="<?php echo site_url('inventory/suppliers'); ?>">Suppliers</a></li>
+                        <li><a href="<?php echo site_url('inventory/items'); ?>">Items</a></li>
                         <li><a href="<?php echo site_url('inventory/reports'); ?>">Report Log</a></li>
-                    <?php endif; ?>
-                    <?php if ($current_user_type == 'Admin') : ?>
                         <li><a href="<?php echo site_url('inventory/users'); ?>">Users</a></li>
-                    <?php endif; ?>
-                </ul>
-            </li>
+                    </ul>
+                </li>
+            <?php endif; ?>
             <li>
                 <a href="<?php echo site_url('inventory/report'); ?>">
                     <i class='bx bx-file'></i>

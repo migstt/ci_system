@@ -57,9 +57,16 @@
                             showConfirmButton: false,
                             timer: 2000
                         });
-                        setTimeout(function() {
-                            window.location.href = "<?php echo site_url('contacts'); ?>";
-                        }, 1500);
+
+                        if (response.user_type_id == 1) {
+                            setTimeout(function() {
+                                window.location.href = "<?php echo site_url('inventory/dashboard'); ?>";
+                            }, 1500);
+                        } else {
+                            setTimeout(function() {
+                                window.location.href = "<?php echo site_url('tasks'); ?>";
+                            }, 1500);
+                        }
                     }
                 },
                 error: function(xhr, status, error, response) {

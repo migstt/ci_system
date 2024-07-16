@@ -57,7 +57,7 @@ class Stock_model extends MY_Model
         $table  = 'inventory';
         $where  = "inv_tracking_id = '$batch_number'";
         $data   = array('inv_status' => 0);
-        
+
         $this->update($table, $data, $where);
     }
 
@@ -90,5 +90,49 @@ class Stock_model extends MY_Model
     {
         $query = "SELECT * FROM inventory WHERE inv_serial = '$serial'";
         return $this->getRowBySQL($query, 'row');
+    }
+
+    function get_stock_counts()
+    {
+        // 0 - Delivered, 1 - Issued, 2 - Approved by Warehouse Manager, 3 - On the Way
+        $query = "
+            SELECT 
+                SUM(inv_trk_status = 0) AS delivered,
+                SUM(inv_trk_status = 1) AS issued,
+                SUM(inv_trk_status = 2) AS approved_manager,
+                SUM(inv_trk_status = 3) AS transit
+            FROM 
+                inventory_tracking;
+        ";
+
+        return $this->getRowBySQL($query, 'row');
+    }
+
+    function get_monthly_stock_counts_per_category()
+    {
+        $query = "
+            SELECT
+                c.category_name,
+                DATE_FORMAT(it.inv_trk_date_delivered, '%Y-%m') AS month,
+                COUNT(it.inv_trk_id) AS stock_count
+            FROM
+                inventory_tracking it
+            JOIN
+                inventory i ON it.inv_trk_batch_num = i.inv_tracking_id
+            JOIN
+                items itm ON i.inv_item_id = itm.item_id
+            JOIN
+                categories c ON itm.item_category_id = c.category_id
+            WHERE
+                it.inv_trk_status = 0 AND it.inv_trk_date_delivered != '0000-00-00 00:00:00'
+            GROUP BY
+                c.category_name,
+                DATE_FORMAT(it.inv_trk_date_delivered, '%Y-%m')
+            ORDER BY
+                c.category_name,
+                month
+        ";
+
+        return $this->getRowBySQL($query, 'result');
     }
 }

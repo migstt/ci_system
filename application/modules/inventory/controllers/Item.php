@@ -25,15 +25,20 @@ class Item extends MY_Controller
 
     function items()
     {
-        $data['active_categories']  = $this->category->get_active_categories();
-        $data['active_locations']   = $this->location->get_active_locations();
-        
-        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
-            $view = $this->load->view('inventory/items', $data, true);
-            $this->template($view);
-        } else {
+
+        if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
+            redirect('login');
+        }
+
+        if ($_SESSION['user_type_id'] != 1) {
             redirect('forbidden');
         }
+
+        $data['active_categories']  = $this->category->get_active_categories();
+        $data['active_locations']   = $this->location->get_active_locations();
+
+        $view = $this->load->view('inventory/items', $data, true);
+        $this->template($view);
     }
 
     function insert_item()

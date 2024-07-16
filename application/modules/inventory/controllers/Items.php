@@ -44,6 +44,11 @@ class Items extends MY_Controller
             redirect('login');
         }
 
+        if ($_SESSION['user_type_id'] != 1) {
+            redirect('forbidden');
+        }
+
+
         $items = $this->items->get_all_items();
 
         if ($items === false || empty($items)) {

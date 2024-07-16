@@ -351,7 +351,7 @@ class Task extends MY_Controller
                 $updated_task_status_formdata['task_status']            = 'pending';
                 $updated_task_status_formdata['task_assigned_to_user']  = $courier_id;
                 $updated_task_status_formdata['task_completed_at']      = null;
-                $updated_task_status_formdata['task_title']             = 'Stock Delivery Task';
+                $updated_task_status_formdata['task_title']             = 'Stocks Delivery';
                 $updated_task_status_formdata['task_description']       = 'Deliver ' . $stock_row['inv_trk_batch_num'] . ' to ' . $location['location_name'] . '.';
             }
         }

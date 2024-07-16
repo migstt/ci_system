@@ -53,6 +53,8 @@
     <!-- Google Charts -->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
     <!-- Custom Styles -->
     <style>
@@ -656,7 +658,6 @@
             /* Adjust the spacing as needed */
         }
     </style>
-
 </head>
 
 <body>
