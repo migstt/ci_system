@@ -48,18 +48,23 @@ class Inventory_model extends MY_Model
         return $this->getRowBySQL($query, 'result');
     }
 
-    function update_items_by_batch($batch_number)
+    function update_items_by_batch($batch_number, $status = null)
     {
+
+        if ($status == null) {
+            $status = 0;
+        }
+
         $table  = 'inventory';
-        $data   = array('inv_status' => 0);
+        $data   = array('inv_status' => $status);
         $where  = array('inv_tracking_id' => $batch_number);
         $this->update($table, $data, $where);
     }
 
 
-    function get_last_inserted_serial_number($item_id)
+    function get_last_inserted_serial_number($item_id, $location_id)
     {
-        $query = 'SELECT * FROM inventory WHERE inv_item_id=' . $item_id . ' ORDER BY inv_id DESC LIMIT 1';
+        $query = 'SELECT * FROM inventory WHERE inv_item_id=' . $item_id . ' AND inv_assigned_to=' . $location_id .  ' ORDER BY inv_id DESC LIMIT 1';
         return $this->getRowBySQL($query, 'row');
     }
 
@@ -86,4 +91,16 @@ class Inventory_model extends MY_Model
         return $this->getRowBySQL($query, 'result');
     }
 
+    function get_item_remaining_current_location($item_id, $location_id)
+    {
+        $query = "
+            SELECT 
+                COUNT(*) as total_remaining 
+            FROM 
+                inventory 
+            WHERE inv_item_id = $item_id AND inv_assigned_to = $location_id AND inv_status = 0;
+        ";
+
+        return $this->getRowBySQL($query, 'row');
+    }
 }

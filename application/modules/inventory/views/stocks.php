@@ -613,6 +613,7 @@
                 <?php echo form_open_multipart('inventory/stock/insert_stocks', array('id' => 'addNewStocksForm')); ?>
                 <div class="modal-body">
                     <div class="row mb-3">
+                        
                         <div class="col-md-6">
                             <label for="batchCodeDisplay" class="form-label">Batch Code</label>
                             <input type="text" class="form-control" name="batch_code" id="batchCode" value="" hidden>

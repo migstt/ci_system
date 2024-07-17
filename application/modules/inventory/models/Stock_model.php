@@ -71,11 +71,17 @@ class Stock_model extends MY_Model
         return false;
     }
 
-    function get_last_inserted_batch_number()
+    function get_last_inserted_batch_number($location_id)
     {
-        $query = 'SELECT inv_trk_batch_num FROM inventory_tracking ORDER BY inv_trk_id DESC LIMIT 1';
-        return $this->getRowBySQL($query, 'row');
+        $query = "SELECT inv_trk_batch_num 
+                  FROM inventory_tracking 
+                  WHERE inv_trk_location_id = $location_id
+                  ORDER BY inv_trk_id DESC 
+                  LIMIT 1";
+        $params = array(':location_id' => $location_id);
+        return $this->getRowBySQL($query, 'row', $params);
     }
+
 
     function get_item_by_serial($serial)
     {

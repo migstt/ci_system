@@ -66,7 +66,7 @@ class Stock extends MY_Controller
             $courier_id     = $this->input->post('courier_id');
             $added_by       = $_SESSION['user_id'];
 
-            $upload_path = './uploads/' . $batch_code . '/';
+            $upload_path = './uploads/' . $location_id . '/' . $batch_code . '/';
 
             if (!is_dir($upload_path)) {
                 mkdir($upload_path, 0755, true);
@@ -179,7 +179,6 @@ class Stock extends MY_Controller
     }
 
 
-
     public function get_stocks()
     {
         if (!$this->input->is_ajax_request()) {
@@ -249,9 +248,14 @@ class Stock extends MY_Controller
         echo json_encode($output);
     }
 
-    private function generate_batch_code()
+    private function generate_batch_code($location_id = null)
     {
-        $last_inserted_batch_number = $this->stock->get_last_inserted_batch_number();
+
+        if ($location_id == null || $location_id == '') {
+            $location_id = $_SESSION['user_loc_id'];
+        }
+
+        $last_inserted_batch_number = $this->stock->get_last_inserted_batch_number($location_id);
 
         if (!$last_inserted_batch_number) {
             return 'B00000001';
@@ -265,13 +269,22 @@ class Stock extends MY_Controller
 
     public function get_batch_code()
     {
-        echo json_encode(['batch_code' => $this->generate_batch_code()]);
+        $location_id = $this->input->post('location_id');
+        echo json_encode(['batch_code' => $this->generate_batch_code($location_id)]);
     }
 
-    public function get_last_inserted_serial_number_of_a_specific_item()
+    public function get_last_inserted_serial_number_of_a_specific_item($item_id = null, $location_id = null)
     {
-        $item_id    = $this->input->post('item_id');
-        $last_item  = $this->inventory->get_last_inserted_serial_number($item_id);
+
+        if ($item_id == null) {
+            $item_id = $this->input->post('item_id');
+        }
+
+        if ($location_id == null) {
+            $location_id = $_SESSION['user_loc_id'];
+        }
+    
+        $last_item  = $this->inventory->get_last_inserted_serial_number($item_id, $location_id);
         $item       = $this->item->get_item($item_id);
 
         if (!$item) {

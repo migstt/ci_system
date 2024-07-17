@@ -121,6 +121,46 @@
             });
         });
 
+        $(document).on('change', '.item_select', function() {
+            var itemId = $(this).val();
+            var stocksRemaining = $(this).siblings('.stocks-remaining');
+            var quantityInput = $(this).closest('tr').find('.quantity');
+
+            if (itemId) {
+                $.ajax({
+                    url: "<?php echo site_url(); ?>/inventory/transfer/get_item_remaining_current_location/",
+                    type: 'POST',
+                    data: {
+                        item_id: itemId
+                    },
+                    success: function(response) {
+                        var data = JSON.parse(response);
+                        if (data.status === 'success') {
+                            if (data.stocks_remaining !== undefined) {
+                                stocksRemaining.text('Stocks remaining: ' + data.stocks_remaining).show();
+                                quantityInput.attr('max', data.stocks_remaining);
+                            }
+                        } else {
+                            stocksRemaining.text('Stocks remaining: Error fetching data').show();
+                            quantityInput.attr('max', '');
+                        }
+                    },
+                    error: function() {
+                        stocksRemaining.text('Stocks remaining: Error fetching data').show();
+                        quantityInput.attr('max', '');
+                    }
+                });
+            } else {
+                stocksRemaining.hide();
+                quantityInput.attr('max', '');
+            }
+        });
+
+        $(document).on('input', '.quantity', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+
         $('.courier_select').select2({
             width: '100%',
             theme: "classic",
@@ -147,6 +187,14 @@
             $(this).closest('tr').remove();
             reindexItemRows();
         });
+
+        $('.location_select').change(function() {
+            var location_id = $(this).val();
+            if (location_id) {
+                generateBatchCode(location_id);
+            }
+        });
+
     });
 
     var itemIndex = 1;
@@ -161,15 +209,13 @@
                                         <option value="<?php echo $item['item_id']; ?>"><?php echo $item['item_name']; ?></option>
                                     <?php endforeach; ?>
                                 </select>
-                                <p class="stocks-remaining">Stocks remaining:</p>
+                                <p class="stocks-remaining">Stocks remaining: {value here}</p>
                             </td>
                             <td class="align-middle">
                                 <input type="number" name="items[` + itemIndex + `][quantity]" class="form-control quantity" placeholder="" min="1" required>
-                                <p class="stocks-remaining">&zwnj;</p>
                             </td>
                             <td class="action align-middle text-center">
                                 <button type="button" class="btn btn-danger remove-item btn-sm">Remove</button>
-                                <p class="stocks-remaining">&zwnj;</p>
                             </td>
                         </tr>
                     `;
@@ -202,6 +248,27 @@
             placeholder: 'Select item',
         });
     }
+
+    function generateBatchCode(location_id) {
+        $.ajax({
+            url: '<?php echo site_url(); ?>/inventory/stock/get_batch_code/',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                location_id: location_id
+            },
+            success: function(response) {
+                if (response.batch_code) {
+                    $('#batchCode').val(response.batch_code);
+                } else {
+                    console.error('Failed to generate batch code.');
+                }
+            },
+            error: function() {
+                console.error('An error occurred while generating the batch code.');
+            }
+        });
+    }
 </script>
 
 <i class='bx bx-menu' style='margin-top: .7%;'></i>
@@ -209,6 +276,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-container p-4 rounded shadow-sm bg-light">
+
                 <div class="d-flex justify-content-between align-items-center form-header mb-4">
                     <h5>Transfer Stocks Form</h5>
                 </div>
@@ -234,18 +302,28 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="col">
-                            <input type="hidden" name="location_id" value="<?php echo $_SESSION['user_loc_id']; ?>">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" name="batch_code" id="batchCode" value="" hidden>
                         </div>
                     </div>
-
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="attachment" class="form-label">Attachment</label>
+                            <input type="file" name="attachment" class="form-control" id="attachment" required>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" name="requires_approval" value="1" id="requires_approval">
+                                <label class="form-check-label" for="requires_approval">
+                                    Requires Approval from Receiving Location
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                     <div class="mb-3">
-                        <div>
-                            <label for="remarks" class="form-label">Remarks</label>
-                            <textarea name="remarks" class="form-control" id="remarks" placeholder="Enter remarks here..." rows="3"></textarea>
-                        </div>
+                        <label for="remarks" class="form-label">Remarks</label>
+                        <textarea name="remarks" class="form-control" id="remarks" placeholder="Enter remarks here..." rows="3"></textarea>
                     </div>
-
                     <div class="table-responsive">
                         <table class="table table-bordered" id="itemsTable">
                             <thead>
@@ -264,7 +342,7 @@
                                                 <option value="<?php echo $item['item_id']; ?>"><?php echo $item['item_name']; ?></option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <p class="stocks-remaining">Stocks remaining:</p>
+                                        <p class="stocks-remaining">Stocks remaining: {value here}</p>
                                     </td>
                                     <td class="align-middle">
                                         <input type="number" name="items[0][quantity]" class="form-control quantity" placeholder="" min="1" required>
@@ -284,6 +362,7 @@
                     <button type="submit" class="btn btn-success">Submit</button>
                 </div>
                 <?php echo form_close(); ?>
+
 
             </div>
         </div>
