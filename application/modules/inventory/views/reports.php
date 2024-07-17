@@ -198,7 +198,7 @@
 <i class='bx bx-menu' style='margin-top: .7%;'></i>
 <div class="container-sm">
     <div class="d-flex justify-content-between align-items-center">
-        <h5 class="mt-2">Report Log</h5>
+        <h5 class="mt-2"><?php echo $admin_loc['location_name'] ?> Item Report Logs</h5>
     </div>
 
     <!-- Report Logs Table -->

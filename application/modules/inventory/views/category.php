@@ -339,6 +339,9 @@
                     <div class="col">
                         <input name="name" value="<?php echo set_value('name'); ?>" type="text" class="form-control" placeholder="Category name" aria-label="Category name" required />
                     </div>
+                    <div class="col">
+                        <input type="hidden" name="location_id" value="<?php echo $_SESSION['user_loc_id']; ?>">
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Create</button>

@@ -26,8 +26,10 @@ class Items extends MY_Controller
 
     function all_items()
     {
+        $data['location'] = $this->location->get_location_row_by_id($_SESSION['user_loc_id']);
+
         if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
-            $view = $this->load->view('inventory/all_items', '', true);
+            $view = $this->load->view('inventory/all_items', $data, true);
             $this->template($view);
         } else {
             redirect('forbidden');
@@ -48,8 +50,9 @@ class Items extends MY_Controller
             redirect('forbidden');
         }
 
+        $admin_loc_id = $_SESSION['user_loc_id'];
 
-        $items = $this->items->get_all_items();
+        $items = $this->items->get_all_items($admin_loc_id);
 
         if ($items === false || empty($items)) {
             $items = array();

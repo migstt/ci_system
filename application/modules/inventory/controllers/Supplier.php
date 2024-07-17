@@ -25,7 +25,6 @@ class Supplier extends MY_Controller
 
     function suppliers()
     {
-
         if (!isset($_SESSION['user_id']) && !isset($_SESSION['user_email'])) {
             redirect('login');
         }

@@ -51,4 +51,16 @@ class Supplier_model extends MY_Model
         $table = 'suppliers';
         return $this->getRow('*', $table, $where);
     }
+
+    function get_supplier_count()
+    {
+        $query = "
+            SELECT 
+                COUNT(*) AS total_suppliers
+            FROM
+                suppliers
+        ";
+
+        return $this->getRowBySQL($query, 'row');
+    }
 }

@@ -45,18 +45,17 @@ class Item extends MY_Controller
     {
         $this->form_validation->set_rules('name', 'Item name', 'required');
         $this->form_validation->set_rules('category', 'Item category', 'required');
-        $this->form_validation->set_rules('location', 'Item location', 'required');
 
         if ($this->form_validation->run() == TRUE) {
 
             $name       = $this->input->post('name');
             $category   = $this->input->post('category');
-            $location   = $this->input->post('location');
+            $location_id   = $this->input->post('location_id');
 
             $item_form_data = array(
                 'item_name'         => $name,
                 'item_category_id'  => $category,
-                'item_location_id'  => $location,
+                'item_location_id'  => $location_id,
                 'item_status'       => 0,
                 'item_added_by'     => $_SESSION['user_id'],
                 'item_added_at'     => date('Y-m-d H:i:s'),
@@ -133,6 +132,8 @@ class Item extends MY_Controller
             echo json_encode(array('error' => 'Login required.'));
             return;
         }
+
+        $admin_loc_id = $_SESSION['user_loc_id']; 
 
         $items = $this->item->get_all_items();
 

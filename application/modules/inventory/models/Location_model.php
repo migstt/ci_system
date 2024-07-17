@@ -47,9 +47,31 @@ class Location_model extends MY_Model
         return $this->db->get()->result();
     }
 
+    function get_active_locations_except_current($admin_loc_id)
+    {
+        $this->db->select('*');
+        $this->db->from('locations');
+        $this->db->where('location_status', 0);
+        $this->db->where('location_id !=', $admin_loc_id);
+        $this->db->order_by('location_name', 'ASC');
+        return $this->db->get()->result();
+    }
+
     function get_location_row_by_id($location_id)
     {
         $where = 'location_id=' . $location_id;
         return $this->getRow('*', 'locations', $where);
+    }
+
+    function get_location_count()
+    {
+        $query = "
+            SELECT 
+                COUNT(*) AS total_locations
+            FROM
+                locations
+        ";
+
+        return $this->getRowBySQL($query, 'row');
     }
 }

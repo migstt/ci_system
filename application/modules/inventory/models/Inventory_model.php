@@ -63,7 +63,7 @@ class Inventory_model extends MY_Model
         return $this->getRowBySQL($query, 'row');
     }
 
-    function count_items_supplied_by_each_supplier()
+    function count_items_supplied_by_each_supplier($admin_location_id)
     {
         $query = "
             SELECT 
@@ -76,7 +76,7 @@ class Inventory_model extends MY_Model
             JOIN 
                 suppliers s ON it.inv_trk_supplier_id = s.supplier_id
             WHERE
-                i.inv_status = 0
+                i.inv_status = 0 AND i.inv_assigned_to = $admin_location_id
             GROUP BY 
                 s.supplier_name
             ORDER BY 

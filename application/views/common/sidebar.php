@@ -13,6 +13,7 @@
         <div class="user-info">
             <span class="user_name"><?php echo $current_user_full_name ?></span>
             <span class="user_role"><?php echo $current_user_type ?></span>
+            <span class="user_loc">(<?php echo $current_user_loc ?>)</span>
         </div>
     </div>
     <div class="nav-container">
@@ -71,6 +72,7 @@
                         <li><a href="<?php echo site_url('inventory/suppliers'); ?>">Suppliers</a></li>
                         <li><a href="<?php echo site_url('inventory/items'); ?>">Items</a></li>
                         <li><a href="<?php echo site_url('inventory/reports'); ?>">Report Log</a></li>
+                        <li><a href="<?php echo site_url('inventory/transfers'); ?>">Transfer Stocks</a></li>
                         <li><a href="<?php echo site_url('inventory/users'); ?>">Users</a></li>
                     </ul>
                 </li>

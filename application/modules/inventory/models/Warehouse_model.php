@@ -25,4 +25,16 @@ class Warehouse_model extends MY_Model
         $where      = 'wh_id = ' . $warehouse_id;
         return $this->getRow($field, $table, $where);
     }
+
+    function get_warehouse_count()
+    {
+        $query = "
+            SELECT 
+                COUNT(*) AS total_warehouses
+            FROM
+                warehouses
+        ";
+
+        return $this->getRowBySQL($query, 'row');
+    }
 }

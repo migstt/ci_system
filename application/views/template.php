@@ -608,6 +608,12 @@
             font-weight: normal;
         }
 
+        .user_loc {
+            display: block;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
         /* Additional styles for the closed sidebar state */
         .sidebar.close .user-info {
             opacity: 0;

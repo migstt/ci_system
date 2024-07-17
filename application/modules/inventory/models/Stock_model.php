@@ -9,11 +9,11 @@ class Stock_model extends MY_Model
         parent::__construct();
     }
 
-    public function get_stocks()
+    public function get_stocks($admin_loc_id)
     {
         $table      = 'inventory_tracking';
         $orderby    = 'inv_trk_id DESC';
-        $where      = '';
+        $where      = 'inv_trk_location_id = ' . $admin_loc_id;
         return $this->getRows('*', $table, $where, $orderby);
     }
 
@@ -108,7 +108,7 @@ class Stock_model extends MY_Model
         return $this->getRowBySQL($query, 'row');
     }
 
-    function get_monthly_stock_counts_per_category()
+    function get_monthly_stock_counts_per_category($admin_location_id)
     {
         $query = "
             SELECT
@@ -124,7 +124,7 @@ class Stock_model extends MY_Model
             JOIN
                 categories c ON itm.item_category_id = c.category_id
             WHERE
-                it.inv_trk_status = 0 AND it.inv_trk_date_delivered != '0000-00-00 00:00:00'
+                it.inv_trk_status = 0 AND it.inv_trk_date_delivered != '0000-00-00 00:00:00' AND it.inv_trk_location_id = $admin_location_id
             GROUP BY
                 c.category_name,
                 DATE_FORMAT(it.inv_trk_date_delivered, '%Y-%m')

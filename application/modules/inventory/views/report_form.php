@@ -146,11 +146,12 @@
                     <label for="attachment" class="font-weight-bold">Attachment</label>
                     <input type="file" name="attachment" class="form-control mt-2" id="attachment" required>
                 </div>
+                <div class="col">
+                    <input type="hidden" name="location_id" value="<?php echo $_SESSION['user_loc_id']; ?>">
+                </div>
                 <button type="submit" class="btn btn-primary btn-block mt-4">Submit</button>
                 <?php echo form_close(); ?>
-
             </div>
-
         </div>
         <div class="col-md-6">
             <div class="table-container p-4 rounded shadow-sm bg-light">

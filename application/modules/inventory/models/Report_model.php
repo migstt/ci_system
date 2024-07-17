@@ -39,15 +39,16 @@ class Report_model extends MY_Model
         return $this->db->get()->result();
     }
 
-    function get_all_reports()
+    function get_all_reports($admin_location_id)
     {
         $this->db->select('*');
         $this->db->from('report_logs');
-        $this->db->order_by('rlog_added_at', 'DESC');
+        $this->db->where('rlog_location_id', $admin_location_id);
+        $this->db->order_by('rlog_added_at', 'ASC');
         return $this->db->get()->result();
     }
 
-    function get_report_log_counts()
+    function get_report_log_counts($admin_location_id)
     {
         $query = "
             SELECT 
@@ -56,8 +57,10 @@ class Report_model extends MY_Model
                 SUM(rlog_status = 'Reviewed') AS reviewed,
                 SUM(rlog_status = 'Disposed') AS disposed,
                 SUM(rlog_status = 'Replaced') AS replaced
-            FROM 
-                report_logs;
+            FROM
+                report_logs
+            WHERE
+                rlog_location_id = $admin_location_id
         ";
 
         return $this->getRowBySQL($query, 'row');

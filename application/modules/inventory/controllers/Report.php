@@ -10,6 +10,7 @@ class Report extends MY_Controller
         $this->load->model('user/user_model', 'user');
         $this->load->model('team/team_model', 'team');
         $this->load->model('report_model', 'report');
+        $this->load->model('location_model', 'location');
         $this->load->model('item_model', 'item');
         $this->load->model('stock_model', 'stock');
         $this->load->library('parser');
@@ -34,7 +35,9 @@ class Report extends MY_Controller
             redirect('forbidden');
         }
 
-        $view = $this->load->view('inventory/reports', '', true);
+        $data['admin_loc'] = $this->location->get_location_row_by_id($_SESSION['user_loc_id']);
+
+        $view = $this->load->view('inventory/reports', $data, true);
         $this->template($view);
     }
 
@@ -59,7 +62,8 @@ class Report extends MY_Controller
             return;
         }
 
-        $reports = $this->report->get_all_reports($_SESSION['user_id']);
+        $admin_loc_id = $_SESSION['user_loc_id'];
+        $reports = $this->report->get_all_reports($admin_loc_id);
 
         if ($reports === false || empty($reports)) {
             $reports = array();
@@ -163,8 +167,9 @@ class Report extends MY_Controller
 
         if ($this->form_validation->run() == TRUE) {
 
-            $serial = $this->input->post('serial');
-            $remarks = $this->input->post('remarks');
+            $serial     = $this->input->post('serial');
+            $remarks    = $this->input->post('remarks');
+            $loc_id     = $this->input->post('location_id');
 
             $inv_item = $this->stock->get_item_by_serial_by_sql($serial);
 
@@ -201,6 +206,7 @@ class Report extends MY_Controller
                         'rlog_added_by'     => $_SESSION['user_id'],
                         'rlog_added_at'     => date('Y-m-d H:i:s'),
                         'rlog_updated_at'   => null,
+                        'rlog_location_id'  => $loc_id,
                     );
 
                     if ($this->report->insert_report('report_logs', $report_form_data)) {

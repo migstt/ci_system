@@ -335,7 +335,6 @@
                     <th class="text-center"></th>
                     <th class="text-start">Name</th>
                     <th class="text-start">Category</th>
-                    <!-- <th class="text-start">Location</th> -->
                     <th class="text-start">Status</th>
                     <th class="text-start">Added by</th>
                     <th class="text-end">Actions</th>
@@ -375,17 +374,8 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-
-                    <div class="col mt-3">
-                        <p><strong>Item location</strong></p>
-                    </div>
-                    <div class="col mt-3 mb-3">
-                        <select name="location" class="form-control" required>
-                            <option value="">Select location</option>
-                            <?php foreach ($active_locations as $location) : ?>
-                                <option value="<?php echo $location->location_id; ?>"><?php echo $location->location_name; ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                    <div class="col">
+                        <input type="hidden" name="location_id" value="<?php echo $_SESSION['user_loc_id']; ?>">
                     </div>
 
                     <div class="modal-footer">

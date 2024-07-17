@@ -68,7 +68,7 @@
 <i class='bx bx-menu' style='margin-top: .7%;'></i>
 <div class="container-sm">
     <div class="d-flex justify-content-between align-items-center">
-        <h5 class="mt-2">Inventory</h5>
+        <h5 class="mt-2"><?php echo $location['location_name']; ?> Inventory</h5>
     </div>
 
     <!-- Supplier Table -->

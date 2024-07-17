@@ -246,7 +246,7 @@
 <i class='bx bx-menu' style='margin-top: .7%;'></i>
 <div class="container-sm">
     <div class="d-flex justify-content-between align-items-center">
-        <h5 class="mt-2">Inventory Dashboard</h5>
+        <h5 class="mt-2"><?php echo $current_user_loc['location_name']; ?> Inventory Dashboard</h5>
     </div>
     <div class="line_chart">
         <!-- Dropdown to select chart options -->
@@ -267,7 +267,28 @@
     </div>
     <div class="dashboard-cards">
         <div class="card">
-            <h6>Report Log Stats</h6>
+            <h6>Stock Tracking</h6>
+            <table>
+                <tr>
+                    <td>Total Batches Delivered:</td>
+                    <td><?php echo $stock_counts['delivered']; ?></td>
+                </tr>
+                <tr>
+                    <td>Issued Stocks:</td>
+                    <td><?php echo $stock_counts['issued']; ?></td>
+                </tr>
+                <tr>
+                    <td>Approved by Warehouse Manager:</td>
+                    <td><?php echo $stock_counts['approved_manager']; ?></td>
+                </tr>
+                <tr>
+                    <td>In Transit:</td>
+                    <td><?php echo $stock_counts['transit']; ?></td>
+                </tr>
+            </table>
+        </div>
+        <div class="card">
+            <h6>Report Logs</h6>
             <table>
                 <tr>
                     <td>Total Reported Items:</td>
@@ -317,48 +338,23 @@
             </table>
         </div>
         <div class="card">
-            <h6>Stock Tracking</h6>
+            <h6>Entities</h6>
             <table>
                 <tr>
-                    <td>Total Batches Delivered:</td>
-                    <td><?php echo $stock_counts['delivered']; ?></td>
+                    <td>Suppliers:</td>
+                    <td><?php echo $supplier_count['total_suppliers'] ?></td>
                 </tr>
                 <tr>
-                    <td>Issued Stocks:</td>
-                    <td><?php echo $stock_counts['issued']; ?></td>
+                    <td>Warehouses:</td>
+                    <td><?php echo $warehouse_count['total_warehouses'] ?></td>
                 </tr>
                 <tr>
-                    <td>Approved by Warehouse Manager:</td>
-                    <td><?php echo $stock_counts['approved_manager']; ?></td>
+                    <td>Locations:</td>
+                    <td><?php echo $location_count['total_locations'] ?></td>
                 </tr>
                 <tr>
-                    <td>In Transit:</td>
-                    <td><?php echo $stock_counts['transit']; ?></td>
-                </tr>
-            </table>
-        </div>
-        <div class="card">
-            <h6>Users</h6>
-            <table>
-                <tr>
-                    <td>Total Users:</td>
-                    <td><?php echo $user_counts['total_users']; ?></td>
-                </tr>
-                <tr>
-                    <td>Admins:</td>
-                    <td><?php echo $user_counts['admins']; ?></td>
-                </tr>
-                <tr>
-                    <td>Employees:</td>
-                    <td><?php echo $user_counts['employees']; ?></td>
-                </tr>
-                <tr>
-                    <td>Warehouse Managers:</td>
-                    <td><?php echo $user_counts['managers']; ?></td>
-                </tr>
-                <tr>
-                    <td>Couriers:</td>
-                    <td><?php echo $user_counts['couriers']; ?></td>
+                    <td><?php echo $current_user_loc['location_name']; ?> Users:</td>
+                    <td><?php echo $currloc_user_count['total_users'] ?></td>
                 </tr>
             </table>
         </div>

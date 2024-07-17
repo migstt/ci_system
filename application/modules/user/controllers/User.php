@@ -42,6 +42,7 @@ class User extends MY_Controller
                             'user_id'       => $existing_user['user_id'],
                             'user_email'    => $existing_user['user_email'],
                             'user_type_id'  => $existing_user['user_type_id'],
+                            'user_loc_id'   => $existing_user['user_location_id']
                         );
                         $this->session->set_userdata($user_session_data);
                         if (isset($_SESSION['user_id']) && isset($_SESSION['user_email']) && isset($_SESSION['user_type_id'])) {

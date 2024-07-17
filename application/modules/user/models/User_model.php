@@ -123,4 +123,18 @@ class User_model extends MY_Model
 
         return $this->getRowBySQL($query, 'row');
     }
+
+    function get_currentloc_user_count($admin_current_loc)
+    {
+        $query = "
+            SELECT 
+                COUNT(*) AS total_users
+            FROM
+                users
+            WHERE
+                user_location_id = $admin_current_loc
+        ";
+
+        return $this->getRowBySQL($query, 'row');
+    }
 }

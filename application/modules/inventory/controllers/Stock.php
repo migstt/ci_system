@@ -42,6 +42,7 @@ class Stock extends MY_Controller
         $data['active_items']       = $this->item->get_active_items();
         $data['batch_code']         = $this->generate_batch_code();
         $data['active_couriers']    = $this->user->get_users_by_type(3);
+        $data['admin_loc']          = $this->location->get_location_row_by_id($_SESSION['user_loc_id']);
 
         $view = $this->load->view('inventory/stocks', $data, true);
         $this->template($view);
@@ -91,10 +92,12 @@ class Stock extends MY_Controller
                 if ($date_received == '' || $date_received == null || $date_received == '0000-00-00 00:00:00') {
                     $inv_trk_status = 1;
 
+                    $location = $this->location->get_location_row_by_id($location_id);
+
                     $task_formdata = array(
                         'task_assigned_by'          => $_SESSION['user_id'],
-                        'task_title'                => 'Stocks Approval',
-                        'task_description'          => 'Stock batch number ' . $batch_code . ' is pending for approval.',
+                        'task_title'                => 'Stocks Approval for ' . $location['location_name'],
+                        'task_description'          => 'Stock batch number ' . $batch_code . ' currently pending approval. Please review and approve at your earliest convenience.',
                         'task_assigned_to_user'     => 30,
                         'task_status'               => 'pending',
                         'task_created_at'           => date('Y-m-d H:i:s'),
@@ -187,7 +190,9 @@ class Stock extends MY_Controller
             redirect('login');
         }
 
-        $stocks = $this->stock->get_stocks();
+        $admin_loc_id = $_SESSION['user_loc_id'];
+
+        $stocks = $this->stock->get_stocks($admin_loc_id);
 
         if ($stocks === false || empty($stocks)) {
             $stocks = array();

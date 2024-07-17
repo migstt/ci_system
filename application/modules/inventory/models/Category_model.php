@@ -42,7 +42,6 @@ class Category_model extends MY_Model
     {
         $this->db->select('*');
         $this->db->from('categories');
-        // $this->db->where('category_status', 0);
         $this->db->order_by('category_name', 'ASC');
         return $this->db->get()->result();
     }
@@ -53,7 +52,7 @@ class Category_model extends MY_Model
         return $this->getRow('*', 'categories', $where);
     }
 
-    public function count_items_each_category()
+    public function count_items_each_category($admin_location_id)
     {
         $query = "
             SELECT 
@@ -66,7 +65,7 @@ class Category_model extends MY_Model
             JOIN 
                 categories c ON it.item_category_id = c.category_id
             WHERE 
-                i.inv_status = 0
+                i.inv_status = 0 AND c.category_location_id = $admin_location_id 
             GROUP BY 
                 c.category_name
             ORDER BY 

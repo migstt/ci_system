@@ -43,7 +43,9 @@ class Category extends MY_Controller
         $this->form_validation->set_rules('name', 'Category name', 'required');
 
         if ($this->form_validation->run() == TRUE) {
+
             $name     = $this->input->post('name');
+            $loc_id   = $this->input->post('location_id');
 
             $category_form_data = array(
                 'category_name'         => $name,
@@ -51,7 +53,8 @@ class Category extends MY_Controller
                 'category_added_by'     => $_SESSION['user_id'],
                 'category_created_at'   => date('Y-m-d H:i:s'),
                 'category_updated_at'   => null,
-                'category_deleted_at'   => null
+                'category_deleted_at'   => null,
+                'category_location_id'  => $loc_id
             );
 
             if ($this->category->insert_category('categories', $category_form_data)) {
@@ -146,7 +149,13 @@ class Category extends MY_Controller
 
     function count_items_each_category()
     {
-        $data = $this->category->count_items_each_category();
-        echo json_encode($data);
+        $admin_location_id = $_SESSION['user_loc_id'];
+        $data = $this->category->count_items_each_category($admin_location_id);
+
+        if ($data) {
+            echo json_encode($data);
+        } else {
+            echo json_encode([]);
+        }
     }
 }

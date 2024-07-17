@@ -573,7 +573,7 @@
 <i class='bx bx-menu' style='margin-top: .7%;'></i>
 <div class="container-sm">
     <div class="d-flex justify-content-between align-items-center">
-        <h5 class="mt-2">Stocks</h5>
+        <h5 class="mt-2"><?php echo $admin_loc['location_name'] ?> Stocks</h5>
     </div>
 
     <!-- Add New Stocks Button -->
@@ -669,12 +669,10 @@
 
                         <div class="col-md-6">
                             <label for="location" class="form-label">Location</label>
-                            <select name="location_id" class="form-control location_select" required>
-                                <option value="">Select Location</option>
-                                <?php foreach ($active_locations as $location) : ?>
-                                    <option value="<?php echo $location->location_id; ?>"><?php echo $location->location_name; ?></option>
-                                <?php endforeach; ?>
-                            </select>
+                            <input type="text" class="form-control serial_code" placeholder="<?php echo $admin_loc['location_name']; ?>" disabled>
+                        </div>
+                        <div class="col">
+                            <input type="hidden" name="location_id" value="<?php echo $_SESSION['user_loc_id']; ?>">
                         </div>
                     </div>
                     <div class="row mb-3">
