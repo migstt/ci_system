@@ -113,10 +113,8 @@ class Transfer extends MY_Controller
                     foreach ($items as $item) {
                         $last_inserted_item_serial = $this->stock->get_last_inserted_serial_number_of_a_specific_item($item['item_id'], $current_location['location_id']);
                         $last_serial = substr($last_inserted_item_serial['serial'], 3);
-                        $last_serial_int = (int) $last_serial - 1;
-                        cute_print($last_serial_int);
-
-                    
+                        $last_serial_int = (int) $last_serial;
+                        echo cute_print($last_serial_int);
                     }
 
                     // Message: Call to undefined method Inventory_model::update_inventory_by_batch()

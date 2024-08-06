@@ -283,7 +283,7 @@ class Stock extends MY_Controller
         if ($location_id == null) {
             $location_id = $_SESSION['user_loc_id'];
         }
-    
+
         $last_item  = $this->inventory->get_last_inserted_serial_number($item_id, $location_id);
         $item       = $this->item->get_item($item_id);
 
@@ -300,7 +300,13 @@ class Stock extends MY_Controller
             $last_inserted_serial = $last_item['inv_serial'];
             if (strpos($last_inserted_serial, $item_name_cap) === 0) {
                 $last_serial_number = substr($last_inserted_serial, 3);
-                $new_serial_number  = str_pad((int)$last_serial_number + 1, 8, '0', STR_PAD_LEFT);
+
+                if ($item_id != null) {
+                    $new_serial_number = str_pad((int)$last_serial_number + 1, 8, '0', STR_PAD_LEFT);
+                } else {
+                    $new_serial_number = str_pad((int)$last_serial_number, 8, '0', STR_PAD_LEFT);
+                }
+
                 $new_serial         = $item_name_cap . $new_serial_number;
             } else {
                 $new_serial = $item_name_cap . '00000001';
